@@ -2,6 +2,7 @@
 import { Component } from '@angular/core';
 
 type RoleKey = 'patient' | 'doctor' | 'nurse' | 'coordinator' | 'auditor' | 'admin';
+type CarouselRoleKey = RoleKey | 'other';
 
 @Component({
   selector: 'app-signup-form',
@@ -9,6 +10,9 @@ type RoleKey = 'patient' | 'doctor' | 'nurse' | 'coordinator' | 'auditor' | 'adm
   styles: ``,
 })
 export class SignupFormComponent {
+  openAddRoleModal() {
+    console.log('Open custom role flow');
+  }
   step = 1;
   carouselStart = 0;
   readonly visibleRoles = 5;
@@ -25,6 +29,7 @@ export class SignupFormComponent {
     { key: 'patient' as const, label: 'Patient' },
     { key: 'admin' as const, label: 'Admin' },
   ];
+  readonly otherRole = { key: 'other' as const, label: 'Other Role' };
 
   departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Emergency'];
   doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
@@ -47,8 +52,12 @@ export class SignupFormComponent {
   };
   profileImageName = '';
 
+  get carouselRoles() {
+    return [...this.roles, this.otherRole];
+  }
+
   get displayedRoles() {
-    return this.roles.slice(this.carouselStart, this.carouselStart + this.visibleRoles);
+    return this.carouselRoles.slice(this.carouselStart, this.carouselStart + this.visibleRoles);
   }
 
   get roleTitle(): string {
@@ -65,11 +74,21 @@ export class SignupFormComponent {
   }
 
   nextRoles() {
-    if (this.carouselStart + this.visibleRoles < this.roles.length) this.carouselStart += 1;
+    if (this.carouselStart + this.visibleRoles < this.carouselRoles.length) this.carouselStart += 1;
+  }
+
+  isOtherRole(roleKey: CarouselRoleKey) {
+    return roleKey === 'other';
   }
 
   selectRole(role: RoleKey) {
     this.selectedRole = role;
+  }
+
+  selectRoleFromCarousel(roleKey: CarouselRoleKey) {
+    if (roleKey !== 'other') {
+      this.selectRole(roleKey);
+    }
   }
 
   continueToStepTwo() {
