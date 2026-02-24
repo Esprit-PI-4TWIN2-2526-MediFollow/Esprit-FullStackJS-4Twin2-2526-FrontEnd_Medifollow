@@ -250,7 +250,9 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
           icon: 'success',
           timer: 2000,
           showConfirmButton: true,
-        }).then(() => this.router.navigate(['/signin']));
+        }).then(
+          () => this.router.navigate(['/signin']));
+        this.signupForm.reset();
       },
       error: (err) => {
         const message = err?.error?.message || 'Failed to create account.';
