@@ -1,7 +1,7 @@
 import { Role } from "@amcharts/amcharts5/.internal/core/util/Accessibility";
 
-export interface User {
-  id?: string;              
+export interface Users {
+  id?: string;
   firstName: string;
   lastName: string;
   phoneNumber: string;
