@@ -103,6 +103,7 @@ import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.com
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
 import { ResetPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { provideHttpClient } from '@angular/common/http';
+import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
 
 @NgModule({
   declarations: [
@@ -202,6 +203,7 @@ import { provideHttpClient } from '@angular/common/http';
     UserMetaCardComponent,
     VideosComponent,
     ResetPasswordComponent,
+    AllProfilesComponent,
   ],
   imports: [
     BrowserModule,
@@ -210,6 +212,7 @@ import { provideHttpClient } from '@angular/common/http';
     ReactiveFormsModule,
     NgApexchartsModule,
     FullCalendarModule,
+
   ],
   providers: [
     provideHttpClient()

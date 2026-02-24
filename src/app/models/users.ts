@@ -1,7 +1,11 @@
 import { Role } from "@amcharts/amcharts5/.internal/core/util/Accessibility";
 
 export interface Users {
+<<<<<<< Updated upstream
   id?: string;
+=======
+  _id?: string;
+>>>>>>> Stashed changes
   firstName: string;
   lastName: string;
   phoneNumber: string;
