@@ -42,7 +42,7 @@
 
           <div class="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             @for (role of displayedRoles; track role.key) {
-              @if (isOtherRole(role.key)) {
+              @if (isOtherRole(role)) {
                 <button
                   type="button"
                   (click)="openAddRoleModal()"
@@ -59,7 +59,7 @@
               } @else {
                 <button
                   type="button"
-                  (click)="selectRoleFromCarousel(role.key)"
+                  (click)="selectRoleFromCarousel(role)"
                   class="group rounded-xl border p-3 text-left transition hover:-translate-y-0.5"
                   [ngClass]="{
                     'border-brand-500 bg-brand-50 dark:border-brand-600 dark:bg-brand-900/20': selectedRole === role.key,
@@ -184,6 +184,65 @@
           Continue
         </button>
       </form>
+
+      @if (showAddRoleModal) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeAddRoleModal()"></div>
+
+          <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <div class="mb-4 flex items-start justify-between">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Add Role</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter role name.</p>
+              </div>
+
+              <button
+                type="button"
+                (click)="closeAddRoleModal()"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400"
+              >
+                x
+              </button>
+            </div>
+
+            <form class="space-y-4" (ngSubmit)="submitAddRole()">
+              <div>
+                <app-label>Name <span class="text-error-500">*</span></app-label>
+                <input
+                  class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800"
+                  type="text"
+                  placeholder="Role name"
+                  [(ngModel)]="newRoleName"
+                  name="newRoleName"
+                  required
+                />
+
+                @if (addRoleError) {
+                  <p class="mt-2 text-sm text-error-500">{{ addRoleError }}</p>
+                }
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  (click)="closeAddRoleModal()"
+                  class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  [disabled]="isAddingRole"
+                  class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {{ isAddingRole ? 'Saving...' : 'Add' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
     } @else {
       <form class="space-y-6" (ngSubmit)="submitSignUp()">
         <div class="flex items-center justify-between rounded-xl border border-brand-100 bg-brand-50/60 p-3 dark:border-brand-800 dark:bg-brand-900/20">

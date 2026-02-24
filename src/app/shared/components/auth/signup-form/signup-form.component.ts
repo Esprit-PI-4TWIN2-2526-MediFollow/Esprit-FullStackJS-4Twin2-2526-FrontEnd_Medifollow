@@ -1,8 +1,8 @@
 
 import { Component } from '@angular/core';
 
-type RoleKey = 'patient' | 'doctor' | 'nurse' | 'coordinator' | 'auditor' | 'admin';
-type CarouselRoleKey = RoleKey | 'other';
+type RoleKey = string;
+type CarouselRole = { key: string; label: string; isOther?: boolean };
 
 @Component({
   selector: 'app-signup-form',
@@ -10,9 +10,10 @@ type CarouselRoleKey = RoleKey | 'other';
   styles: ``,
 })
 export class SignupFormComponent {
-  openAddRoleModal() {
-    console.log('Open custom role flow');
-  }
+  showAddRoleModal = false;
+  newRoleName = '';
+  isAddingRole = false;
+  addRoleError = '';
   step = 1;
   carouselStart = 0;
   readonly visibleRoles = 5;
@@ -21,15 +22,15 @@ export class SignupFormComponent {
   isChecked = false;
   selectedRole: RoleKey | null = null;
 
-  roles = [
-    { key: 'nurse' as const, label: 'Nurse' },
-    { key: 'doctor' as const, label: 'Doctor' },
-    { key: 'coordinator' as const, label: 'Coordinator' },
-    { key: 'auditor' as const, label: 'Auditor' },
-    { key: 'patient' as const, label: 'Patient' },
-    { key: 'admin' as const, label: 'Admin' },
+  roles: CarouselRole[] = [
+    { key: 'nurse', label: 'Nurse' },
+    { key: 'doctor', label: 'Doctor' },
+    { key: 'coordinator', label: 'Coordinator' },
+    { key: 'auditor', label: 'Auditor' },
+    { key: 'patient', label: 'Patient' },
+    { key: 'admin', label: 'Admin' },
   ];
-  readonly otherRole = { key: 'other' as const, label: 'Other Role' };
+  readonly otherRole: CarouselRole = { key: '__other__', label: 'Other Role', isOther: true };
 
   departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Emergency'];
   doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
@@ -77,18 +78,73 @@ export class SignupFormComponent {
     if (this.carouselStart + this.visibleRoles < this.carouselRoles.length) this.carouselStart += 1;
   }
 
-  isOtherRole(roleKey: CarouselRoleKey) {
-    return roleKey === 'other';
+  isOtherRole(role: CarouselRole) {
+    return !!role.isOther;
   }
 
   selectRole(role: RoleKey) {
     this.selectedRole = role;
   }
 
-  selectRoleFromCarousel(roleKey: CarouselRoleKey) {
-    if (roleKey !== 'other') {
-      this.selectRole(roleKey);
+  selectRoleFromCarousel(role: CarouselRole) {
+    if (role.isOther) {
+      this.openAddRoleModal();
+      return;
     }
+    this.selectRole(role.key);
+  }
+
+  openAddRoleModal() {
+    this.showAddRoleModal = true;
+    this.newRoleName = '';
+    this.addRoleError = '';
+  }
+
+  closeAddRoleModal() {
+    this.showAddRoleModal = false;
+    this.newRoleName = '';
+    this.isAddingRole = false;
+    this.addRoleError = '';
+  }
+
+  submitAddRole() {
+    const name = this.newRoleName.trim();
+    this.addRoleError = '';
+
+    if (!name) {
+      this.addRoleError = 'Role name is required.';
+      return;
+    }
+
+    const alreadyExists = this.roles.some((role) => role.label.toLowerCase() === name.toLowerCase());
+    if (alreadyExists) {
+      this.addRoleError = 'This role already exists.';
+      return;
+    }
+
+    this.isAddingRole = true;
+    const roleKey = this.generateUniqueRoleKey(name);
+    const newRole: CarouselRole = { key: roleKey, label: name };
+    this.roles.push(newRole);
+    this.selectedRole = newRole.key;
+    this.isAddingRole = false;
+    this.showAddRoleModal = false;
+  }
+
+  private generateUniqueRoleKey(roleName: string): string {
+    const baseKey = roleName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'role';
+
+    let key = baseKey;
+    let counter = 2;
+    while (this.roles.some((role) => role.key === key)) {
+      key = `${baseKey}-${counter}`;
+      counter += 1;
+    }
+
+    return key;
   }
 
   continueToStepTwo() {
