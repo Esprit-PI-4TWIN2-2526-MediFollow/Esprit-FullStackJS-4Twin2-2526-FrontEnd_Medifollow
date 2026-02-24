@@ -66,6 +66,10 @@ message: string = '';
 
   showPassword = false;
   isChecked = false;
+  showPasswordStrength = false;
+  passwordStrengthPercent = 0;
+  passwordStrengthLabel = 'Weak';
+  passwordStrengthClass = 'bg-error-500';
   selectedRole: RoleKey | null = null;
   minDateOfBirth = '';
   maxDateOfBirth = '';
@@ -184,7 +188,37 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
     this.signupForm.get('password')?.setValue(password);
     this.signupForm.get('password')?.markAsDirty();
     this.signupForm.get('password')?.markAsTouched();
+    this.showPasswordStrength = false;
     this.showPassword = true;
+  }
+
+  onPasswordManualInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.showPasswordStrength = true;
+    this.updatePasswordStrength(input.value || '');
+  }
+
+  private updatePasswordStrength(password: string): void {
+    let score = 0;
+
+    if (password.length >= 6) score += 25;
+    if (password.length >= 10) score += 15;
+    if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score += 20;
+    if (/\d/.test(password)) score += 20;
+    if (/[^A-Za-z0-9]/.test(password)) score += 20;
+
+    this.passwordStrengthPercent = Math.min(score, 100);
+
+    if (this.passwordStrengthPercent < 40) {
+      this.passwordStrengthLabel = 'Weak';
+      this.passwordStrengthClass = 'bg-error-500';
+    } else if (this.passwordStrengthPercent < 70) {
+      this.passwordStrengthLabel = 'Medium';
+      this.passwordStrengthClass = 'bg-warning-500';
+    } else {
+      this.passwordStrengthLabel = 'Strong';
+      this.passwordStrengthClass = 'bg-success-500';
+    }
   }
 
   submitSignUp() {
@@ -262,6 +296,31 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
     return Object.keys(this.signupForm.controls).filter(
       (controlName) => this.signupForm.get(controlName)?.invalid
     );
+  }
+
+  isFieldInvalid(controlName: string): boolean {
+    const control = this.signupForm.get(controlName);
+    return !!control && control.invalid && control.dirty;
+  }
+
+  getFieldError(controlName: string, label: string): string {
+    const control = this.signupForm.get(controlName);
+    if (!control || !control.errors) return '';
+
+    if (control.errors['required']) return `${label} is required.`;
+    if (control.errors['email']) return 'Please enter a valid email address.';
+    if (control.errors['minlength']) {
+      return `${label} must be at least ${control.errors['minlength'].requiredLength} characters long.`;
+    }
+    if (control.errors['maxlength']) {
+      return `${label} must be at most ${control.errors['maxlength'].requiredLength} characters long.`;
+    }
+    if (control.errors['pattern'] && controlName === 'phoneNumber') {
+      return 'Phone number format is invalid.';
+    }
+    if (control.errors['pattern']) return `${label} format is invalid.`;
+
+    return `${label} is invalid.`;
   }
 
 

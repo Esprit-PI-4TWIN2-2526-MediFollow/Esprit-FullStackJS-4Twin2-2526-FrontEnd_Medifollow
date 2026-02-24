@@ -93,13 +93,10 @@
               formControlName="firstName"
 
             />
-
+            @if (isFieldInvalid('firstName')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('firstName', 'First name') }}</p>
+            }
           </div>
-<div class="text-danger small mt-1" *ngIf="signupForm.get('firstName')?.touched && signupForm.get('firstName')?.invalid">
-
-<span *ngIf="signupForm.get('firstName')?.hasError('minlength')">First name must be at least 4 characters long.</span>
-<span *ngIf="signupForm.get('firstName')?.hasError('maxlength')">First name must be at most 50 characters long.</span>
-</div>
           <div>
             <app-label>Last Name <span class="text-error-500">*</span></app-label>
             <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm ..."
@@ -109,6 +106,9 @@
               formControlName="lastName"
 
             />
+            @if (isFieldInvalid('lastName')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('lastName', 'Last name') }}</p>
+            }
           </div>
         </div>
 
@@ -122,6 +122,9 @@
             formControlName="email"
 
           />
+          @if (isFieldInvalid('email')) {
+            <p class="mt-1 text-xs text-error-500">{{ getFieldError('email', 'Email') }}</p>
+          }
         </div>
 
         <div>
@@ -133,6 +136,7 @@
               name="password"
               placeholder="Enter your password"
               formControlName="password"
+              (input)="onPasswordManualInput($event)"
 
             />
             <div class="absolute right-3 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2">
@@ -166,6 +170,24 @@
               </button>
             </div>
           </div>
+          @if (isFieldInvalid('password')) {
+            <p class="mt-1 text-xs text-error-500">{{ getFieldError('password', 'Password') }}</p>
+          }
+          @if (showPasswordStrength && signupForm.get('password')?.value) {
+            <div class="mt-2">
+              <div class="mb-1 flex items-center justify-between text-xs">
+                <span class="text-gray-500 dark:text-gray-400">Password strength</span>
+                <span class="font-medium text-gray-700 dark:text-gray-200">{{ passwordStrengthLabel }}</span>
+              </div>
+              <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div
+                  class="h-full transition-all duration-300"
+                  [ngClass]="passwordStrengthClass"
+                  [style.width.%]="passwordStrengthPercent"
+                ></div>
+              </div>
+            </div>
+          }
         </div>
 
         <div>
@@ -178,6 +200,9 @@
             formControlName="phoneNumber"
 
           />
+          @if (isFieldInvalid('phoneNumber')) {
+            <p class="mt-1 text-xs text-error-500">{{ getFieldError('phoneNumber', 'Phone number') }}</p>
+          }
         </div>
 
         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -193,6 +218,9 @@
                 <option [value]="sexe">{{ sexe }}</option>
               }
             </select>
+            @if (isFieldInvalid('sexe')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('sexe', 'Sexe') }}</p>
+            }
           </div>
           <div>
             <app-label>Date of Birth <span class="text-error-500">*</span></app-label>
@@ -205,6 +233,9 @@
               [themeClass]="'flatpickr-theme-green'"
               (dateChange)="onDateOfBirthChange($event)"
             />
+            @if (isFieldInvalid('dateOfBirth')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('dateOfBirth', 'Date of birth') }}</p>
+            }
           </div>
         </div>
 
@@ -217,6 +248,9 @@
             placeholder="Enter your address"
             formControlName="address"
           />
+          @if (isFieldInvalid('address')) {
+            <p class="mt-1 text-xs text-error-500">{{ getFieldError('address', 'Address') }}</p>
+          }
         </div>
 
         <div class="flex items-start gap-3">
@@ -274,6 +308,9 @@
                   <option [value]="doctor">{{ doctor }}</option>
                 }
               </select>
+              @if (isFieldInvalid('primaryDoctor')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('primaryDoctor', 'Primary doctor') }}</p>
+              }
             </div>
           </div>
         }
@@ -283,14 +320,23 @@
             <div>
               <app-label>Specialization <span class="text-error-500">*</span></app-label>
               <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm ..." type="text" name="specialization" placeholder="Cardiology, Neurology..." formControlName="specialization"  />
+              @if (isFieldInvalid('specialization')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('specialization', 'Specialization') }}</p>
+              }
             </div>
             <div>
               <app-label>Grade <span class="text-error-500">*</span></app-label>
               <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm ..." type="text" name="grade" placeholder="Senior / Junior" formControlName="grade"  />
+              @if (isFieldInvalid('grade')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('grade', 'Grade') }}</p>
+              }
             </div>
             <div>
               <app-label>Diploma <span class="text-error-500">*</span></app-label>
               <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm ..." type="text" name="diploma" placeholder="Medical diploma" formControlName="diploma"  />
+              @if (isFieldInvalid('diploma')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('diploma', 'Diploma') }}</p>
+              }
             </div>
             <div>
               <app-label>Years of Experience <span class="text-error-500">*</span></app-label>
@@ -304,6 +350,9 @@
                   <option [value]="department">{{ department }}</option>
                 }
               </select>
+              @if (isFieldInvalid('assignedDepartment')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('assignedDepartment', 'Assigned department') }}</p>
+              }
             </div>
           </div>
         }
@@ -317,6 +366,9 @@
                 <option [value]="department">{{ department }}</option>
               }
             </select>
+            @if (isFieldInvalid('assignedDepartment')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('assignedDepartment', 'Assigned department') }}</p>
+            }
           </div>
         }
 
@@ -329,6 +381,9 @@
                 <option [value]="scope">{{ scope }}</option>
               }
             </select>
+            @if (isFieldInvalid('auditScope')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('auditScope', 'Audit scope') }}</p>
+            }
           </div>
         }
 
