@@ -1,5 +1,6 @@
 
 import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 
 type RoleKey = string;
 type CarouselRole = { key: string; label: string; isOther?: boolean };
@@ -31,6 +32,8 @@ export class SignupFormComponent {
     { key: 'admin', label: 'Admin' },
   ];
   readonly otherRole: CarouselRole = { key: '__other__', label: 'Other Role', isOther: true };
+
+  constructor(private readonly http: HttpClient) {}
 
   departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Emergency'];
   doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
@@ -112,23 +115,32 @@ export class SignupFormComponent {
     this.addRoleError = '';
 
     if (!name) {
-      this.addRoleError = 'Role name is required.';
+      this.addRoleError = 'Le nom du role est obligatoire.';
       return;
     }
 
     const alreadyExists = this.roles.some((role) => role.label.toLowerCase() === name.toLowerCase());
     if (alreadyExists) {
-      this.addRoleError = 'This role already exists.';
+      this.addRoleError = 'Ce role existe deja.';
       return;
     }
 
     this.isAddingRole = true;
-    const roleKey = this.generateUniqueRoleKey(name);
-    const newRole: CarouselRole = { key: roleKey, label: name };
-    this.roles.push(newRole);
-    this.selectedRole = newRole.key;
-    this.isAddingRole = false;
-    this.showAddRoleModal = false;
+    this.http.post<{ data?: { name?: string } }>('http://localhost:3000/api/roles', { name }).subscribe({
+      next: (res: { data?: { name?: string } }) => {
+        const createdName = res?.data?.name || name;
+        const roleKey = this.generateUniqueRoleKey(createdName);
+        const newRole: CarouselRole = { key: roleKey, label: createdName };
+        this.roles.push(newRole);
+        this.selectedRole = newRole.key;
+        this.isAddingRole = false;
+        this.showAddRoleModal = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.isAddingRole = false;
+        this.addRoleError = err?.error?.message || 'Erreur lors de la creation du role.';
+      },
+    });
   }
 
   private generateUniqueRoleKey(roleName: string): string {
