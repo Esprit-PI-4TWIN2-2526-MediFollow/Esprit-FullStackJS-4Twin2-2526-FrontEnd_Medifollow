@@ -1,4 +1,4 @@
-
+﻿
 import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import flatpickr from 'flatpickr';
 import { Instance } from 'flatpickr/dist/types/instance';
@@ -60,7 +60,7 @@ export class StatisticsChartComponent implements AfterViewInit {
     toolbar: { show: false },
   };
 
-  public colors: string[] = ['#465FFF', '#9CB9FF'];
+  public colors: string[] = ['#099aa7', '#63cad2'];
 
   public stroke: ApexStroke = {
     curve: 'straight',
@@ -134,3 +134,4 @@ export class StatisticsChartComponent implements AfterViewInit {
     horizontalAlign: 'left',
   };
 }
+

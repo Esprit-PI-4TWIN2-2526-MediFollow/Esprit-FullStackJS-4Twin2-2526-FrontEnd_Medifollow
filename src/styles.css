@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap") layer(base);
+﻿@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap") layer(base);
 @import "swiper/css/bundle";
 
 @tailwind base;
@@ -40,31 +40,31 @@
   --color-white: #ffffff;
   --color-black: #101828;
 
-  --color-brand-25: #f2f7ff;
-  --color-brand-50: #ecf3ff;
-  --color-brand-100: #dde9ff;
-  --color-brand-200: #c2d6ff;
-  --color-brand-300: #9cb9ff;
-  --color-brand-400: #7592ff;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
-  --color-brand-700: #2a31d8;
-  --color-brand-800: #252dae;
-  --color-brand-900: #262e89;
-  --color-brand-950: #161950;
+  --color-brand-25: #effbfc;
+  --color-brand-50: #def7f8;
+  --color-brand-100: #c3eef1;
+  --color-brand-200: #99e0e5;
+  --color-brand-300: #63cad2;
+  --color-brand-400: #2eb2bc;
+  --color-brand-500: #099aa7;
+  --color-brand-600: #087f8b;
+  --color-brand-700: #086874;
+  --color-brand-800: #095560;
+  --color-brand-900: #0a4751;
+  --color-brand-950: #052b31;
 
-  --color-blue-light-25: #f5fbff;
-  --color-blue-light-50: #f0f9ff;
-  --color-blue-light-100: #e0f2fe;
-  --color-blue-light-200: #b9e6fe;
-  --color-blue-light-300: #7cd4fd;
-  --color-blue-light-400: #36bffa;
-  --color-blue-light-500: #0ba5ec;
-  --color-blue-light-600: #0086c9;
-  --color-blue-light-700: #026aa2;
-  --color-blue-light-800: #065986;
-  --color-blue-light-900: #0b4a6f;
-  --color-blue-light-950: #062c41;
+  --color-blue-light-25: #f2fcfd;
+  --color-blue-light-50: #e8f9fa;
+  --color-blue-light-100: #d2f2f4;
+  --color-blue-light-200: #aae5ea;
+  --color-blue-light-300: #76d3db;
+  --color-blue-light-400: #3dbdc8;
+  --color-blue-light-500: #13a7b4;
+  --color-blue-light-600: #0f8894;
+  --color-blue-light-700: #0d6f79;
+  --color-blue-light-800: #0c5961;
+  --color-blue-light-900: #0b4950;
+  --color-blue-light-950: #052e33;
 
   --color-gray-25: #fcfcfd;
   --color-gray-50: #f9fafb;
@@ -146,7 +146,7 @@
   --shadow-theme-xl: 0px 20px 24px -4px rgba(16, 24, 40, 0.08),
     0px 8px 8px -4px rgba(16, 24, 40, 0.03);
   --shadow-datepicker: -5px 0 0 #262d3c, 5px 0 0 #262d3c;
-  --shadow-focus-ring: 0px 0px 0px 4px rgba(70, 95, 255, 0.12);
+  --shadow-focus-ring: 0px 0px 0px 4px rgba(9, 154, 167, 0.18);
   --shadow-slider-navigation: 0px 1px 2px 0px rgba(16, 24, 40, 0.1),
     0px 1px 3px 0px rgba(16, 24, 40, 0.1);
   --shadow-tooltip: 0px 4px 6px -2px rgba(16, 24, 40, 0.05),
@@ -534,13 +534,13 @@ span.flatpickr-weekday,
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-  background: #465fff;
+  background: #099aa7;
   @apply !border-brand-500 !bg-brand-500 hover:!border-brand-500 hover:!bg-brand-500;
 }
 .flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n + 1)),
 .flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n + 1)) {
-  box-shadow: -10px 0 0 #465fff;
+  box-shadow: -10px 0 0 #099aa7;
 }
 
 .flatpickr-months .flatpickr-prev-month svg,
@@ -841,16 +841,16 @@ pre[class*="language-"] {
   color: #018001;
 }
 .token.tag {
-  color: #267f99;
+  color: #0f8894;
 }
 .token.selector {
-  color: #267f99;
+  color: #0f8894;
 }
 .token.property {
-  color: #0070c1;
+  color: #099aa7;
 }
 .token.language-css {
-  color: #1b00ff;
+  color: #0a4751;
 }
 .token.attr-name {
   color: #98a2b3;
@@ -871,3 +871,5 @@ pre[class*="language-"] {
 pre[class*="language-"].line-numbers {
   padding-left: 2.8em !important;
 }
+
+

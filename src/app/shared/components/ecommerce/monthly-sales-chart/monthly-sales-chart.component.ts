@@ -1,4 +1,4 @@
-
+﻿
 import { Component } from '@angular/core';
 import { NgApexchartsModule, ApexAxisChartSeries, ApexChart, ApexXAxis, ApexPlotOptions, ApexDataLabels, ApexStroke, ApexLegend, ApexYAxis, ApexGrid, ApexFill, ApexTooltip } from 'ng-apexcharts';
 
@@ -54,7 +54,7 @@ export class MonthlySalesChartComponent {
     x: { show: false },
     y: { formatter: (val: number) => `${val}` },
   };
-  public colors: string[] = ['#465fff'];
+  public colors: string[] = ['#099aa7'];
 
   isOpen = false;
 

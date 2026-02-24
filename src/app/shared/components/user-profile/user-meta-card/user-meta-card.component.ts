@@ -22,12 +22,7 @@ export class UserMetaCardComponent {
     role: 'Team Manager',
     location: 'Arizona, United States',
     avatar: '/images/user/owner.jpg',
-    social: {
-      facebook: 'https://www.facebook.com/PimjoHQ',
-      x: 'https://x.com/PimjoHQ',
-      linkedin: 'https://www.linkedin.com/company/pimjo',
-      instagram: 'https://instagram.com/PimjoHQ',
-    },
+
     email: 'randomuser@pimjo.com',
     phone: '+09 363 398 46',
     bio: 'Team Manager',

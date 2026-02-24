@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+﻿import { Component } from '@angular/core';
 import {
   ApexAxisChartSeries,
   ApexChart,
@@ -39,7 +39,7 @@ export class BarChartOneComponent {
     },
   };
 
-  public colors: string[] = ['#465fff'];
+  public colors: string[] = ['#099aa7'];
 
   public plotOptions: ApexPlotOptions = {
     bar: {
@@ -107,3 +107,4 @@ export class BarChartOneComponent {
     },
   };
 }
+

@@ -1,4 +1,4 @@
-
+﻿
 import { Component } from '@angular/core';
 import {
   ApexAxisChartSeries,
@@ -43,7 +43,7 @@ export class LineChartOneComponent {
     }
   };
 
-  public colors: string[] = ['#465FFF', '#9CB9FF'];
+  public colors: string[] = ['#099aa7', '#63cad2'];
 
   public stroke: ApexStroke = {
     curve: 'straight',
@@ -129,3 +129,4 @@ export class LineChartOneComponent {
     horizontalAlign: 'left'
   };
 }
+

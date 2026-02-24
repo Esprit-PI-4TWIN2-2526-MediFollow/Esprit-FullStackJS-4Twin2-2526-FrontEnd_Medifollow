@@ -10,7 +10,7 @@ import { AlertsComponent } from './pages/ui-elements/alerts/alerts.component';
 import { AppComponent } from './app.component';
 import { AppHeaderComponent } from './shared/layout/app-header/app-header.component';
 import { AppLayoutComponent } from './shared/layout/app-layout/app-layout.component';
-import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
+
 import { AuthPageLayoutComponent } from './shared/layout/auth-page-layout/auth-page-layout.component';
 import { AvatarComponent } from './shared/components/ui/avatar/avatar.component';
 import { AvatarElementComponent } from './pages/ui-elements/avatar-element/avatar-element.component';
@@ -77,7 +77,6 @@ import { ResponsiveImageComponent } from './shared/components/ui/images/responsi
 import { SafeHtmlPipe } from './shared/pipe/safe-html.pipe';
 import { SelectComponent } from './shared/components/form/select/select.component';
 import { SelectInputsComponent } from './shared/components/form/form-elements/select-inputs/select-inputs.component';
-import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
 import { SignInComponent } from './pages/auth-pages/sign-in/sign-in.component';
 import { SignUpComponent } from './pages/auth-pages/sign-up/sign-up.component';
 import { SigninFormComponent } from './shared/components/auth/signin-form/signin-form.component';
@@ -100,6 +99,9 @@ import { UserDropdownComponent } from './shared/components/header/user-dropdown/
 import { UserInfoCardComponent } from './shared/components/user-profile/user-info-card/user-info-card.component';
 import { UserMetaCardComponent } from './shared/components/user-profile/user-meta-card/user-meta-card.component';
 import { VideosComponent } from './pages/ui-elements/videos/videos.component';
+import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
+import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
+import { ResetPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [
@@ -109,6 +111,7 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
     AppHeaderComponent,
     AppLayoutComponent,
     AppSidebarComponent,
+    SidebarWidgetComponent,
     AuthPageLayoutComponent,
     AvatarComponent,
     AvatarElementComponent,
@@ -175,7 +178,6 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
     SafeHtmlPipe,
     SelectComponent,
     SelectInputsComponent,
-    SidebarWidgetComponent,
     SignInComponent,
     SignUpComponent,
     SigninFormComponent,
@@ -198,6 +200,7 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
     UserInfoCardComponent,
     UserMetaCardComponent,
     VideosComponent,
+    ResetPasswordComponent,
   ],
   imports: [
     BrowserModule,

@@ -1,4 +1,4 @@
-
+﻿
 import { Component } from '@angular/core';
 import {
   ApexNonAxisChartSeries,
@@ -46,13 +46,13 @@ export class MonthlyTargetComponent {
   };
   public fill: ApexFill = {
     type: 'solid',
-    colors: ['#465FFF'],
+    colors: ['#099aa7'],
   };
   public stroke: ApexStroke = {
     lineCap: 'round',
   };
   public labels: string[] = ['Progress'];
-  public colors: string[] = ['#465FFF'];
+  public colors: string[] = ['#099aa7'];
 
   isOpen = false;
 
@@ -64,3 +64,4 @@ export class MonthlyTargetComponent {
     this.isOpen = false;
   }
 }
+
