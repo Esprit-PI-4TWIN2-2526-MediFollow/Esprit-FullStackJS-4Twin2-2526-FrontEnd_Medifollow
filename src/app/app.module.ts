@@ -102,6 +102,7 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
 import { ResetPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
+import { provideHttpClient } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -210,7 +211,9 @@ import { ResetPasswordComponent } from './shared/components/auth/forgot-password
     NgApexchartsModule,
     FullCalendarModule,
   ],
-  providers: [],
+  providers: [
+    provideHttpClient()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
