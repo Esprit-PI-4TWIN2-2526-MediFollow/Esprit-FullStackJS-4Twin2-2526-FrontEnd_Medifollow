@@ -42,7 +42,11 @@ export class AllProfilesComponent implements OnInit {
 
   handleViewMore(user: Users) {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     this.usersService.getUserById(user.id!).subscribe({
+=======
+    this.usersService.getUserById(user._id!).subscribe({
+>>>>>>> Stashed changes
 =======
     this.usersService.getUserById(user._id!).subscribe({
 >>>>>>> Stashed changes
@@ -63,7 +67,11 @@ export class AllProfilesComponent implements OnInit {
     if (!this.selectedUserToDelete) return;
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     this.usersService.deleteUser(this.selectedUserToDelete.id!).subscribe({
+=======
+    this.usersService.deleteUser(this.selectedUserToDelete._id!).subscribe({
+>>>>>>> Stashed changes
 =======
     this.usersService.deleteUser(this.selectedUserToDelete._id!).subscribe({
 >>>>>>> Stashed changes
