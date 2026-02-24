@@ -15,10 +15,3 @@ export class RoleGuard implements CanActivate {
     return false;
   }
 }
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
