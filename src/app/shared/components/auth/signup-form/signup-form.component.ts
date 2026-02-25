@@ -110,7 +110,6 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
   };
   profileImageName = '';
 
-// Get the currently displayed roles based on carousel position
   get displayedRoles() {
     return this.roles.slice(this.carouselStart, this.carouselStart + this.visibleRoles);
   }
