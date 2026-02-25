@@ -42,31 +42,47 @@
 
           <div class="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
             @for (role of displayedRoles; track role.key) {
-              <button
-                type="button"
-                (click)="selectRole(role.key)"
-                class="group rounded-xl border p-3 text-left transition hover:-translate-y-0.5"
-                [ngClass]="{
-                  'border-brand-500 bg-brand-50 dark:border-brand-600 dark:bg-brand-900/20': selectedRole === role.key,
-                  'border-gray-200 bg-gray-50 hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:bg-gray-800/40': selectedRole !== role.key
-                }"
-              >
-                <span class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white shadow-theme-xs dark:bg-gray-900">
-                  <img
-                    class="h-10 w-10 object-contain"
-                    [src]="'/images/roles/' + role.key + '.svg'"
-                    [alt]="role.label + ' icon'"
-                  />
-                </span>
-                <p class="text-sm font-semibold text-gray-800 dark:text-white/90">{{ role.label }}</p>
-              </button>
+              @if (isOtherRole(role)) {
+                <button
+                  type="button"
+                  (click)="openAddRoleModal()"
+                  class="group rounded-xl border border-dashed border-brand-300 bg-brand-50/60 p-3 text-left transition hover:-translate-y-0.5 hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20"
+                >
+                  <span class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white text-brand-500 shadow-theme-xs dark:bg-gray-900 dark:text-brand-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-6">
+                      <path d="M10 4.1665V15.8332" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                      <path d="M4.1665 10H15.8332" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                  </span>
+                  <p class="text-sm font-semibold text-brand-600 dark:text-brand-400">{{ role.label }}</p>
+                </button>
+              } @else {
+                <button
+                  type="button"
+                  (click)="selectRoleFromCarousel(role)"
+                  class="group rounded-xl border p-3 text-left transition hover:-translate-y-0.5"
+                  [ngClass]="{
+                    'border-brand-500 bg-brand-50 dark:border-brand-600 dark:bg-brand-900/20': selectedRole === role.key,
+                    'border-gray-200 bg-gray-50 hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:bg-gray-800/40': selectedRole !== role.key
+                  }"
+                >
+                  <span class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white shadow-theme-xs dark:bg-gray-900">
+                    <img
+                      class="h-10 w-10 object-contain"
+                      [src]="getRoleImageSrc(role)"
+                      [alt]="role.label + ' icon'"
+                    />
+                  </span>
+                  <p class="text-sm font-semibold text-gray-800 dark:text-white/90">{{ role.label }}</p>
+                </button>
+              }
             }
           </div>
 
           <button
             type="button"
             (click)="nextRoles()"
-            [disabled]="carouselStart + visibleRoles >= roles.length"
+            [disabled]="carouselStart + visibleRoles >= carouselRoles.length"
             class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-brand-300 hover:text-brand-500 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-400"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-5">
@@ -271,6 +287,65 @@
           Continue
         </button>
       </form>
+
+      @if (showAddRoleModal) {
+        <div class="fixed inset-0 z-50 flex items-center justify-center">
+          <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="closeAddRoleModal()"></div>
+
+          <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+            <div class="mb-4 flex items-start justify-between">
+              <div>
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Add Role</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter role name.</p>
+              </div>
+
+              <button
+                type="button"
+                (click)="closeAddRoleModal()"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400"
+              >
+                x
+              </button>
+            </div>
+
+            <form class="space-y-4" (ngSubmit)="submitAddRole()">
+              <div>
+                <app-label>Name <span class="text-error-500">*</span></app-label>
+                <input
+                  class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800"
+                  type="text"
+                  placeholder="Role name"
+                  [(ngModel)]="newRoleName"
+                  name="newRoleName"
+                  required
+                />
+
+                @if (addRoleError) {
+                  <p class="mt-2 text-sm text-error-500">{{ addRoleError }}</p>
+                }
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  (click)="closeAddRoleModal()"
+                  class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800/40"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  type="submit"
+                  [disabled]="isAddingRole"
+                  class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {{ isAddingRole ? 'Saving...' : 'Add' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      }
     } @else {
       <form [formGroup]="signupForm" class="space-y-6" (ngSubmit)="submitSignUp()">
         <div class="flex items-center justify-between rounded-xl border border-brand-100 bg-brand-50/60 p-3 dark:border-brand-800 dark:bg-brand-900/20">
