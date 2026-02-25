@@ -1,12 +1,16 @@
 
 import { Component, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Users } from '../../../../models/users';
 import { UsersService } from '../../../../services/users.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
-type RoleKey = 'patient' | 'doctor' | 'nurse' | 'coordinator' | 'auditor' | 'admin';
+type RoleKey = string;
+type CarouselRole = { key: string; label: string; imageKey?: string; isOther?: boolean };
+type RoleApiItem = { _id?: string; id?: string; name?: string; label?: string };
+type RoleApiResponse = RoleApiItem[] | { data?: RoleApiItem[] };
 
 @Component({
   selector: 'app-signup-form',
@@ -55,6 +59,10 @@ type RoleKey = 'patient' | 'doctor' | 'nurse' | 'coordinator' | 'auditor' | 'adm
   `,
 })
 export class SignupFormComponent implements OnInit {
+  showAddRoleModal = false;
+  newRoleName = '';
+  isAddingRole = false;
+  addRoleError = '';
 
 signupForm!:FormGroup;
 users!:Users[];
@@ -75,16 +83,20 @@ message: string = '';
   maxDateOfBirth = '';
   private readonly stepOneControlNames = ['firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address', 'dateOfBirth'];
 
-constructor(private usersService: UsersService,private fb:FormBuilder,private router:Router) {}
+constructor(private usersService: UsersService,private fb:FormBuilder,private router:Router,private readonly http: HttpClient) {}
 
-  roles = [
-    { key: 'nurse' as const, label: 'Nurse' },
-    { key: 'doctor' as const, label: 'Doctor' },
-    { key: 'coordinator' as const, label: 'Coordinator' },
-    { key: 'auditor' as const, label: 'Auditor' },
-    { key: 'patient' as const, label: 'Patient' },
-    { key: 'admin' as const, label: 'Admin' },
+  roles: CarouselRole[] = [
+    { key: 'nurse', label: 'Nurse' },
+    { key: 'doctor', label: 'Doctor' },
+    { key: 'coordinator', label: 'Coordinator' },
+    { key: 'auditor', label: 'Auditor' },
+    { key: 'patient', label: 'Patient' },
+    { key: 'admin', label: 'Admin' },
   ];
+  readonly otherRole: CarouselRole = { key: '__other__', label: 'Other Role', isOther: true };
+  readonly knownRoleImageKeys = ['nurse', 'doctor', 'coordinator', 'auditor', 'patient', 'admin'] as const;
+
+
 
   departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Emergency'];
   doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
@@ -110,9 +122,13 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
   };
   profileImageName = '';
 
+  get carouselRoles() {
+    return [...this.roles, this.otherRole];
+  }
+
 // Get the currently displayed roles based on carousel position
   get displayedRoles() {
-    return this.roles.slice(this.carouselStart, this.carouselStart + this.visibleRoles);
+    return this.carouselRoles.slice(this.carouselStart, this.carouselStart + this.visibleRoles);
   }
 
 // Get the display title for the currently selected role
@@ -130,11 +146,148 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
   }
 // Navigate to next set of roles in the carousel
   nextRoles() {
-    if (this.carouselStart + this.visibleRoles < this.roles.length) this.carouselStart += 1;
+    if (this.carouselStart + this.visibleRoles < this.carouselRoles.length) this.carouselStart += 1;
+  }
+
+  isOtherRole(role: CarouselRole) {
+    return !!role.isOther;
   }
 // Handle role selection and move to next step
   selectRole(role: RoleKey) {
     this.selectedRole = role;
+  }
+
+  selectRoleFromCarousel(role: CarouselRole) {
+    if (role.isOther) {
+      this.openAddRoleModal();
+      return;
+    }
+    this.selectRole(role.key);
+  }
+
+  openAddRoleModal() {
+    this.showAddRoleModal = true;
+    this.newRoleName = '';
+    this.addRoleError = '';
+  }
+
+  closeAddRoleModal() {
+    this.showAddRoleModal = false;
+    this.newRoleName = '';
+    this.isAddingRole = false;
+    this.addRoleError = '';
+  }
+
+  submitAddRole() {
+    const name = this.newRoleName.trim();
+    this.addRoleError = '';
+
+    if (!name) {
+      this.addRoleError = 'Le nom du role est obligatoire.';
+      return;
+    }
+
+    const alreadyExists = this.roles.some((role) => role.label.toLowerCase() === name.toLowerCase());
+    if (alreadyExists) {
+      this.addRoleError = 'Ce role existe deja.';
+      return;
+    }
+
+    this.isAddingRole = true;
+    this.http.post<{ data?: { name?: string } }>('http://localhost:3000/api', { name }).subscribe({
+      next: (res: { data?: { name?: string } }) => {
+        const createdName = res?.data?.name || name;
+        const roleKey = this.generateUniqueRoleKey(createdName);
+        const newRole: CarouselRole = {
+          key: roleKey,
+          label: createdName,
+          imageKey: this.resolveImageKey(createdName),
+        };
+        this.roles.push(newRole);
+        this.selectedRole = newRole.key;
+        this.isAddingRole = false;
+        this.showAddRoleModal = false;
+      },
+      error: (err: { error?: { message?: string } }) => {
+        this.isAddingRole = false;
+        this.addRoleError = err?.error?.message || 'Erreur lors de la creation du role.';
+      },
+    });
+  }
+
+  private generateUniqueRoleKey(roleName: string): string {
+    const baseKey = this.normalizeRoleKey(roleName);
+
+    let key = baseKey;
+    let counter = 2;
+    while (this.roles.some((role) => role.key === key)) {
+      key = `${baseKey}-${counter}`;
+      counter += 1;
+    }
+
+    return key;
+  }
+
+  getRoleImageSrc(role: CarouselRole): string {
+    const imageKey = role.imageKey || this.resolveImageKey(role.label);
+    return `/images/roles/${imageKey}.svg`;
+  }
+
+  private loadRoles() {
+    this.http.get<RoleApiResponse>('http://localhost:3000/api').subscribe({
+      next: (res: RoleApiResponse) => {
+        const apiRoles = Array.isArray(res) ? res : (res?.data ?? []);
+        const mappedRoles = apiRoles
+          .map((item) => {
+            const label = this.extractRoleLabel(item);
+            if (!label) return null;
+            return {
+              key: this.generateUniqueRoleKey(label),
+              label,
+              imageKey: this.resolveImageKey(label),
+            } as CarouselRole;
+          })
+          .filter((role): role is CarouselRole => !!role);
+
+        if (mappedRoles.length > 0) {
+          this.roles = mappedRoles;
+          this.carouselStart = 0;
+          if (this.selectedRole && !this.roles.some((role) => role.key === this.selectedRole)) {
+            this.selectedRole = null;
+          }
+        }
+      },
+      error: () => {
+        // Keep static fallback roles when API is unavailable.
+      },
+    });
+  }
+
+  private extractRoleLabel(role: RoleApiItem): string {
+    return (role?.name || role?.label || '').trim();
+  }
+
+  private normalizeRoleKey(roleName: string): string {
+    return roleName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'role';
+  }
+
+  private resolveImageKey(roleName: string): string {
+    const normalized = this.normalizeRoleKey(roleName);
+    if (this.knownRoleImageKeys.includes(normalized as (typeof this.knownRoleImageKeys)[number])) {
+      return normalized;
+    }
+
+    if (normalized.includes('doctor')) return 'doctor';
+    if (normalized.includes('nurse')) return 'nurse';
+    if (normalized.includes('audit')) return 'auditor';
+    if (normalized.includes('coord')) return 'coordinator';
+    if (normalized.includes('patient')) return 'patient';
+    if (normalized.includes('admin')) return 'admin';
+
+    return 'admin';
   }
 
 // Validate step one controls and proceed to step two if valid
@@ -275,6 +428,7 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
     this.profileImageName = file ? file.name : '';
   }
 
+
   onDateOfBirthChange(event: { dateStr: string }): void {
     const value = event?.dateStr ?? '';
     const control = this.signupForm.get('dateOfBirth');
@@ -332,6 +486,7 @@ ngOnInit(): void {
   const maxDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());// Set maximum date to 1 year ago
   this.minDateOfBirth = this.formatDateForInput(minDate);
   this.maxDateOfBirth = this.formatDateForInput(maxDate);
+  this.loadRoles();
 
   this.signupForm = this.fb.group({
     firstName: ['',[Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
