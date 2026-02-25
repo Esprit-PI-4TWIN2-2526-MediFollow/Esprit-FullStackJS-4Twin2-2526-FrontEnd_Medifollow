@@ -18,13 +18,13 @@ export class InputStatesComponent {
     return isValidEmail;
   }
 
-  handleEmailChange(value: string | number) {
-    this.email = value.toString();
+  handleEmailChange(value: string | number | null) {
+    this.email = value == null ? '' : value.toString();
     this.validateEmail(this.email);
   }
   
-  handleEmailTwoChange(value: string | number) {
-    this.emailTwo = value.toString();
+  handleEmailTwoChange(value: string | number | null) {
+    this.emailTwo = value == null ? '' : value.toString();
     this.validateEmail(this.emailTwo);
   }
 }

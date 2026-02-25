@@ -50,8 +50,13 @@ export class AddProductFormComponent {
     }
   }
 
-  updateQuantity(value: string | number) {
-    this.stockQuantity = typeof value === 'string' ? parseInt(value) || 0 : value;
+  updateQuantity(value: string | number | null) {
+    if (value == null) {
+      this.stockQuantity = 0;
+      return;
+    }
+
+    this.stockQuantity = typeof value === 'string' ? parseInt(value, 10) || 0 : value;
   }
 
   onDraft() {
