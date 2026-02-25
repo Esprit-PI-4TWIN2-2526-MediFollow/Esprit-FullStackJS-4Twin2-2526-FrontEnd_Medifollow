@@ -19,8 +19,9 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { SignInComponent } from './pages/auth-pages/sign-in/sign-in.component';
 import { SignUpComponent } from './pages/auth-pages/sign-up/sign-up.component';
 import { CalenderComponent } from './pages/calender/calender.component';
-import { ResetPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
+import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 
 const routes: Routes = [
   {
@@ -123,16 +124,18 @@ const routes: Routes = [
     title: 'Medifollow - Sign Up'
   },
   {
-    path: 'forgot-password', component: ResetPasswordComponent, title: 'Angular Reset Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
 
+    path:'forgot-password',
+    component:ForgotPasswordComponent,
+    title:'Angular Forgot Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
   },
-
-  // {
-  //     path: 'dashboard',
-  //     component: ,
-  //     canActivate: [AuthGuard, RoleGuard],
-  //     data: { roles: ['ADMIN', 'SUPERADMIN'] },
-  //   },
+  {
+    path:'reset-password/:token',
+    component:ResetPasswordComponent,
+    title:'Angular Reset Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
+  },
+  // les path te3 les modules
+  { path: 'users', loadChildren: () => import('./modules/users/users.module').then(u => u.UsersModule) },
   // error pages
 
   {

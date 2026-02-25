@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { FullCalendarModule } from '@fullcalendar/angular';
 
@@ -101,9 +102,12 @@ import { UserMetaCardComponent } from './shared/components/user-profile/user-met
 import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
-import { ResetPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
-import { provideHttpClient } from '@angular/common/http';
+
+import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
+
+import { provideHttpClient } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -202,6 +206,7 @@ import { AllProfilesComponent } from './users/all-profiles/all-profiles.componen
     UserInfoCardComponent,
     UserMetaCardComponent,
     VideosComponent,
+    ForgotPasswordComponent,
     ResetPasswordComponent,
     AllProfilesComponent,
   ],
