@@ -42,7 +42,7 @@ export class AllProfilesComponent implements OnInit {
 
   handleViewMore(user: Users) {
 
-    this.usersService.getUserById(user.id!).subscribe({
+    this.usersService.getUserById(user._id!).subscribe({
       next: (res: Users) => console.log('User details:', res),
       error: (err) => console.error(err)
     });
@@ -60,7 +60,7 @@ export class AllProfilesComponent implements OnInit {
     if (!this.selectedUserToDelete) return;
 
 
-    this.usersService.deleteUser(this.selectedUserToDelete.id!).subscribe({
+    this.usersService.deleteUser(this.selectedUserToDelete._id!).subscribe({
       next: () => {
         console.log('User deleted:', this.selectedUserToDelete);
         this.loadUsers();
