@@ -133,7 +133,7 @@ export class SignupFormComponent implements OnInit {
     }
 
     this.isAddingRole = true;
-    this.http.post<{ data?: { name?: string } }>('http://localhost:3000/api/roles', { name }).subscribe({
+    this.http.post<{ data?: { name?: string } }>('http://localhost:3000/api', { name }).subscribe({
       next: (res: { data?: { name?: string } }) => {
         const createdName = res?.data?.name || name;
         const roleKey = this.generateUniqueRoleKey(createdName);
@@ -173,7 +173,7 @@ export class SignupFormComponent implements OnInit {
   }
 
   private loadRoles() {
-    this.http.get<RoleApiResponse>('http://localhost:3000/api/roles').subscribe({
+    this.http.get<RoleApiResponse>('http://localhost:3000/api').subscribe({
       next: (res: RoleApiResponse) => {
         const apiRoles = Array.isArray(res) ? res : (res?.data ?? []);
         const mappedRoles = apiRoles
