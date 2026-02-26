@@ -63,6 +63,10 @@ export class AllProfilesComponent implements OnInit {
   currentPage = 1;
   itemsPerPage = 6;
   selectedUserToDelete: Users | null = null;
+  viewedUser: Users | null = null;
+  isViewUserModalOpen = false;
+  isEditMode = false;
+  editingUserId: string | null = null;
 
   isAddUserModalOpen = false;
   signupForm!: FormGroup;
@@ -83,6 +87,8 @@ export class AllProfilesComponent implements OnInit {
   newRoleName = '';
   isAddingRole = false;
   addRoleError = '';
+//une variable pour stocker le fichier sélectionné
+selectedAvatarFile: File | null = null;
 
   private readonly stepOneControlNames = ['firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address', 'dateOfBirth'];
   readonly knownRoleImageKeys = ['nurse', 'doctor', 'coordinator', 'auditor', 'patient', 'admin'] as const;
@@ -185,14 +191,64 @@ export class AllProfilesComponent implements OnInit {
   }
 
   handleViewMore(user: Users) {
-    this.usersService.getUserById(user._id!).subscribe({
-      next: (res: Users) => console.log('User details:', res),
-      error: (err) => console.error(err)
+    const userId = user?._id;
+    if (!userId) {
+      this.viewedUser = user;
+      this.isViewUserModalOpen = true;
+      return;
+    }
+
+    this.usersService.getUserById(userId).subscribe({
+      next: (res: Users) => {
+        this.viewedUser = res;
+        this.isViewUserModalOpen = true;
+      },
+      error: () => {
+        this.viewedUser = user;
+        this.isViewUserModalOpen = true;
+      }
     });
   }
 
+  closeViewUserModal(): void {
+    this.isViewUserModalOpen = false;
+    this.viewedUser = null;
+  }
+
   handleEdit(user: Users) {
-    console.log('Edit user:', user);
+    this.isEditMode = true;
+    this.editingUserId = user._id;
+    this.isAddUserModalOpen = true;
+    this.step = 1;
+    this.showAddRoleModal = false;
+    this.selectedAvatarFile = null;
+    this.profileImageName = '';
+
+    this.selectedRole = this.findRoleKeyForUser(user.role);
+    this.applyRoleSpecificValidators();
+    this.setPasswordValidatorsForMode();
+
+    const phoneRaw = String(user.phoneNumber || '').trim();
+    const countryMatch = this.countryOptions.find((country) => phoneRaw.startsWith(country.dialCode));
+    this.selectedDialCode = countryMatch?.dialCode || '+216';
+
+    this.signupForm.patchValue({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      password: '',
+      phoneNumber: phoneRaw || `${this.selectedDialCode} `,
+      sexe: user.sexe || '',
+      address: user.address || '',
+      dateOfBirth: this.formatDateForInputValue(user.dateOfBirth),
+      primaryDoctor: user.primaryDoctor || '',
+      specialization: user.specialization || '',
+      grade: user.grade || '',
+      diploma: user.diploma || '',
+      yearsOfExperience: user.yearsOfExperience ?? null,
+      assignedDepartment: user.assignedDepartment || '',
+      auditScope: user.auditScope || '',
+    });
   }
 
   handleDelete(user: Users) {
@@ -221,6 +277,8 @@ export class AllProfilesComponent implements OnInit {
   }
 
   openAddUserModal(): void {
+    this.isEditMode = false;
+    this.editingUserId = null;
     this.isAddUserModalOpen = true;
     this.resetSignupState();
   }
@@ -228,6 +286,8 @@ export class AllProfilesComponent implements OnInit {
   closeAddUserModal(): void {
     this.isAddUserModalOpen = false;
     this.showAddRoleModal = false;
+    this.isEditMode = false;
+    this.editingUserId = null;
   }
 
   private resetSignupState(): void {
@@ -241,6 +301,7 @@ export class AllProfilesComponent implements OnInit {
     this.passwordStrengthClass = 'bg-error-500';
     this.selectedRole = null;
     this.profileImageName = '';
+    this.selectedAvatarFile = null;
     this.showAddRoleModal = false;
     this.newRoleName = '';
     this.isAddingRole = false;
@@ -248,6 +309,7 @@ export class AllProfilesComponent implements OnInit {
     this.signupForm.reset();
     this.selectedDialCode = '+216';
     this.applyDialCodeToPhone();
+    this.setPasswordValidatorsForMode();
   }
 
   get carouselRoles() {
@@ -277,6 +339,7 @@ export class AllProfilesComponent implements OnInit {
 
   selectRole(role: RoleKey) {
     this.selectedRole = role;
+    this.applyRoleSpecificValidators();
   }
 
   selectRoleFromCarousel(role: CarouselRole) {
@@ -305,13 +368,13 @@ export class AllProfilesComponent implements OnInit {
     this.addRoleError = '';
 
     if (!name) {
-      this.addRoleError = 'Le nom du role est obligatoire.';
+      this.addRoleError = 'Role name is required.';
       return;
     }
 
     const alreadyExists = this.roles.some((role) => role.label.toLowerCase() === name.toLowerCase());
     if (alreadyExists) {
-      this.addRoleError = 'Ce role existe deja.';
+      this.addRoleError = 'Role already exists.';
       return;
     }
 
@@ -413,6 +476,7 @@ export class AllProfilesComponent implements OnInit {
   continueToStepTwo() {
     if (!this.selectedRole) return;
 
+    this.applyRoleSpecificValidators();
     this.markControlsAsTouched(this.stepOneControlNames);
     const hasInvalidStepOneControl = this.stepOneControlNames.some(
       (controlName) => this.signupForm.get(controlName)?.invalid
@@ -493,7 +557,48 @@ export class AllProfilesComponent implements OnInit {
     }
   }
 
-  submitSignUp() {
+submitSignUp() {
+  if (!this.selectedRole) {
+    Swal.fire('Role missing', 'Please select a role before continuing.', 'warning');
+    return;
+  }
+
+  this.applyRoleSpecificValidators();
+  if (this.signupForm.invalid) {
+    this.signupForm.markAllAsTouched();
+    Swal.fire('Form invalid', 'Please verify the required fields.', 'error');
+    return;
+  }
+
+  const payload: any = {
+    ...this.signupForm.value,
+    role: this.selectedRole,
+    acceptedPolicy: this.isChecked,
+  };
+
+  const request$ = this.isEditMode && this.editingUserId
+    ? this.usersService.updateUser(this.editingUserId, payload, this.selectedAvatarFile || undefined)
+    : this.usersService.createUser(payload, this.selectedAvatarFile || undefined);
+
+  request$.subscribe({
+    next: () => {
+      Swal.fire({
+        title: 'Success',
+        text: this.isEditMode ? 'Account updated successfully.' : 'Account created successfully.',
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: true,
+      });
+      this.closeAddUserModal();
+      this.loadUsers();
+    },
+    error: (err) => {
+      const message = err?.error?.message || 'Failed to create account.';
+      Swal.fire('Error', message, 'error');
+    },
+  });
+}
+  /* submitSignUp() {
     if (!this.selectedRole) {
       Swal.fire('Role missing', 'Please select a role before continuing.', 'warning');
       return;
@@ -529,20 +634,50 @@ export class AllProfilesComponent implements OnInit {
         Swal.fire('Error', message, 'error');
       },
     });
-  }
+  } */
 
   requiresImage(): boolean {
-    return this.selectedRole === 'doctor'
-      || this.selectedRole === 'nurse'
-      || this.selectedRole === 'admin'
-      || this.selectedRole === 'auditor'
-      || this.selectedRole === 'coordinator';
+    return this.isSelectedRole('doctor')
+      || this.isSelectedRole('nurse')
+      || this.isSelectedRole('admin')
+      || this.isSelectedRole('auditor')
+      || this.isSelectedRole('coordinator');
+  }
+
+  isSelectedRole(roleType: 'doctor' | 'patient' | 'nurse' | 'coordinator' | 'auditor' | 'admin'): boolean {
+    const token = `${this.selectedRole || ''} ${this.roleTitle || ''}`.toLowerCase();
+    const aliases: Record<string, string[]> = {
+      doctor: ['doctor', 'medecin', 'médecin', 'physician'],
+      patient: ['patient'],
+      nurse: ['nurse', 'infirmier', 'infirmiere', 'infirmière'],
+      coordinator: ['coordinator', 'coordinateur', 'coordinatrice'],
+      auditor: ['auditor', 'audit', 'auditeur'],
+      admin: ['admin', 'administrator', 'administrateur'],
+    };
+    return aliases[roleType].some((alias) => token.includes(alias));
+  }
+
+  isRoleType(roleValue: unknown, roleType: 'doctor' | 'patient' | 'nurse' | 'coordinator' | 'auditor' | 'admin'): boolean {
+    const token = String(roleValue || '').toLowerCase();
+    const aliases: Record<string, string[]> = {
+      doctor: ['doctor', 'medecin', 'mÃ©decin', 'physician'],
+      patient: ['patient'],
+      nurse: ['nurse', 'infirmier', 'infirmiere', 'infirmiÃ¨re'],
+      coordinator: ['coordinator', 'coordinateur', 'coordinatrice'],
+      auditor: ['auditor', 'audit', 'auditeur'],
+      admin: ['admin', 'administrator', 'administrateur'],
+    };
+    return aliases[roleType].some((alias) => token.includes(alias));
   }
 
   onImageSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
+const input = event.target as HTMLInputElement;
+  const file = input.files && input.files.length > 0 ? input.files[0] : null;
+  this.selectedAvatarFile = file;
+  this.profileImageName = file ? file.name : '';
+    /* const input = event.target as HTMLInputElement;
     const file = input.files && input.files.length > 0 ? input.files[0] : null;
-    this.profileImageName = file ? file.name : '';
+    this.profileImageName = file ? file.name : ''; */
   }
 
   onDateOfBirthChange(event: { dateStr: string }): void {
@@ -591,8 +726,81 @@ export class AllProfilesComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
+  private formatDateForInputValue(dateValue: Date | string | undefined): string {
+    if (!dateValue) return '';
+    const parsedDate = new Date(dateValue);
+    if (Number.isNaN(parsedDate.getTime())) return '';
+    return this.formatDateForInput(parsedDate);
+  }
+
+  private findRoleKeyForUser(roleValue: unknown): RoleKey {
+    const roleText = String(roleValue || '').toLowerCase().trim();
+    if (!roleText) return 'patient';
+
+    const matched = this.roles.find((role) => {
+      const key = role.key.toLowerCase();
+      const label = role.label.toLowerCase();
+      return roleText === key || roleText === label || roleText.includes(key) || key.includes(roleText);
+    });
+
+    return matched?.key || roleText;
+  }
+
+  private setPasswordValidatorsForMode(): void {
+    const passwordControl = this.signupForm.get('password');
+    if (!passwordControl) return;
+
+    if (this.isEditMode) {
+      passwordControl.setValidators([Validators.minLength(6), Validators.maxLength(100)]);
+    } else {
+      passwordControl.setValidators([Validators.required, Validators.minLength(6), Validators.maxLength(100)]);
+    }
+    passwordControl.updateValueAndValidity({ emitEvent: false });
+  }
+
   private markControlsAsTouched(controlNames: string[]): void {
     controlNames.forEach((controlName) => this.signupForm.get(controlName)?.markAsTouched());
+  }
+
+  private applyRoleSpecificValidators(): void {
+    const roleControls = [
+      'primaryDoctor',
+      'specialization',
+      'grade',
+      'diploma',
+      'yearsOfExperience',
+      'assignedDepartment',
+      'auditScope',
+    ];
+
+    roleControls.forEach((controlName) => {
+      this.signupForm.get(controlName)?.setValidators([]);
+      this.signupForm.get(controlName)?.updateValueAndValidity({ emitEvent: false });
+    });
+
+    if (this.isSelectedRole('patient')) {
+      this.signupForm.get('primaryDoctor')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+    }
+
+    if (this.isSelectedRole('doctor')) {
+      this.signupForm.get('specialization')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+      this.signupForm.get('grade')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+      this.signupForm.get('diploma')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+      this.signupForm.get('yearsOfExperience')?.setValidators([Validators.required, Validators.min(0), Validators.max(80)]);
+      this.signupForm.get('assignedDepartment')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+    }
+
+    if (this.isSelectedRole('nurse') || this.isSelectedRole('coordinator')) {
+      this.signupForm.get('assignedDepartment')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+    }
+
+    if (this.isSelectedRole('auditor')) {
+      this.signupForm.get('auditScope')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
+    }
+
+    roleControls.forEach((controlName) => {
+      this.signupForm.get(controlName)?.updateValueAndValidity({ emitEvent: false });
+    });
   }
 
   isFieldInvalid(controlName: string): boolean {
@@ -611,6 +819,12 @@ export class AllProfilesComponent implements OnInit {
     }
     if (control.errors['maxlength']) {
       return `${label} must be at most ${control.errors['maxlength'].requiredLength} characters long.`;
+    }
+    if (control.errors['min'] && controlName === 'yearsOfExperience') {
+      return 'Years of experience must be at least 0.';
+    }
+    if (control.errors['max'] && controlName === 'yearsOfExperience') {
+      return 'Years of experience is too high.';
     }
     if (control.errors['pattern'] && controlName === 'phoneNumber') {
       return 'Phone number format is invalid.';
@@ -638,6 +852,8 @@ export class AllProfilesComponent implements OnInit {
       assignedDepartment: ['', [Validators.minLength(4), Validators.maxLength(50)]],
       auditScope: ['', [Validators.minLength(4), Validators.maxLength(50)]],
     });
+    this.setPasswordValidatorsForMode();
+    this.applyRoleSpecificValidators();
   }
 
   private setDateRange(): void {
