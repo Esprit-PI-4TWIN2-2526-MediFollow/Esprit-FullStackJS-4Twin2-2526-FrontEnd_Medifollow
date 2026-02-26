@@ -26,7 +26,7 @@ import { ResetPasswordComponent } from './shared/components/auth/reset-password/
 const routes: Routes = [
   {
     path: '',
-    component: SignInComponent,
+    component: AppLayoutComponent,
     children: [
       {
         path: '',
