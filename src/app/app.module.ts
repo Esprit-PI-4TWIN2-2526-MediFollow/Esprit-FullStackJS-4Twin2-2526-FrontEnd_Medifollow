@@ -109,6 +109,9 @@ import { ResetPasswordComponent } from './shared/components/auth/reset-password/
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
 import { HttpClientModule } from '@angular/common/http';
 
+
+
+
 @NgModule({
   declarations: [
     AlertComponent,
@@ -209,6 +212,7 @@ import { HttpClientModule } from '@angular/common/http';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     AllProfilesComponent,
+
   ],
   imports: [
     BrowserModule,
