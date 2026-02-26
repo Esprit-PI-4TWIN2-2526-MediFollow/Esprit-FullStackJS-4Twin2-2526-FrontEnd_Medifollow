@@ -304,13 +304,32 @@
 
             <div>
               <app-label>Phone Number <span class="text-error-500">*</span></app-label>
-              <input
-                class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm ..."
-                type="tel"
-                name="phoneNumber"
-                placeholder="+216 00 000 000"
-                formControlName="phoneNumber"
-              />
+              <div class="flex h-11 items-center rounded-lg border border-gray-300 bg-transparent shadow-theme-xs focus-within:border-brand-300 focus-within:ring-3 focus-within:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:focus:border-brand-800">
+                <img
+                  [src]="getFlagUrl(selectedCountry.iso2)"
+                  [alt]="selectedCountry.name + ' flag'"
+                  class="ml-3 h-5 w-7 rounded-sm object-cover"
+                />
+                <select
+                  class="h-full appearance-none border-0 bg-transparent pl-2 pr-6 text-sm text-gray-800 outline-none ring-0 focus:border-0 focus:outline-none focus:ring-0 dark:text-white/90"
+                  [value]="selectedDialCode"
+                  (change)="onCountryCodeChange($event)"
+                >
+                  @for (country of countryOptions; track country.dialCode) {
+                    <option [value]="country.dialCode">{{ country.name }} ({{ country.dialCode }})</option>
+                  }
+                </select>
+                <span class="mx-1 h-6 w-px bg-gray-300 dark:bg-gray-700"></span>
+
+                <input
+                  class="h-full w-full bg-transparent px-3 text-sm text-gray-800 outline-none dark:text-white/90"
+                  type="tel"
+                  name="phoneNumber"
+                  placeholder="Phone number"
+                  formControlName="phoneNumber"
+                  (focus)="onPhoneNumberFocus()"
+                />
+              </div>
               @if (isFieldInvalid('phoneNumber')) {
                 <p class="mt-1 text-xs text-error-500">{{ getFieldError('phoneNumber', 'Phone number') }}</p>
               }
