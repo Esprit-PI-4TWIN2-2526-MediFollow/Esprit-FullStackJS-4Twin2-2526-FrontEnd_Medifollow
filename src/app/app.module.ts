@@ -103,11 +103,11 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
 
-
 import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
-import { HttpClientModule } from '@angular/common/http';
+
+import { provideHttpClient } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -217,9 +217,11 @@ import { HttpClientModule } from '@angular/common/http';
     ReactiveFormsModule,
     NgApexchartsModule,
     FullCalendarModule,
-    HttpClientModule,
+
   ],
-  providers: [],
+  providers: [
+    provideHttpClient()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
