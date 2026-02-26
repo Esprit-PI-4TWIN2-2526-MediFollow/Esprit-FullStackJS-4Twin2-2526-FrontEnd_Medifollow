@@ -101,6 +101,27 @@ export class AllProfilesComponent implements OnInit {
   doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
   auditScopes = ['Logs', 'Data', 'Full Access'];
   sexeOptions = ['Male', 'Female'];
+  countryOptions = [
+    { name: 'Tunisia', iso2: 'tn', dialCode: '+216' },
+    { name: 'Algeria', iso2: 'dz', dialCode: '+213' },
+    { name: 'Morocco', iso2: 'ma', dialCode: '+212' },
+    { name: 'Libya', iso2: 'ly', dialCode: '+218' },
+    { name: 'Egypt', iso2: 'eg', dialCode: '+20' },
+    { name: 'France', iso2: 'fr', dialCode: '+33' },
+    { name: 'Spain', iso2: 'es', dialCode: '+34' },
+    { name: 'Italy', iso2: 'it', dialCode: '+39' },
+    { name: 'Belgium', iso2: 'be', dialCode: '+32' },
+    { name: 'Switzerland', iso2: 'ch', dialCode: '+41' },
+    { name: 'United States', iso2: 'us', dialCode: '+1' },
+    { name: 'Canada', iso2: 'ca', dialCode: '+1' },
+    { name: 'Germany', iso2: 'de', dialCode: '+49' },
+    { name: 'United Kingdom', iso2: 'gb', dialCode: '+44' },
+    { name: 'Turkey', iso2: 'tr', dialCode: '+90' },
+    { name: 'Saudi Arabia', iso2: 'sa', dialCode: '+966' },
+    { name: 'United Arab Emirates', iso2: 'ae', dialCode: '+971' },
+    { name: 'Qatar', iso2: 'qa', dialCode: '+974' },
+  ];
+  selectedDialCode = '+216';
 
   constructor(
     private usersService: UsersService,
@@ -225,6 +246,8 @@ export class AllProfilesComponent implements OnInit {
     this.isAddingRole = false;
     this.addRoleError = '';
     this.signupForm.reset();
+    this.selectedDialCode = '+216';
+    this.applyDialCodeToPhone();
   }
 
   get carouselRoles() {
@@ -530,6 +553,37 @@ export class AllProfilesComponent implements OnInit {
     control?.markAsDirty();
   }
 
+  onCountryCodeChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedDialCode = select.value || '+216';
+    this.applyDialCodeToPhone();
+  }
+
+  onPhoneNumberFocus(): void {
+    const phoneValue = String(this.signupForm.get('phoneNumber')?.value || '').trim();
+    if (!phoneValue) {
+      this.applyDialCodeToPhone();
+    }
+  }
+
+  get selectedCountry() {
+    return this.countryOptions.find((c) => c.dialCode === this.selectedDialCode) || this.countryOptions[0];
+  }
+
+  getFlagUrl(iso2: string): string {
+    return `https://flagcdn.com/w40/${iso2}.png`;
+  }
+
+  private applyDialCodeToPhone(): void {
+    const control = this.signupForm.get('phoneNumber');
+    if (!control) return;
+
+    const currentValue = String(control.value || '');
+    const localPart = currentValue.replace(/^\+\d{1,4}\s*/, '').trim();
+    const nextValue = localPart ? `${this.selectedDialCode} ${localPart}` : `${this.selectedDialCode} `;
+    control.setValue(nextValue);
+  }
+
   private formatDateForInput(date: Date): string {
     const year = date.getFullYear();
     const month = `${date.getMonth() + 1}`.padStart(2, '0');
@@ -572,7 +626,7 @@ export class AllProfilesComponent implements OnInit {
       lastName: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(50)]],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern('^(\\+216\\s?)?\\d{2}\\s?\\d{3}\\s?\\d{3}$')]],
+      phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.pattern('^\\+\\d{1,4}\\s[0-9 ]{6,15}$')]],
       sexe: ['', [Validators.required]],
       address: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
       dateOfBirth: ['', [Validators.required]],
