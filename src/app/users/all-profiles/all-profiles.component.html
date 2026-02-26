@@ -48,8 +48,16 @@
               <td class="px-4 py-4">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8">
-                    <img *ngIf="user.profileImageName" [src]="'/uploads/' + user.profileImageName" class="w-8 h-8 rounded-full object-cover" alt="profile" />
-                    <div *ngIf="!user.profileImageName" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                    <!-- <img *ngIf="user.profileImageName" [src]="'/uploads/' + user.profileImageName" class="w-8 h-8 rounded-full object-cover" alt="profile" /> -->
+                   <!--  <div *ngIf="!user.profileImageName" class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div> -->
+
+                   <img *ngIf="user.avatarUrl"
+                        [src]="user.avatarUrl"
+                        class="w-8 h-8 rounded-full object-cover"
+                        alt="profile" />
+                        <div *ngIf="!user.avatarUrl"
+                        class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+
                   </div>
                   <div><span class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">{{ user.firstName }} {{ user.lastName }}</span></div>
                 </div>
@@ -108,6 +116,117 @@
     </div>
   }
 </div>
+
+<div *ngIf="isViewUserModalOpen && viewedUser" class="fixed inset-0 z-50">
+  <div class="absolute inset-0 bg-black/50" (click)="closeViewUserModal()"></div>
+  <div class="relative z-10 flex h-full items-center justify-center p-4">
+    <div class="max-h-[92vh] w-full max-w-3xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8" (click)="$event.stopPropagation()">
+      <div class="mb-6 flex items-start justify-between">
+        <div class="flex items-center gap-4">
+          <img *ngIf="viewedUser.avatarUrl" [src]="viewedUser.avatarUrl" alt="profile" class="h-14 w-14 rounded-full object-cover" />
+          <div *ngIf="!viewedUser.avatarUrl" class="h-14 w-14 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">{{ viewedUser.firstName }} {{ viewedUser.lastName }}</h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ viewedUser.role || '-' }}</p>
+          </div>
+        </div>
+        <button type="button" (click)="closeViewUserModal()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">x</button>
+      </div>
+
+      <div class="space-y-6">
+        <div>
+          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Common Information</h3>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Email</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.email || '-' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Phone Number</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.phoneNumber || '-' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Sexe</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.sexe || '-' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Date of Birth</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.dateOfBirth ? (viewedUser.dateOfBirth | date:'mediumDate') : '-' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700 sm:col-span-2">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Address</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.address || '-' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.actif ? 'Active' : 'Inactive' }}</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Created At</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.createdAt ? (viewedUser.createdAt | date:'medium') : '-' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 class="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">Role Specific Information</h3>
+
+          @if (isRoleType(viewedUser.role, 'patient')) {
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Primary Doctor</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.primaryDoctor || '-' }}</p>
+            </div>
+          }
+
+          @if (isRoleType(viewedUser.role, 'doctor')) {
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Specialization</p>
+                <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.specialization || '-' }}</p>
+              </div>
+              <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Grade</p>
+                <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.grade || '-' }}</p>
+              </div>
+              <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Diploma</p>
+                <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.diploma || '-' }}</p>
+              </div>
+              <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Years of Experience</p>
+                <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.yearsOfExperience ?? '-' }}</p>
+              </div>
+              <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700 sm:col-span-2">
+                <p class="text-xs text-gray-500 dark:text-gray-400">Assigned Department</p>
+                <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.assignedDepartment || '-' }}</p>
+              </div>
+            </div>
+          }
+
+          @if (isRoleType(viewedUser.role, 'nurse') || isRoleType(viewedUser.role, 'coordinator')) {
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Assigned Department</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.assignedDepartment || '-' }}</p>
+            </div>
+          }
+
+          @if (isRoleType(viewedUser.role, 'auditor')) {
+            <div class="rounded-xl border border-gray-200 p-3 dark:border-gray-700">
+              <p class="text-xs text-gray-500 dark:text-gray-400">Audit Scope</p>
+              <p class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">{{ viewedUser.auditScope || '-' }}</p>
+            </div>
+          }
+
+          @if (!isRoleType(viewedUser.role, 'patient') && !isRoleType(viewedUser.role, 'doctor') && !isRoleType(viewedUser.role, 'nurse') && !isRoleType(viewedUser.role, 'coordinator') && !isRoleType(viewedUser.role, 'auditor')) {
+            <div class="rounded-xl border border-dashed border-gray-300 p-3 text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+              No specific fields for this role.
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Add User Modal -->
 
 <div *ngIf="isAddUserModalOpen" class="fixed inset-0 z-50">
@@ -116,7 +235,9 @@
     <div class="max-h-[95vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8" (click)="$event.stopPropagation()">
       <div class="mb-6 sm:mb-8 flex items-start justify-between">
         <div>
-          <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">Create An Account</h1>
+          <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
+            {{ isEditMode ? 'Edit Account' : 'Create An Account' }}
+          </h1>
           @if (step === 1) {
             <p class="text-sm text-gray-500 dark:text-gray-400">Select a role and enter common information to continue.</p>
           } @else {
@@ -315,7 +436,7 @@
                   [value]="selectedDialCode"
                   (change)="onCountryCodeChange($event)"
                 >
-                  @for (country of countryOptions; track country.dialCode) {
+                  @for (country of countryOptions; track country.iso2) {
                     <option [value]="country.dialCode">{{ country.name }} ({{ country.dialCode }})</option>
                   }
                 </select>
@@ -411,18 +532,21 @@
             <button type="button" (click)="backToRoleSelection()" class="rounded-lg border border-brand-200 px-3 py-2 text-xs font-medium text-brand-600 transition hover:bg-brand-100 dark:border-brand-700 dark:text-brand-400 dark:hover:bg-brand-900/30">Back</button>
           </div>
 
-          @if (requiresImage()) {
-            <div>
-              <app-label>Profile Image <span class="text-error-500">*</span></app-label>
-              <label class="mt-1 flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-brand-300 bg-brand-50/40 px-4 py-3 text-sm text-gray-700 hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-gray-300">
-                <span>{{ profileImageName || 'Upload profile image (JPG/PNG)' }}</span>
-                <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-brand-600 dark:bg-gray-800 dark:text-brand-400">Browse</span>
-                <input type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
-              </label>
-            </div>
-          }
+          <div>
+            <app-label>
+              Profile Image
+              @if (requiresImage()) {
+                <span class="text-error-500">*</span>
+              }
+            </app-label>
+            <label class="mt-1 flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-brand-300 bg-brand-50/40 px-4 py-3 text-sm text-gray-700 hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-gray-300">
+              <span>{{ profileImageName || 'Upload profile image (JPG/PNG)' }}</span>
+              <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-brand-600 dark:bg-gray-800 dark:text-brand-400">Browse</span>
+              <input type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
+            </label>
+          </div>
 
-          @if (selectedRole === 'patient') {
+          @if (isSelectedRole('patient')) {
             <div>
               <app-label>Primary Doctor <span class="text-error-500">*</span></app-label>
               <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800" name="primaryDoctor" formControlName="primaryDoctor">
@@ -433,7 +557,7 @@
             </div>
           }
 
-          @if (selectedRole === 'doctor') {
+          @if (isSelectedRole('doctor')) {
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <app-label>Specialization <span class="text-error-500">*</span></app-label>
@@ -450,6 +574,9 @@
               <div>
                 <app-label>Years of Experience <span class="text-error-500">*</span></app-label>
                 <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm ..." type="number" name="yearsOfExperience" placeholder="0" formControlName="yearsOfExperience" />
+                @if (isFieldInvalid('yearsOfExperience')) {
+                  <p class="mt-1 text-xs text-error-500">{{ getFieldError('yearsOfExperience', 'Years of experience') }}</p>
+                }
               </div>
               <div class="sm:col-span-2">
                 <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
@@ -461,7 +588,7 @@
             </div>
           }
 
-          @if (selectedRole === 'nurse' || selectedRole === 'coordinator') {
+          @if (isSelectedRole('nurse') || isSelectedRole('coordinator')) {
             <div>
               <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
               <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800" name="assignedDepartment" formControlName="assignedDepartment">
@@ -471,7 +598,7 @@
             </div>
           }
 
-          @if (selectedRole === 'auditor') {
+          @if (isSelectedRole('auditor')) {
             <div>
               <app-label>Audit Scope <span class="text-error-500">*</span></app-label>
               <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:text-white/90 dark:focus:border-brand-800" name="auditScope" formControlName="auditScope">
@@ -482,7 +609,7 @@
           }
 
           <button type="submit" class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600">
-            Create Account
+            {{ isEditMode ? 'Update Account' : 'Create Account' }}
           </button>
         </form>
       }

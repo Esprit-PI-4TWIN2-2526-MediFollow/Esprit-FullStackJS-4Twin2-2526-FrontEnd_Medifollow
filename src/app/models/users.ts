@@ -18,6 +18,7 @@ yearsOfExperience: number;
 assignedDepartment: string;
 auditScope: string;
 profileImageName: string;
+avatarUrl: string;
 primaryDoctor: string;
 email: string;
 password: string;
