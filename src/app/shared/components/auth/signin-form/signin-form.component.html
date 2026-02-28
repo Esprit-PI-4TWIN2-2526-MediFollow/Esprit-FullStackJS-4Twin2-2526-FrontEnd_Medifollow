@@ -91,6 +91,51 @@
       >
         {{ isLoading ? 'Signing in...' : 'Sign in' }}
       </button>
+
+      <!-- Face ID Login Button -->
+      <button
+        *ngIf="showFaceIdButton && !showCamera"
+        type="button"
+        (click)="onFaceIdLogin()"
+        [disabled]="isFaceIdLoading || !loginForm.get('email')?.value"
+        class="w-full flex items-center justify-center gap-2 bg-gray-100 text-gray-800 rounded p-2 hover:bg-gray-200 disabled:opacity-50 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+        </svg>
+        {{ isFaceIdLoading ? 'Opening camera...' : 'Login with Face ID' }}
+      </button>
+
+      <!-- Camera Preview for Face Login -->
+      <div *ngIf="showCamera" class="mt-4 p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
+        <p class="text-center mb-3 font-medium text-gray-700 dark:text-gray-300">
+          📸 Look at the camera
+        </p>
+        <div class="flex justify-center">
+          <video 
+            id="loginCameraPreview" 
+            autoplay 
+            playsinline
+            class="rounded-lg border-4 border-brand-500 shadow-lg"
+            style="max-width: 400px; width: 100%; transform: scaleX(-1);">
+          </video>
+        </div>
+        <div class="flex justify-center gap-3 mt-4">
+          <button 
+            type="button"
+            (click)="captureFaceForLogin()"
+            class="inline-flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+            📸 Capture & Login
+          </button>
+          <button 
+            type="button"
+            (click)="cancelFaceLogin()"
+            class="inline-flex items-center gap-2 px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+            Cancel
+          </button>
+        </div>
+      </div>
     </form>
 
     <div class="mt-5">

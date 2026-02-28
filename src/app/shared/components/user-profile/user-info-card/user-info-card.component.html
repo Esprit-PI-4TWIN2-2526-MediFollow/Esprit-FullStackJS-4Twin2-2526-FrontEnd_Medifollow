@@ -10,7 +10,7 @@
             First Name
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ user.firstName }}
+            {{ currentUser?.firstName || '-' }}
           </p>
         </div>
         <div>
@@ -18,7 +18,7 @@
             Last Name
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ user.lastName }}
+            {{ currentUser?.lastName || '-' }}
           </p>
         </div>
         <div>
@@ -26,7 +26,7 @@
             Email address
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ user.email }}
+            {{ currentUser?.email || '-' }}
           </p>
         </div>
         <div>
@@ -34,7 +34,7 @@
             Phone
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ user.phone }}
+            {{ currentUser?.phoneNumber || '-' }}
           </p>
         </div>
         <div>
@@ -42,7 +42,7 @@
             Bio
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ user.bio }}
+            {{ currentUser?.role || '-' }}
           </p>
         </div>
       </div>
@@ -98,23 +98,23 @@
             <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
               <div class="col-span-2 lg:col-span-1">
                 <app-label>First Name</app-label>
-                <app-input-field type="text" [value]="user.firstName" />
+                <app-input-field type="text" [value]="currentUser?.firstName || ''" />
               </div>
               <div class="col-span-2 lg:col-span-1">
                 <app-label>Last Name</app-label>
-                <app-input-field type="text" [value]="user.lastName" />
+                <app-input-field type="text" [value]="currentUser?.lastName || ''" />
               </div>
               <div class="col-span-2 lg:col-span-1">
                 <app-label>Email Address</app-label>
-                <app-input-field type="text" [value]="user.email" />
+                <app-input-field type="text" [value]="currentUser?.email || ''" />
               </div>
               <div class="col-span-2 lg:col-span-1">
                 <app-label>Phone</app-label>
-                <app-input-field type="text" [value]="user.phone" />
+                <app-input-field type="text" [value]="currentUser?.phoneNumber || ''" />
               </div>
               <div class="col-span-2">
                 <app-label>Bio</app-label>
-                <app-input-field type="text" [value]="user.bio" />
+                <app-input-field type="text" [value]="currentUser?.role?.toString() || ''" />
               </div>
             </div>
           </div>
