@@ -99,15 +99,19 @@ import { UserAddressCardComponent } from './shared/components/user-profile/user-
 import { UserDropdownComponent } from './shared/components/header/user-dropdown/user-dropdown.component';
 import { UserInfoCardComponent } from './shared/components/user-profile/user-info-card/user-info-card.component';
 import { UserMetaCardComponent } from './shared/components/user-profile/user-meta-card/user-meta-card.component';
+import { SecuritySettingsCardComponent } from './shared/components/user-profile/security-settings-card/security-settings-card.component';
 import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
 
-
 import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
-import { HttpClientModule } from '@angular/common/http';
+
+import { provideHttpClient } from '@angular/common/http';
+
+
+
 
 @NgModule({
   declarations: [
@@ -205,10 +209,12 @@ import { HttpClientModule } from '@angular/common/http';
     UserDropdownComponent,
     UserInfoCardComponent,
     UserMetaCardComponent,
+    SecuritySettingsCardComponent,
     VideosComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
     AllProfilesComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -217,9 +223,11 @@ import { HttpClientModule } from '@angular/common/http';
     ReactiveFormsModule,
     NgApexchartsModule,
     FullCalendarModule,
-    HttpClientModule,
+
   ],
-  providers: [],
+  providers: [
+    provideHttpClient()
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
