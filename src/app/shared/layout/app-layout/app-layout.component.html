@@ -1,21 +1,40 @@
-<div class="min-h-screen xl:flex">
-  <div>
-    <app-sidebar></app-sidebar>
-    <app-backdrop></app-backdrop>
-  </div>
+<!--
+  ╔══════════════════════════════════════════════════════╗
+  ║  STRUCTURE CORRECTE DU LAYOUT                       ║
+  ║                                                      ║
+  ║  <div class="layout-wrapper">                        ║
+  ║    <app-sidebar />          ← fixed, left            ║
+  ║                                                      ║
+  ║    <div class="content-area">   ← margin-left auto   ║
+  ║      <app-header />         ← sticky, inside here   ║
+  ║      <main>...</main>                                ║
+  ║    </div>                                            ║
+  ║  </div>                                              ║
+  ╚══════════════════════════════════════════════════════╝
+-->
+
+<!-- app.component.html ou layout.component.html -->
+<div style="display:flex;min-height:100vh;background:#f8fafb;">
+
+  <!-- SIDEBAR (fixed, positioned by its own CSS) -->
+  <app-sidebar />
+
+  <!-- CONTENT AREA — pousse à droite selon la largeur du sidebar -->
   <div
-      class="flex-1 transition-all duration-300 ease-in-out"
-      [ngClass]="{
-        'xl:ml-[290px]': (isExpanded$ | async) || (isHovered$ | async),
-        'xl:ml-[90px]': !(isExpanded$ | async) && !(isHovered$ | async),
-        'ml-0': (isMobileOpen$ | async)
-      }"
+    class="content-wrapper transition-all duration-300"
+    [ngClass]="{
+      'xl:ml-[268px]': (isExpanded$ | async) || (isHovered$ | async),
+      'xl:ml-[72px]':  !((isExpanded$ | async) || (isHovered$ | async))
+    }"
+    style="flex:1;min-width:0;display:flex;flex-direction:column;"
   >
-    <!-- app header start -->
-    <app-header/>
-    <!-- app header end -->
-    <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
-      <router-outlet></router-outlet>
-    </div>
+    <!-- HEADER — sticky, seulement dans la zone de contenu -->
+    <app-header />
+
+    <!-- PAGE CONTENT -->
+    <main style="flex:1;padding:24px;">
+      <router-outlet />
+    </main>
   </div>
+
 </div>
