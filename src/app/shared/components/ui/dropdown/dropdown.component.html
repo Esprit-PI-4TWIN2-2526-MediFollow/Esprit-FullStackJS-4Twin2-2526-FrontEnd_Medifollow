@@ -1,7 +1,13 @@
 @if (isOpen) {
+<!-- Backdrop -->
+<div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 2147483646; background: rgba(0,0,0,0.05);"></div>
+
+<!-- Dropdown -->
 <div
   #dropdownRef
-  [ngClass]="'absolute z-40 right-0 mt-2 rounded-xl border border-gray-200 bg-white shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark ' + className"
+  [ngClass]="className"
+  style="position: fixed !important; z-index: 2147483647 !important; right: 20px !important; top: 70px !important; background: white !important; border-radius: 1rem !important; border: 1px solid #e5e7eb !important; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important; min-width: 260px !important; padding: 12px !important;"
+  class="dark:!bg-gray-900 dark:!border-gray-800"
 >
   <ng-content></ng-content>
 </div>
