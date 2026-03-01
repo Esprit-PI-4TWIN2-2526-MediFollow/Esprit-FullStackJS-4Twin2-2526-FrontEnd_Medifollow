@@ -39,7 +39,7 @@
         </div>
         <div>
           <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-            Bio
+            Role
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
             {{ currentUser?.role || '-' }}
@@ -98,30 +98,55 @@
             <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
               <div class="col-span-2 lg:col-span-1">
                 <app-label>First Name</app-label>
-                <app-input-field type="text" [value]="currentUser?.firstName || ''" />
+                <app-input-field
+                  type="text"
+                  [value]="editForm.firstName"
+                  (valueChange)="updateEditField('firstName', $event)"
+                />
               </div>
               <div class="col-span-2 lg:col-span-1">
                 <app-label>Last Name</app-label>
-                <app-input-field type="text" [value]="currentUser?.lastName || ''" />
+                <app-input-field
+                  type="text"
+                  [value]="editForm.lastName"
+                  (valueChange)="updateEditField('lastName', $event)"
+                />
               </div>
               <div class="col-span-2 lg:col-span-1">
                 <app-label>Email Address</app-label>
-                <app-input-field type="text" [value]="currentUser?.email || ''" />
+                <app-input-field
+                  type="text"
+                  [value]="editForm.email"
+                  (valueChange)="updateEditField('email', $event)"
+                />
               </div>
               <div class="col-span-2 lg:col-span-1">
                 <app-label>Phone</app-label>
-                <app-input-field type="text" [value]="currentUser?.phoneNumber || ''" />
+                <app-input-field
+                  type="text"
+                  [value]="editForm.phoneNumber"
+                  (valueChange)="updateEditField('phoneNumber', $event)"
+                />
               </div>
               <div class="col-span-2">
-                <app-label>Bio</app-label>
-                <app-input-field type="text" [value]="currentUser?.role?.toString() || ''" />
+                <app-label>Role</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.role"
+                  (valueChange)="updateEditField('role', $event)"
+                />
               </div>
             </div>
           </div>
         </div>
+        <p *ngIf="saveError" class="px-2 mt-3 text-sm text-error-500">
+          {{ saveError }}
+        </p>
         <div class="flex items-center gap-3 px-2 mt-6 lg:justify-end">
           <app-button size="sm" variant="outline" (btnClick)="closeModal()">Close</app-button>
-          <app-button size="sm" (btnClick)="handleSave()">Save Changes</app-button>
+          <app-button size="sm" [disabled]="isSaving" (btnClick)="handleSave()">
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </app-button>
         </div>
       </form>
     </div>

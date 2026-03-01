@@ -2,39 +2,15 @@
   <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
     <div>
       <h4 class="text-lg font-semibold text-gray-800 dark:text-white/90 lg:mb-6">
-        Address
+        Additional Information
       </h4>
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-7 2xl:gap-x-32">
-        <div>
+        <div *ngFor="let item of displayItems">
           <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-            Country
+            {{ item.label }}
           </p>
           <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ address.country }}
-          </p>
-        </div>
-        <div>
-          <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-            City/State
-          </p>
-          <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ address.cityState }}
-          </p>
-        </div>
-        <div>
-          <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-            Postal Code
-          </p>
-          <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ address.postalCode }}
-          </p>
-        </div>
-        <div>
-          <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-            TAX ID
-          </p>
-          <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-            {{ address.taxId }}
+            {{ item.value }}
           </p>
         </div>
       </div>
@@ -62,7 +38,6 @@
     </button>
   </div>
 
-  <!-- Modal -->
   <app-modal
     [isOpen]="isOpen"
     (close)="closeModal()"
@@ -71,36 +46,154 @@
     <div class="relative w-full p-4 overflow-y-auto bg-white no-scrollbar rounded-3xl dark:bg-gray-900 lg:p-11">
       <div class="px-2 pr-14">
         <h4 class="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">
-          Edit Address
+          Edit Additional Information
         </h4>
         <p class="mb-6 text-sm text-gray-500 dark:text-gray-400 lg:mb-7">
-          Update your details to keep your profile up-to-date.
+          Update role-related information for your profile.
         </p>
       </div>
       <form class="flex flex-col" (ngSubmit)="handleSave()">
         <div class="px-2 overflow-y-auto custom-scrollbar">
-          <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
-            <div>
-              <app-label>Country</app-label>
-              <app-input-field type="text" [value]="address.country" />
-            </div>
-            <div>
-              <app-label>City/State</app-label>
-              <app-input-field type="text" [value]="address.cityState" />
-            </div>
-            <div>
-              <app-label>Postal Code</app-label>
-              <app-input-field type="text" [value]="address.postalCode" />
-            </div>
-            <div>
-              <app-label>TAX ID</app-label>
-              <app-input-field type="text" [value]="address.taxId" />
+          <div class="mb-5">
+            <app-label>Profile Image</app-label>
+            <div class="mt-2 flex items-center gap-4">
+              <div class="h-16 w-16 overflow-hidden rounded-full border border-gray-200 dark:border-gray-700">
+                <img
+                  *ngIf="selectedAvatarFile || currentUser?.avatarUrl"
+                  [src]="avatarPreviewUrl || currentUser?.avatarUrl"
+                  alt="profile"
+                  class="h-full w-full object-cover"
+                />
+                <div *ngIf="!selectedAvatarFile && !currentUser?.avatarUrl" class="flex h-full w-full items-center justify-center bg-gray-100 text-xs text-gray-500 dark:bg-gray-800 dark:text-gray-400">
+                  No image
+                </div>
+              </div>
+              <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-brand-300 bg-brand-50/40 px-3 py-2 text-sm text-brand-600 hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-brand-400">
+                <span>{{ avatarFileName || 'Choose image' }}</span>
+                <input type="file" accept="image/*" class="hidden" (change)="onAvatarSelected($event)" />
+              </label>
             </div>
           </div>
+
+          <div class="grid grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-2">
+            <div>
+              <app-label>Address</app-label>
+              <app-input-field
+                type="text"
+                [value]="editForm.address"
+                (valueChange)="updateEditField('address', $event)"
+              />
+            </div>
+            <div>
+              <app-label>Sexe</app-label>
+              <app-input-field
+                type="text"
+                [value]="editForm.sexe"
+                (valueChange)="updateEditField('sexe', $event)"
+              />
+            </div>
+            <div>
+              <app-label>Date of Birth</app-label>
+              <input
+                type="date"
+                class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800"
+                [value]="editForm.dateOfBirth"
+                (input)="updateEditField('dateOfBirth', $any($event.target).value)"
+              />
+            </div>
+
+            <div class="lg:col-span-2" *ngIf="roleLabel && roleLabel !== 'User'">
+              <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                Role: <span class="font-medium text-gray-700 dark:text-gray-300">{{ roleLabel }}</span>
+              </p>
+            </div>
+
+            <ng-container *ngIf="isRole('patient')">
+              <div class="lg:col-span-2">
+                <app-label>Primary Doctor</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.primaryDoctor"
+                  (valueChange)="updateEditField('primaryDoctor', $event)"
+                />
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="isRole('doctor')">
+              <div>
+                <app-label>Specialization</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.specialization"
+                  (valueChange)="updateEditField('specialization', $event)"
+                />
+              </div>
+              <div>
+                <app-label>Grade</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.grade"
+                  (valueChange)="updateEditField('grade', $event)"
+                />
+              </div>
+              <div>
+                <app-label>Diploma</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.diploma"
+                  (valueChange)="updateEditField('diploma', $event)"
+                />
+              </div>
+              <div>
+                <app-label>Years of Experience</app-label>
+                <app-input-field
+                  type="number"
+                  [value]="editForm.yearsOfExperience"
+                  (valueChange)="updateEditField('yearsOfExperience', $event)"
+                />
+              </div>
+              <div class="lg:col-span-2">
+                <app-label>Assigned Department</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.assignedDepartment"
+                  (valueChange)="updateEditField('assignedDepartment', $event)"
+                />
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="isRole('nurse') || isRole('coordinator')">
+              <div class="lg:col-span-2">
+                <app-label>Assigned Department</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.assignedDepartment"
+                  (valueChange)="updateEditField('assignedDepartment', $event)"
+                />
+              </div>
+            </ng-container>
+
+            <ng-container *ngIf="isRole('auditor')">
+              <div class="lg:col-span-2">
+                <app-label>Audit Scope</app-label>
+                <app-input-field
+                  type="text"
+                  [value]="editForm.auditScope"
+                  (valueChange)="updateEditField('auditScope', $event)"
+                />
+              </div>
+            </ng-container>
+          </div>
+
+          <p *ngIf="saveError" class="mt-4 text-sm text-error-500">
+            {{ saveError }}
+          </p>
         </div>
         <div class="flex items-center gap-3 px-2 mt-6 lg:justify-end">
           <app-button size="sm" variant="outline" (btnClick)="closeModal()">Close</app-button>
-          <app-button size="sm" (btnClick)="handleSave()">Save Changes</app-button>
+          <app-button size="sm" [disabled]="isSaving" (btnClick)="handleSave()">
+            {{ isSaving ? 'Saving...' : 'Save Changes' }}
+          </app-button>
         </div>
       </form>
     </div>
