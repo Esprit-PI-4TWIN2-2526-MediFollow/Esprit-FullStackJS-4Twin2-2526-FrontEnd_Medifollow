@@ -25,8 +25,7 @@ import { ResetPasswordComponent } from './shared/components/auth/reset-password/
 
 const routes: Routes = [
   {
-
-
+    path: '',
     component: AppLayoutComponent,//ba3d nbadlou signin par defaut
     children: [
       {
