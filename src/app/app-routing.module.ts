@@ -25,8 +25,9 @@ import { ResetPasswordComponent } from './shared/components/auth/reset-password/
 
 const routes: Routes = [
   {
-    path: '',
-    component: AppLayoutComponent,
+
+
+    component: AppLayoutComponent,//ba3d nbadlou signin par defaut
     children: [
       {
         path: '',
@@ -135,16 +136,14 @@ const routes: Routes = [
     title:'Angular Reset Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
   },
   // les path te3 les modules
-  { path: 'users', loadChildren: () => import('./modules/users/users.module').then(u => u.UsersModule) },
+  { path: 'users', loadChildren: () => import('./users/users.module').then(u => u.UsersModule) },
   // error pages
 
   {
     path: '**',
     component: NotFoundComponent,
     title: 'Medifollow - 404 Not Found'
-  },
-  // les path te3 les modules
-  { path: 'users', loadChildren: () => import('./modules/users/users.module').then(u => u.UsersModule) },
+  }
 ];
 
 @NgModule({
