@@ -48,6 +48,7 @@ export class AllProfilesComponent implements OnInit {
 
   // ── Delete ────────────────────────────────────────────────────
   selectedUserToDelete: Users | null = null;
+selectedRoleFilter = '';
 
   // ── View modal stub (kept for template compatibility) ─────────
   viewedUser: Users | null = null;
@@ -155,19 +156,25 @@ export class AllProfilesComponent implements OnInit {
     return this.filteredUsers.slice(start, start + this.itemsPerPage);
   }
 
-  get filteredUsers(): Users[] {
-    const q = this.searchTerm.trim().toLowerCase();
-    if (!q) return this.users;
-    return this.users.filter((u) => {
-      const fn = (u.firstName  || '').toLowerCase();
-      const ln = (u.lastName   || '').toLowerCase();
-      const em = (u.email      || '').toLowerCase().split('@')[0];
-      const ph = (u.phoneNumber|| '').toLowerCase();
-      const ro = (u.role       || '').toLowerCase();
-      return fn.startsWith(q) || ln.startsWith(q) || `${fn} ${ln}`.includes(q)
-          || em.includes(q)   || ph.includes(q)   || ro.includes(q);
-    });
-  }
+get filteredUsers(): Users[] {
+  const q = this.searchTerm.trim().toLowerCase();
+  return this.users.filter((u) => {
+    // Filtre par rôle
+    if (this.selectedRoleFilter) {
+      const roleLabel = this.selectedRoleFilter.toLowerCase();
+      if (!(u.role || '').toLowerCase().includes(roleLabel)) return false;
+    }
+    // Filtre par recherche texte
+    if (!q) return true;
+    const fn = (u.firstName  || '').toLowerCase();
+    const ln = (u.lastName   || '').toLowerCase();
+    const em = (u.email      || '').toLowerCase().split('@')[0];
+    const ph = (u.phoneNumber|| '').toLowerCase();
+    const ro = (u.role       || '').toLowerCase();
+    return fn.startsWith(q) || ln.startsWith(q) || `${fn} ${ln}`.includes(q)
+        || em.includes(q)   || ph.includes(q)   || ro.includes(q);
+  });
+}
 
   onSearchInput(event: Event): void {
     this.searchTerm = (event.target as HTMLInputElement).value || '';
@@ -559,4 +566,11 @@ export class AllProfilesComponent implements OnInit {
     this.minDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()));
     this.maxDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 1,   today.getMonth(), today.getDate()));
   }
+
+  get uniqueRoles(): string[] {
+  const roles = this.users
+    .map(u => u.role || '')
+    .filter(r => r.trim() !== '');
+  return [...new Set(roles)].sort();
+}
 }
