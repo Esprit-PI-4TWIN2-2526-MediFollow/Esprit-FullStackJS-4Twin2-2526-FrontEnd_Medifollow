@@ -1,0 +1,88 @@
+<div class="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+  <div class="flex flex-col gap-6">
+    <div>
+      <h4 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
+        Security Settings
+      </h4>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Manage your face recognition authentication settings
+      </p>
+    </div>
+
+    <!-- Face ID Section -->
+    <div class="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+      <div class="flex items-start justify-between">
+        <div class="flex-1">
+          <div class="flex items-center gap-2 mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            <h5 class="font-medium text-gray-800 dark:text-white/90">Face ID Login</h5>
+            <span *ngIf="faceRegistered" class="px-2 py-1 text-xs font-medium text-green-700 bg-green-100 rounded-full dark:bg-green-900/30 dark:text-green-400">
+              ✓ Enabled
+            </span>
+          </div>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Use your face to sign in quickly and securely. Your face data is encrypted and stored safely.
+          </p>
+        </div>
+      </div>
+
+      <!-- Camera Preview -->
+      <div *ngIf="showCamera" class="mt-4 p-4 bg-gray-50 rounded-lg dark:bg-gray-800">
+        <p class="text-center mb-3 font-medium text-gray-700 dark:text-gray-300">
+          📸 Position your face in the camera
+        </p>
+        <div class="flex justify-center">
+          <video 
+            id="cameraPreview" 
+            autoplay 
+            playsinline
+            class="rounded-lg border-4 border-brand-500 shadow-lg"
+            style="max-width: 400px; width: 100%; transform: scaleX(-1);">
+          </video>
+        </div>
+        <div class="flex justify-center gap-3 mt-4">
+          <button 
+            (click)="captureFace()"
+            class="inline-flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700">
+            📸 Capture Face
+          </button>
+          <button 
+            (click)="cancelCapture()"
+            class="inline-flex items-center gap-2 px-6 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-600">
+            Cancel
+          </button>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-4" *ngIf="!showCamera">
+        <button
+          *ngIf="!faceRegistered"
+          (click)="enableFaceId()"
+          [disabled]="isRegistering"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 disabled:opacity-50"
+        >
+          <svg *ngIf="!isRegistering" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span *ngIf="isRegistering" class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          {{ isRegistering ? 'Opening camera...' : 'Enable Face ID' }}
+        </button>
+
+        <button
+          *ngIf="faceRegistered"
+          (click)="deleteFaceData()"
+          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          Disable Face ID
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
