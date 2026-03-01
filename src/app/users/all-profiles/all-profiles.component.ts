@@ -7,7 +7,7 @@ import { UsersService } from '../../services/users.service';
 
 type RoleKey = string;
 type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
-type RoleApiItem = { _id?: string; id?: string; name?: string; label?: string };
+type RoleApiItem = { _id?: string; id?: string; name?: string; label?: string; key?: string; slug?: string };
 type RoleApiResponse = RoleApiItem[] | { data?: RoleApiItem[] };
 
 @Component({
@@ -345,10 +345,16 @@ get filteredUsers(): Users[] {
     if (!name) { this.addRoleError = 'Role name is required.'; return; }
     if (this.roles.some((r) => r.label.toLowerCase() === name.toLowerCase())) { this.addRoleError = 'Role already exists.'; return; }
     this.isAddingRole = true;
-    this.http.post<{ data?: { name?: string } }>(this.rolesApiUrl, { name }).subscribe({
+    this.http.post<{ data?: RoleApiItem }>(this.rolesApiUrl, { name }).subscribe({
       next: (res) => {
-        const label = res?.data?.name || name;
-        const newRole: CarouselRole = { key: this.generateUniqueRoleKey(label), label, imageKey: this.resolveImageKey(label) };
+        const apiItem = res?.data;
+        const label = apiItem?.name || name;
+        const newRole: CarouselRole = {
+          id: apiItem?._id || apiItem?.id || undefined,
+          key: this.getStableRoleKey(label, apiItem),
+          label,
+          imageKey: this.resolveImageKey(label),
+        };
         this.roles.push(newRole); this.selectedRole = newRole.key;
         this.isAddingRole = false; this.showAddRoleModal = false;
       },
@@ -365,7 +371,7 @@ get filteredUsers(): Users[] {
             const label = (item?.name || item?.label || '').trim();
             const id = (item?._id || item?.id || '').trim();
             return label
-              ? { id: id || undefined, key: this.generateUniqueRoleKey(label), label, imageKey: this.resolveImageKey(label) } as CarouselRole
+              ? { id: id || undefined, key: this.getStableRoleKey(label, item), label, imageKey: this.resolveImageKey(label) } as CarouselRole
               : null;
           })
           .filter((r): r is CarouselRole => !!r);
@@ -404,7 +410,7 @@ get filteredUsers(): Users[] {
         const label = (created?.name || created?.label || name).trim();
         const role: CarouselRole = {
           id: created?._id || created?.id || undefined,
-          key: this.generateUniqueRoleKey(label),
+          key: this.getStableRoleKey(label, created),
           label,
           imageKey: this.resolveImageKey(label),
         };
@@ -519,10 +525,10 @@ get filteredUsers(): Users[] {
     return `/images/roles/${role.imageKey || this.resolveImageKey(role.label)}.svg`;
   }
 
-  private generateUniqueRoleKey(name: string): string {
-    const base = this.normalizeRoleKey(name); let key = base; let c = 2;
-    while (this.roles.some((r) => r.key === key)) { key = `${base}-${c}`; c++; }
-    return key;
+  private getStableRoleKey(name: string, item?: RoleApiItem): string {
+    const apiKey = String(item?.key || item?.slug || '').trim();
+    if (apiKey) return this.normalizeRoleKey(apiKey);
+    return this.normalizeRoleKey(name);
   }
 
   private normalizeRoleKey(name: string): string {
