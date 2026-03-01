@@ -1,25 +1,7 @@
-<!--
-  ╔══════════════════════════════════════════════════════╗
-  ║  STRUCTURE CORRECTE DU LAYOUT                       ║
-  ║                                                      ║
-  ║  <div class="layout-wrapper">                        ║
-  ║    <app-sidebar />          ← fixed, left            ║
-  ║                                                      ║
-  ║    <div class="content-area">   ← margin-left auto   ║
-  ║      <app-header />         ← sticky, inside here   ║
-  ║      <main>...</main>                                ║
-  ║    </div>                                            ║
-  ║  </div>                                              ║
-  ╚══════════════════════════════════════════════════════╝
--->
 
-<!-- app.component.html ou layout.component.html -->
 <div style="display:flex;min-height:100vh;background:#f8fafb;">
-
-  <!-- SIDEBAR (fixed, positioned by its own CSS) -->
   <app-sidebar />
 
-  <!-- CONTENT AREA — pousse à droite selon la largeur du sidebar -->
   <div
     class="content-wrapper transition-all duration-300"
     [ngClass]="{
@@ -28,10 +10,8 @@
     }"
     style="flex:1;min-width:0;display:flex;flex-direction:column;"
   >
-    <!-- HEADER — sticky, seulement dans la zone de contenu -->
     <app-header />
 
-    <!-- PAGE CONTENT -->
     <main style="flex:1;padding:24px;">
       <router-outlet />
     </main>
