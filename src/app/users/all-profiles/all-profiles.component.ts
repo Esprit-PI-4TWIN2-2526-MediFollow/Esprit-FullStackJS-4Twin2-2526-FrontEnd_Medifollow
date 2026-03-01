@@ -6,7 +6,7 @@ import { Users } from '../../models/users';
 import { UsersService } from '../../services/users.service';
 
 type RoleKey = string;
-type CarouselRole = { key: string; label: string; imageKey?: string; isOther?: boolean };
+type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
 type RoleApiItem = { _id?: string; id?: string; name?: string; label?: string };
 type RoleApiResponse = RoleApiItem[] | { data?: RoleApiItem[] };
 
@@ -29,6 +29,7 @@ type RoleApiResponse = RoleApiItem[] | { data?: RoleApiItem[] };
   `],
 })
 export class AllProfilesComponent implements OnInit {
+  private readonly rolesApiUrl = 'http://localhost:3000/api/roles';
 
   // ── Data ──────────────────────────────────────────────────────
   users: Users[] = [];
@@ -77,6 +78,14 @@ selectedRoleFilter = '';
   newRoleName = '';
   isAddingRole = false;
   addRoleError = '';
+  showManageRoleAddModal = false;
+  showManageRoleEditModal = false;
+  showManageRoleDeleteModal = false;
+  manageRoleName = '';
+  manageRoleError = '';
+  isManageRoleSubmitting = false;
+  manageRoleToEdit: CarouselRole | null = null;
+  manageRoleToDelete: CarouselRole | null = null;
 
   private readonly stepOneControlNames = [
     'firstName','lastName','email','password','phoneNumber','sexe','address','dateOfBirth',
@@ -336,7 +345,7 @@ get filteredUsers(): Users[] {
     if (!name) { this.addRoleError = 'Role name is required.'; return; }
     if (this.roles.some((r) => r.label.toLowerCase() === name.toLowerCase())) { this.addRoleError = 'Role already exists.'; return; }
     this.isAddingRole = true;
-    this.http.post<{ data?: { name?: string } }>('http://localhost:3000/api', { name }).subscribe({
+    this.http.post<{ data?: { name?: string } }>(this.rolesApiUrl, { name }).subscribe({
       next: (res) => {
         const label = res?.data?.name || name;
         const newRole: CarouselRole = { key: this.generateUniqueRoleKey(label), label, imageKey: this.resolveImageKey(label) };
@@ -348,15 +357,161 @@ get filteredUsers(): Users[] {
   }
 
   private loadRoles(): void {
-    this.http.get<RoleApiResponse>('http://localhost:3000/api').subscribe({
+    this.http.get<RoleApiResponse>(this.rolesApiUrl).subscribe({
       next: (res) => {
         const list = Array.isArray(res) ? res : (res?.data ?? []);
         const mapped = list
-          .map((item) => { const label = (item?.name || item?.label || '').trim(); return label ? { key: this.generateUniqueRoleKey(label), label, imageKey: this.resolveImageKey(label) } as CarouselRole : null; })
+          .map((item) => {
+            const label = (item?.name || item?.label || '').trim();
+            const id = (item?._id || item?.id || '').trim();
+            return label
+              ? { id: id || undefined, key: this.generateUniqueRoleKey(label), label, imageKey: this.resolveImageKey(label) } as CarouselRole
+              : null;
+          })
           .filter((r): r is CarouselRole => !!r);
         if (mapped.length > 0) { this.roles = mapped; this.carouselStart = 0; }
       },
       error: () => {},
+    });
+  }
+
+  openManageRoleAddModal(): void {
+    this.manageRoleName = '';
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = false;
+    this.showManageRoleAddModal = true;
+  }
+
+  closeManageRoleAddModal(): void {
+    this.showManageRoleAddModal = false;
+    this.manageRoleName = '';
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = false;
+  }
+
+  submitManageRoleAdd(): void {
+    const name = this.manageRoleName.trim();
+    this.manageRoleError = '';
+    if (!name) { this.manageRoleError = 'Role name is required.'; return; }
+    if (this.roles.some((r) => r.label.toLowerCase() === name.toLowerCase())) {
+      this.manageRoleError = 'Role already exists.';
+      return;
+    }
+    this.isManageRoleSubmitting = true;
+    this.http.post<{ data?: RoleApiItem }>(this.rolesApiUrl, { name }).subscribe({
+      next: (res) => {
+        const created = res?.data;
+        const label = (created?.name || created?.label || name).trim();
+        const role: CarouselRole = {
+          id: created?._id || created?.id || undefined,
+          key: this.generateUniqueRoleKey(label),
+          label,
+          imageKey: this.resolveImageKey(label),
+        };
+        this.roles.push(role);
+        this.isManageRoleSubmitting = false;
+        this.closeManageRoleAddModal();
+      },
+      error: (err) => {
+        this.isManageRoleSubmitting = false;
+        this.manageRoleError = err?.error?.message || 'Error creating role.';
+      },
+    });
+  }
+
+  openManageRoleEditModal(role: CarouselRole): void {
+    this.manageRoleToEdit = role;
+    this.manageRoleName = role.label;
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = false;
+    this.showManageRoleEditModal = true;
+  }
+
+  closeManageRoleEditModal(): void {
+    this.showManageRoleEditModal = false;
+    this.manageRoleToEdit = null;
+    this.manageRoleName = '';
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = false;
+  }
+
+  submitManageRoleEdit(): void {
+    const target = this.manageRoleToEdit;
+    if (!target) return;
+
+    const name = this.manageRoleName.trim();
+    this.manageRoleError = '';
+    if (!name) { this.manageRoleError = 'Role name is required.'; return; }
+
+    const duplicate = this.roles.some((r) =>
+      r !== target && r.label.toLowerCase() === name.toLowerCase()
+    );
+    if (duplicate) { this.manageRoleError = 'Role already exists.'; return; }
+
+    this.isManageRoleSubmitting = true;
+
+    if (!target.id) {
+      target.label = name;
+      target.imageKey = this.resolveImageKey(name);
+      this.isManageRoleSubmitting = false;
+      this.closeManageRoleEditModal();
+      return;
+    }
+
+    this.http.put<{ data?: RoleApiItem }>(`${this.rolesApiUrl}/${target.id}`, { name }).subscribe({
+      next: (res) => {
+        const updated = res?.data;
+        const label = (updated?.name || updated?.label || name).trim();
+        target.label = label;
+        target.imageKey = this.resolveImageKey(label);
+        this.isManageRoleSubmitting = false;
+        this.closeManageRoleEditModal();
+      },
+      error: (err) => {
+        this.isManageRoleSubmitting = false;
+        this.manageRoleError = err?.error?.message || 'Error updating role.';
+      },
+    });
+  }
+
+  openManageRoleDeleteModal(role: CarouselRole): void {
+    this.manageRoleToDelete = role;
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = false;
+    this.showManageRoleDeleteModal = true;
+  }
+
+  closeManageRoleDeleteModal(): void {
+    this.showManageRoleDeleteModal = false;
+    this.manageRoleToDelete = null;
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = false;
+  }
+
+  confirmManageRoleDelete(): void {
+    const target = this.manageRoleToDelete;
+    if (!target) return;
+    this.manageRoleError = '';
+    this.isManageRoleSubmitting = true;
+
+    const removeLocal = () => {
+      this.roles = this.roles.filter((r) => r !== target);
+      if (this.selectedRole === target.key) this.selectedRole = null;
+      this.isManageRoleSubmitting = false;
+      this.closeManageRoleDeleteModal();
+    };
+
+    if (!target.id) {
+      removeLocal();
+      return;
+    }
+
+    this.http.delete(`${this.rolesApiUrl}/${target.id}`).subscribe({
+      next: () => removeLocal(),
+      error: (err) => {
+        this.isManageRoleSubmitting = false;
+        this.manageRoleError = err?.error?.message || 'Error deleting role.';
+      },
     });
   }
 
