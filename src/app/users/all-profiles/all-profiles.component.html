@@ -324,6 +324,21 @@
                             ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'" />
                       </div>
 
+                      <!-- Password (optional) -->
+                      <div class="flex flex-col gap-1">
+                        <span class="text-xs text-gray-500 dark:text-gray-400">New Password</span>
+                        <input formControlName="password" type="password" placeholder="Leave blank to keep current"
+                          class="h-9 w-44 rounded-lg border bg-white px-3 text-sm text-gray-800
+                                 focus:outline-none focus:ring-2 focus:ring-brand-500/20
+                                 dark:bg-gray-800 dark:text-white/90"
+                          [ngClass]="inlineForm.get('password')?.invalid && inlineForm.get('password')?.touched
+                            ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'" />
+                        <p *ngIf="inlineForm.get('password')?.invalid && inlineForm.get('password')?.touched"
+                          class="text-[10px] text-red-500">
+                          Password must be between 6 and 100 characters.
+                        </p>
+                      </div>
+
                       <!-- FIX: Role is now editable — uses isInlineRoleType for conditional fields -->
                       <div class="flex flex-col gap-1">
                         <span class="text-xs text-gray-500 dark:text-gray-400">Role</span>

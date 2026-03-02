@@ -218,6 +218,7 @@ get filteredUsers(): Users[] {
       firstName:          [user.firstName          || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       lastName:           [user.lastName           || '', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       email:              [user.email              || '', [Validators.required, Validators.email]],
+      password:           ['', [Validators.minLength(6), Validators.maxLength(100)]],
       phoneNumber:        [user.phoneNumber        || '', [Validators.required]],
       sexe:               [user.sexe               || ''],
       dateOfBirth:        [dob],
@@ -253,7 +254,8 @@ get filteredUsers(): Users[] {
     }
     this.isSavingInline = true;
     // FIX: use the role from the form (editable) instead of user.role
-    const payload = { ...this.inlineForm.value };
+    const payload: any = { ...this.inlineForm.value };
+    if (!String(payload.password || '').trim()) delete payload.password;
 
     this.usersService.updateUser(user._id!, payload, this.inlineAvatarFile || undefined).subscribe({
       next: () => {
