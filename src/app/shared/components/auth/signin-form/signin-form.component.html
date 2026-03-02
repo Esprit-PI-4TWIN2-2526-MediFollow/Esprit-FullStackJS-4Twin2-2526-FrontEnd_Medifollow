@@ -14,12 +14,19 @@
   <div>
     <div class="mb-5 sm:mb-8">
       <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-        Sign In
+        Connexion
       </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400">
-        Enter your email and password to sign in!
+        Entrez vos identifiants pour accéder à votre espace.
       </p>
     </div>
+
+    <p *ngIf="infoMessage" class="mb-4 rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+      {{ infoMessage }}
+    </p>
+    <p *ngIf="errorMessage" class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+      {{ errorMessage }}
+    </p>
 
     <form [formGroup]="loginForm" (ngSubmit)="onSignIn()" class="space-y-6">
 
@@ -45,11 +52,11 @@
 
       <!-- PASSWORD -->
       <div>
-        <label class="block mb-1">Password <span class="text-error-500">*</span></label>
+        <label class="block mb-1">Mot de passe <span class="text-error-500">*</span></label>
         <div class="relative">
           <input
             [type]="showPassword ? 'text' : 'password'"
-            placeholder="Enter your password"
+            placeholder="Entrez votre mot de passe"
             formControlName="password"
             [ngClass]="{
               'border-red-500': loginForm.get('password')?.touched && loginForm.get('password')?.invalid
@@ -74,13 +81,13 @@
       <div class="flex items-center justify-between">
         <label class="flex items-center space-x-2">
           <input type="checkbox"  />
-          <span>Keep me logged in</span>
+          <span>Rester connecté</span>
         </label>
         <a
           routerLink="/forgot-password"
           class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
         >
-          Forgot password?
+          Mot de passe oublié ?
         </a>
       </div>
 
@@ -89,7 +96,7 @@
         [disabled]="loginForm.invalid || isLoading"
         class="w-full bg-brand-500 text-white rounded p-2 hover:bg-brand-600 disabled:opacity-50"
       >
-        {{ isLoading ? 'Signing in...' : 'Sign in' }}
+        {{ isLoading ? 'Connexion en cours...' : 'Se connecter' }}
       </button>
 
       <!-- Face ID Login Button -->

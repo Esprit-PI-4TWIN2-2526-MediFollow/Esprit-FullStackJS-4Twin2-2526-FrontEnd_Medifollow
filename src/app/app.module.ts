@@ -107,6 +107,7 @@ import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-
 import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
+import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
 
 import { provideHttpClient } from '@angular/common/http';
 
@@ -214,6 +215,7 @@ import { provideHttpClient } from '@angular/common/http';
     ForgotPasswordComponent,
     ResetPasswordComponent,
     AllProfilesComponent,
+    FirstLoginChangePasswordComponent,
 
   ],
   imports: [

@@ -22,6 +22,7 @@ import { CalenderComponent } from './pages/calender/calender.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
 import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
+import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
 
 const routes: Routes = [
   {
@@ -133,6 +134,11 @@ const routes: Routes = [
     path:'reset-password/:token',
     component:ResetPasswordComponent,
     title:'Angular Reset Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
+  },
+  {
+    path: 'first-login/change-password',
+    component: FirstLoginChangePasswordComponent,
+    title: 'MediFollow - Première connexion'
   },
   // les path te3 les modules
   { path: 'users', loadChildren: () => import('./users/users.module').then(u => u.UsersModule) },

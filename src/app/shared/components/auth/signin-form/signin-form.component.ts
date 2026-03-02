@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { FaceRecognitionService } from '../../../../services/face-recognition.service';
+import { FirstLoginRequiredResponse, SignInResponse } from '../../../../models/auth';
 
 @Component({
   selector: 'app-signin-form',
@@ -16,6 +17,8 @@ export class SigninFormComponent implements OnInit {
   showFaceIdButton = true;
   showCamera = false;
   videoStream: MediaStream | null = null;
+  errorMessage = '';
+  infoMessage = '';
 
   loginForm: FormGroup;
 
@@ -23,7 +26,8 @@ export class SigninFormComponent implements OnInit {
     private fb: FormBuilder,
     private authService: AuthService,
     private faceRecognitionService: FaceRecognitionService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: [
@@ -43,7 +47,9 @@ export class SigninFormComponent implements OnInit {
   }
 
   ngOnInit() {
-    // Face ID is always available
+    this.route.queryParamMap.subscribe((params) => {
+      this.infoMessage = params.get('message') || '';
+    });
   }
 
   togglePasswordVisibility() {
@@ -51,6 +57,8 @@ export class SigninFormComponent implements OnInit {
   }
 
   onSignIn() {
+    this.errorMessage = '';
+
     if (this.loginForm.invalid || this.isLoading) {
       this.loginForm.markAllAsTouched();
       return;
@@ -61,29 +69,42 @@ export class SigninFormComponent implements OnInit {
     const { email, password } = this.loginForm.value;
 
     this.authService.signIn({ email, password }).subscribe({
-      next: (res: any) => {
-        if (res.accessToken) {
-          localStorage.setItem('accessToken', res.accessToken);
+      next: (res: SignInResponse) => {
+        if (this.isFirstLoginResponse(res)) {
+          this.authService.setOnboardingToken(res.onboardingToken);
+          this.router.navigate(['/first-login/change-password'], {
+            queryParams: {
+              message:
+                res.message ||
+                'Première connexion détectée. Veuillez définir un nouveau mot de passe.',
+            },
+          });
+          return;
         }
-        if (res.user) {
-          localStorage.setItem('user', JSON.stringify(res.user));
-          const role = res.user.role;
 
-          if (role === 'SUPERADMIN' || role === 'ADMIN') {
-            this.router.navigate(['/dashboard']);
-          } else {
-            this.router.navigate(['/']);
-          }
+        if (res.accessToken && res.user) {
+          this.authService.persistAuthSession(res.accessToken, res.user);
+          this.router.navigate([this.authService.getPostLoginRoute(res.user)]);
+          return;
         }
+
+        this.errorMessage = 'Réponse de connexion invalide.';
       },
       error: (err) => {
-        alert(err.error?.message || 'Erreur lors de la connexion');
+        this.errorMessage = err.error?.message || 'Erreur lors de la connexion.';
         this.isLoading = false;
       },
       complete: () => {
         this.isLoading = false;
       }
     });
+  }
+
+  private isFirstLoginResponse(res: SignInResponse): res is FirstLoginRequiredResponse {
+    return (
+      (res as FirstLoginRequiredResponse).requiresPasswordChange === true &&
+      !!(res as FirstLoginRequiredResponse).onboardingToken
+    );
   }
 
   async onFaceIdLogin() {
@@ -133,18 +154,9 @@ export class SigninFormComponent implements OnInit {
 
       this.faceRecognitionService.authenticateWithFace(email, Array.from(descriptor)).subscribe({
         next: (res: any) => {
-          if (res.accessToken) {
-            localStorage.setItem('accessToken', res.accessToken);
-          }
-          if (res.user) {
-            localStorage.setItem('user', JSON.stringify(res.user));
-            const role = res.user.role;
-
-            if (role === 'SUPERADMIN' || role === 'ADMIN') {
-              this.router.navigate(['/dashboard']);
-            } else {
-              this.router.navigate(['/']);
-            }
+          if (res.accessToken && res.user) {
+            this.authService.persistAuthSession(res.accessToken, res.user);
+            this.router.navigate([this.authService.getPostLoginRoute(res.user)]);
           }
         },
         error: (err) => {
