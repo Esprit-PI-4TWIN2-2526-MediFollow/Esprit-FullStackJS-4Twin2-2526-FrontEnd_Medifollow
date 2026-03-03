@@ -64,7 +64,7 @@ export class RoleService {
   }
 
   createRole(name: string): Observable<CarouselRole> {
-    return this.http.post<{ data?: RoleApiItem }>(this.rolesApiUrl, { name }).pipe(
+    return this.http.post<{ data?: RoleApiItem }>(`${this.rolesApiUrl}/add`, { name }).pipe(
       map((response) => this.mapApiItemToCarouselRole(response?.data, name))
     );
   }
