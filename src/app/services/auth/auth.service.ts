@@ -8,6 +8,7 @@ import {
   SignInRequest,
   SignInResponse,
 } from '../../models/auth';
+import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -17,7 +18,7 @@ export class AuthService {
   private readonly API_URL = 'http://localhost:3000/api';
   private readonly ONBOARDING_TOKEN_KEY = 'onboardingToken';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private router: Router) { }
 
   signIn(payload: SignInRequest): Observable<SignInResponse> {
     return this.http.post<SignInResponse>(`${this.API_URL}/signin`, payload);
@@ -56,7 +57,8 @@ export class AuthService {
 
   logout() {
     localStorage.clear();
-    this.clearOnboardingToken();
+      sessionStorage.clear();
+     this.router.navigate(['/signin']);
   }
 }
 
