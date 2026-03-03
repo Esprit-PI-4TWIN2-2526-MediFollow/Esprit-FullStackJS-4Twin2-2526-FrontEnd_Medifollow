@@ -118,7 +118,7 @@
                       <div *ngIf="!user.avatarUrl"
                         class="h-8 w-8 rounded-full bg-gradient-to-br from-gray-500 to-gray-300 dark:from-gray-700 dark:to-gray-800
                                flex items-center justify-center text-xs font-bold text-white">
-                        {{ ((user.firstName?.[0] || '') + (user.lastName?.[0] || '')) | uppercase }}
+                          {{ getUserInitials(user) }}
                       </div>
                     </div>
                     <span class="whitespace-nowrap text-sm font-medium text-gray-700 dark:text-gray-200">
