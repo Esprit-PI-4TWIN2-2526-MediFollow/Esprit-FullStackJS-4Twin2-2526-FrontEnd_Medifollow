@@ -1,9 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { RoleService } from '../../services/role/role.service';
+import { RoleService, CarouselRole } from '../../services/role/role.service';
 
-type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
-type RoleApiItem = { _id?: string; id?: string; name?: string; label?: string; key?: string; slug?: string };
 
 @Component({
   selector: 'app-role-manage',
@@ -14,9 +11,6 @@ export class RoleManageComponent implements OnInit {
   @Input() roles: CarouselRole[] = [];
   @Output() rolesChange = new EventEmitter<CarouselRole[]>();
   @Output() roleSelected = new EventEmitter<string>();
-
-  private readonly rolesApiUrl = 'http://localhost:3000/api/roles';
-  readonly knownRoleImageKeys = ['nurse', 'doctor', 'coordinator', 'auditor', 'patient', 'admin'] as const;
 
   // Modal states
   showAddRoleModal = false;
@@ -30,10 +24,7 @@ export class RoleManageComponent implements OnInit {
   roleToEdit: CarouselRole | null = null;
   roleToDelete: CarouselRole | null = null;
 
-  constructor(
-    private readonly http: HttpClient,
-    private roleService: RoleService
-  ) { }
+  constructor(private readonly roleService: RoleService) { }
 
   ngOnInit(): void {
     if (this.roles.length === 0) {
@@ -43,28 +34,7 @@ export class RoleManageComponent implements OnInit {
 
   // ── Image helpers ─────────────────────────────────────────────
   getRoleImageSrc(role: CarouselRole): string {
-    return `/images/roles/${role.imageKey || this.resolveImageKey(role.label)}.svg`;
-  }
-
-  private resolveImageKey(name: string): string {
-    const n = this.normalizeRoleKey(name);
-    if (this.knownRoleImageKeys.includes(n as any)) return n;
-    if (n.includes('doctor')) return 'doctor';
-    if (n.includes('nurse')) return 'nurse';
-    if (n.includes('audit')) return 'auditor';
-    if (n.includes('coord')) return 'coordinator';
-    if (n.includes('patient')) return 'patient';
-    return 'admin';
-  }
-
-  private normalizeRoleKey(name: string): string {
-    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'role';
-  }
-
-  private getStableRoleKey(name: string, item?: RoleApiItem): string {
-    const apiKey = String(item?.key || item?.slug || '').trim();
-    if (apiKey) return this.normalizeRoleKey(apiKey);
-    return this.normalizeRoleKey(name);
+    return this.roleService.getRoleImageSrc(role);
   }
 
   // ── Modal actions ────────────────────────────────────────────
@@ -128,17 +98,8 @@ export class RoleManageComponent implements OnInit {
     }
 
     this.isSubmitting = true;
-    this.http.post<{ data?: RoleApiItem }>(this.rolesApiUrl, { name }).subscribe({
-      next: (res) => {
-        const created = res?.data;
-        const label = (created?.name || created?.label || name).trim();
-        const newRole: CarouselRole = {
-          id: created?._id || created?.id || undefined,
-          key: this.getStableRoleKey(label, created),
-          label,
-          imageKey: this.resolveImageKey(label),
-        };
-
+    this.roleService.createRole(name).subscribe({
+      next: (newRole) => {
         this.roles = [...this.roles, newRole];
         this.rolesChange.emit(this.roles);
         this.roleSelected.emit(newRole.key); // Optionnel : sélectionne le nouveau rôle
@@ -178,8 +139,8 @@ export class RoleManageComponent implements OnInit {
     if (!target.id) {
       // Local update only
       target.label = name;
-      target.key = this.getStableRoleKey(name);
-      target.imageKey = this.resolveImageKey(name);
+      target.key = this.roleService.getStableRoleKey(name);
+      target.imageKey = this.roleService.resolveImageKey(name);
       this.rolesChange.emit(this.roles);
       this.isSubmitting = false;
       this.closeEditModal();
@@ -187,13 +148,11 @@ export class RoleManageComponent implements OnInit {
     }
 
     // API update
-    this.http.put<{ data?: RoleApiItem }>(`${this.rolesApiUrl}/${target.id}`, { name }).subscribe({
-      next: (res) => {
-        const updated = res?.data;
-        const label = (updated?.name || updated?.label || name).trim();
-        target.label = label;
-        target.key = this.getStableRoleKey(label, updated);
-        target.imageKey = this.resolveImageKey(label);
+    this.roleService.updateRole(target.id, name).subscribe({
+      next: (updatedRole) => {
+        target.label = updatedRole.label;
+        target.key = updatedRole.key;
+        target.imageKey = updatedRole.imageKey;
         this.rolesChange.emit(this.roles);
         this.isSubmitting = false;
         this.closeEditModal();
@@ -225,7 +184,7 @@ export class RoleManageComponent implements OnInit {
       return;
     }
 
-    this.http.delete(`${this.rolesApiUrl}/${target.id}`).subscribe({
+    this.roleService.deleteRole(target.id).subscribe({
       next: () => removeLocal(),
       error: (err) => {
         this.isSubmitting = false;
@@ -236,15 +195,9 @@ export class RoleManageComponent implements OnInit {
 
   // Méthode utilitaire pour charger les rôles depuis le service
   loadRolesFromService(): void {
-    this.roleService.getAllRoles().subscribe({
-      next: (response: any) => {
-        const rolesArray = Array.isArray(response) ? response : (response?.data || []);
-        this.roles = rolesArray.map((role: any) => ({
-          id: role._id,
-          key: this.normalizeRoleKey(role.name || ''),
-          label: role.name || '',
-          imageKey: this.resolveImageKey(role.name || '')
-        }));
+    this.roleService.getAllRolesForCarousel().subscribe({
+      next: (roles) => {
+        this.roles = roles;
         this.rolesChange.emit(this.roles);
       },
       error: (err) => {

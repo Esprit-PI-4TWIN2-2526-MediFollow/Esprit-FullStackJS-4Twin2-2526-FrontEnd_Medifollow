@@ -14,7 +14,6 @@
       <thead class="border-y border-gray-100 dark:border-white/[0.05]">
         <tr>
           <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Role</th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Key</th>
           <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Image</th>
           <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Actions</th>
         </tr>
@@ -32,7 +31,6 @@
           <td class="py-3 pr-4">
             <span class="text-sm font-medium text-gray-700 dark:text-gray-200">{{ roleItem.label }}</span>
           </td>
-          <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ roleItem.key }}</td>
           <td class="px-4 py-3">
             <span class="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white shadow-theme-xs dark:bg-gray-900">
               <img class="h-6 w-6 object-contain" [src]="getRoleImageSrc(roleItem)" [alt]="roleItem.label + ' icon'"
