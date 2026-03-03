@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Users } from '../../models/users';
 import { UsersService } from '../../services/users.service';
@@ -49,6 +50,9 @@ export class AllProfilesComponent implements OnInit {
 
   // ── Delete ────────────────────────────────────────────────────
   selectedUserToDelete: Users | null = null;
+  selectedUserIds = new Set<string>();
+  isBulkDeleteModalOpen = false;
+  isBulkDeleting = false;
 selectedRoleFilter = '';
 
   // ── View modal stub (kept for template compatibility) ─────────
@@ -151,7 +155,10 @@ selectedRoleFilter = '';
   // ── Load / Pagination ─────────────────────────────────────────
   loadUsers(): void {
     this.usersService.getUsers().subscribe({
-      next: (res: Users[]) => (this.users = res),
+      next: (res: Users[]) => {
+        this.users = res;
+        this.sanitizeSelectedUsers();
+      },
       error: (err) => console.error(err),
     });
   }
@@ -286,13 +293,114 @@ get filteredUsers(): Users[] {
 
   confirmDelete(): void {
     if (!this.selectedUserToDelete) return;
+    const deletedId = this.getUserId(this.selectedUserToDelete);
     this.usersService.deleteUser(this.selectedUserToDelete._id!).subscribe({
-      next: () => { this.loadUsers(); this.selectedUserToDelete = null; },
+      next: () => {
+        if (deletedId) this.selectedUserIds.delete(deletedId);
+        this.loadUsers();
+        this.selectedUserToDelete = null;
+      },
       error: (err) => console.error(err),
     });
   }
 
   cancelDelete(): void { this.selectedUserToDelete = null; }
+
+  get selectedUsersCount(): number {
+    return this.selectedUserIds.size;
+  }
+
+  get allCurrentItemsSelected(): boolean {
+    const ids = this.currentItems.map((u) => this.getUserId(u)).filter((id) => !!id);
+    return ids.length > 0 && ids.every((id) => this.selectedUserIds.has(id));
+  }
+
+  get someCurrentItemsSelected(): boolean {
+    const ids = this.currentItems.map((u) => this.getUserId(u)).filter((id) => !!id);
+    if (!ids.length) return false;
+    const selectedOnPage = ids.filter((id) => this.selectedUserIds.has(id)).length;
+    return selectedOnPage > 0 && selectedOnPage < ids.length;
+  }
+
+  toggleUserSelection(user: Users, event: Event): void {
+    const id = this.getUserId(user);
+    if (!id) return;
+    const checked = (event.target as HTMLInputElement).checked;
+    if (checked) this.selectedUserIds.add(id);
+    else this.selectedUserIds.delete(id);
+  }
+
+  toggleSelectAllCurrentItems(event: Event): void {
+    const checked = (event.target as HTMLInputElement).checked;
+    const ids = this.currentItems.map((u) => this.getUserId(u)).filter((id) => !!id);
+    ids.forEach((id) => {
+      if (checked) this.selectedUserIds.add(id);
+      else this.selectedUserIds.delete(id);
+    });
+  }
+
+  isUserSelected(user: Users): boolean {
+    const id = this.getUserId(user);
+    return !!id && this.selectedUserIds.has(id);
+  }
+
+  openBulkDeleteModal(): void {
+    if (!this.selectedUsersCount) return;
+    this.isBulkDeleteModalOpen = true;
+  }
+
+  cancelBulkDelete(): void {
+    if (this.isBulkDeleting) return;
+    this.isBulkDeleteModalOpen = false;
+  }
+
+  async confirmBulkDelete(): Promise<void> {
+    if (this.isBulkDeleting || !this.selectedUsersCount) return;
+    this.isBulkDeleting = true;
+    const ids = Array.from(this.selectedUserIds);
+    let success = 0;
+    let failed = 0;
+
+    for (const id of ids) {
+      try {
+        await firstValueFrom(this.usersService.deleteUser(id));
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+
+    this.isBulkDeleting = false;
+    this.isBulkDeleteModalOpen = false;
+    if (success > 0) {
+      this.selectedUserIds.clear();
+      this.loadUsers();
+    }
+
+    if (failed === 0) {
+      Swal.fire('Deleted', `${success} user(s) deleted successfully.`, 'success');
+      return;
+    }
+
+    if (success === 0) {
+      Swal.fire('Error', 'Failed to delete selected users.', 'error');
+      return;
+    }
+
+    Swal.fire('Partial success', `${success} deleted, ${failed} failed.`, 'warning');
+  }
+
+  private getUserId(user: Users): string {
+    return String(user?._id || '').trim();
+  }
+
+  private sanitizeSelectedUsers(): void {
+    const existing = new Set(this.users.map((u) => this.getUserId(u)).filter((id) => !!id));
+    this.selectedUserIds.forEach((id) => {
+      if (!existing.has(id)) this.selectedUserIds.delete(id);
+    });
+    if (this.currentPage > this.totalPages) this.currentPage = this.totalPages;
+  }
 
   getBadgeColor(user: Users): 'success' | 'error' {
     return user.actif ? 'success' : 'error';
