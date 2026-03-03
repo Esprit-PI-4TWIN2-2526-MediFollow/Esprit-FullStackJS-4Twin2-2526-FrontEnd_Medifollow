@@ -4,7 +4,9 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Users } from '../../models/users';
-import { UsersService } from '../../services/users.service';
+import { UsersService } from '../../services/user/users.service';
+import { RoleService } from '../../services/role/role.service';
+import { Role } from '../../models/roles';
 
 type RoleKey = string;
 type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
@@ -34,6 +36,7 @@ export class AllProfilesComponent implements OnInit {
 
   // ── Data ──────────────────────────────────────────────────────
   users: Users[] = [];
+  roles: any[] = []
   searchTerm = '';
   currentPage = 1;
   itemsPerPage = 6;
@@ -97,14 +100,7 @@ export class AllProfilesComponent implements OnInit {
   readonly knownRoleImageKeys = ['nurse', 'doctor', 'coordinator', 'auditor', 'patient', 'admin'] as const;
   readonly otherRole: CarouselRole = { key: '__other__', label: 'Other Role', isOther: true };
 
-  roles: CarouselRole[] = [
-    { key: 'nurse', label: 'Nurse' },
-    { key: 'doctor', label: 'Doctor' },
-    { key: 'coordinator', label: 'Coordinator' },
-    { key: 'auditor', label: 'Auditor' },
-    { key: 'patient', label: 'Patient' },
-    { key: 'admin', label: 'Admin' },
-  ];
+
 
   departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Emergency'];
   doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
@@ -143,7 +139,7 @@ export class AllProfilesComponent implements OnInit {
     private usersService: UsersService,
     private fb: FormBuilder,
     private readonly http: HttpClient,
-  ) { }
+    private roleService: RoleService){ }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -482,25 +478,27 @@ export class AllProfilesComponent implements OnInit {
       error: (err) => { this.isAddingRole = false; this.addRoleError = err?.error?.message || 'Error creating role.'; },
     });
   }
+//Affichage des rôles 
+loadRoles(): void {
+  this.roleService.getAllRoles().subscribe({
+    next: (response: any) => {
+      console.log('Rôles reçus:', response);
 
-  private loadRoles(): void {
-    this.http.get<RoleApiResponse>(this.rolesApiUrl).subscribe({
-      next: (res) => {
-        const list = Array.isArray(res) ? res : (res?.data ?? []);
-        const mapped = list
-          .map((item) => {
-            const label = (item?.name || item?.label || '').trim();
-            const id = (item?._id || item?.id || '').trim();
-            return label
-              ? { id: id || undefined, key: this.getStableRoleKey(label, item), label, imageKey: this.resolveImageKey(label) } as CarouselRole
-              : null;
-          })
-          .filter((r): r is CarouselRole => !!r);
-        if (mapped.length > 0) { this.roles = mapped; this.carouselStart = 0; }
-      },
-      error: () => { },
-    });
-  }
+      const rolesArray = Array.isArray(response) ? response : (response?.data || []);
+
+      this.roles = rolesArray.map((role: any) => ({
+        _id: role._id,
+        key: this.normalizeRoleKey(role.name || ''),
+        label: role.name || '',
+        imageKey: this.resolveImageKey(role.name || '')
+      }));
+    },
+    error: (err) => {
+      console.error('Erreur:', err);
+    }
+  });
+}
+
 
   openManageRoleAddModal(): void {
     this.manageRoleName = '';

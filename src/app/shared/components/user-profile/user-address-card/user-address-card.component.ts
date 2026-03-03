@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Users } from '../../../../models/users';
-import { UsersService } from '../../../../services/users.service';
+import { UsersService } from '../../../../services/user/users.service';
 
 @Component({
   selector: 'app-user-address-card',
@@ -9,7 +9,7 @@ import { UsersService } from '../../../../services/users.service';
 })
 export class UserAddressCardComponent implements OnInit {
 
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   isOpen = false;
   currentUser: Users | null = null;

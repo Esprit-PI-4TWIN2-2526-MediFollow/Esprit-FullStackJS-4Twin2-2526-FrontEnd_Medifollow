@@ -24,6 +24,7 @@ import { ForgotPasswordComponent } from './shared/components/auth/forgot-passwor
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
 import { AuthGuard } from './services/auth/auth.guard';
+import { RoleManageComponent } from './roles/role-manage/role-manage.component';
 
 const routes: Routes = [
   {
@@ -66,6 +67,11 @@ const routes: Routes = [
         path: 'getAllUsers',
         component: AllProfilesComponent,
         title: 'MediFollow - Tous les utilisateurs'
+      },
+      {
+        path: 'manage-roles',
+        component: RoleManageComponent,
+        title: 'MediFollow - Gestion des rôles'
       },
       {
         path: 'calendar',

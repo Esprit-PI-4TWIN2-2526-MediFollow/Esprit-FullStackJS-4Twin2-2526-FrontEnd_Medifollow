@@ -15,6 +15,6 @@ export class BackdropComponent {
   }
 
   closeSidebar() {
-    this.sidebarService.setMobileOpen(false);
+    this.sidebarService.setMobileOpen(true);
   }
 }

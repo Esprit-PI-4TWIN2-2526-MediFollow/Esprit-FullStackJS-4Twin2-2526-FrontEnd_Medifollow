@@ -110,6 +110,7 @@ import { AllProfilesComponent } from './users/all-profiles/all-profiles.componen
 import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
 
 import { provideHttpClient } from '@angular/common/http';
+import { RoleManageComponent } from './roles/role-manage/role-manage.component';
 
 
 
@@ -216,6 +217,7 @@ import { provideHttpClient } from '@angular/common/http';
     ResetPasswordComponent,
     AllProfilesComponent,
     FirstLoginChangePasswordComponent,
+    RoleManageComponent,
 
   ],
   imports: [

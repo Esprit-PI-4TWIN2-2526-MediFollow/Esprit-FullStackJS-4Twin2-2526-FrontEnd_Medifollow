@@ -2,11 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Users } from '../../../../models/users';
-import { UsersService } from '../../../../services/users.service';
+import { UsersService } from '../../../../services/user/users.service';
 
 @Component({
   selector: 'app-user-dropdown',
-  templateUrl: './user-dropdown.component.html',})
+  templateUrl: './user-dropdown.component.html',
+})
 export class UserDropdownComponent implements OnInit {
   isOpen = false;
   currentUser: Users | null = null;
@@ -14,7 +15,7 @@ export class UserDropdownComponent implements OnInit {
   constructor(
     private router: Router,
     private usersService: UsersService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.loadCurrentUser();
@@ -26,7 +27,7 @@ export class UserDropdownComponent implements OnInit {
       try {
         const localUser = JSON.parse(userStr);
         const userEmail = localUser.email;
-        
+
         // Fetch fresh data from API
         this.usersService.getUserByEmail(userEmail).subscribe({
           next: (user) => {
