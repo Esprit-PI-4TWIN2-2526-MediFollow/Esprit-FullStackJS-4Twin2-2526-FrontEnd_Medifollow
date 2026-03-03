@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Users } from '../models/users';
+import { Users } from '../../models/users';
 
 
 @Injectable({
@@ -12,7 +12,7 @@ export class UsersService {
   private apiUrl = 'http://localhost:3000/api';
 
   //create user with image
-createUser(user: Partial<Users>, avatarFile?: File) {
+  createUser(user: Partial<Users>, avatarFile?: File) {
     const formData = new FormData();
 
     // Ajouter tous les champs du user
@@ -31,9 +31,9 @@ createUser(user: Partial<Users>, avatarFile?: File) {
 
   }
 
- /*  createUser(user: Users) {
-    return this.http.post(`${this.apiUrl}/signup`, user);
-  } */
+  /*  createUser(user: Users) {
+     return this.http.post(`${this.apiUrl}/signup`, user);
+   } */
 
   //get all users
   getUsers() {
@@ -51,7 +51,7 @@ createUser(user: Partial<Users>, avatarFile?: File) {
   }
 
   //update user avec image
-updateUser(id: string, user: Partial<Users>, avatarFile?: File) {
+  updateUser(id: string, user: Partial<Users>, avatarFile?: File) {
     const formData = new FormData();
 
     Object.entries(user).forEach(([key, value]) => {

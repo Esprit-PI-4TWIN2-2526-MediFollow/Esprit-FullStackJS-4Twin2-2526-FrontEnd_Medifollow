@@ -1,7 +1,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Users } from '../../models/users';
-import { UsersService } from '../../services/users.service';
+import { UsersService } from '../../services/user/users.service';
 
 @Component({
   selector: 'app-profile',
@@ -9,7 +9,7 @@ import { UsersService } from '../../services/users.service';
   styles: ``
 })
 export class ProfileComponent implements OnInit {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService) { }
 
   currentUser: Users | null = null;
   today = new Date();

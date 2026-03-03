@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Users } from '../../../../models/users';
-import { UsersService } from '../../../../services/users.service';
+import { UsersService } from '../../../../services/user/users.service';
 
 @Component({
   selector: 'app-user-info-card',
@@ -11,7 +11,7 @@ export class UserInfoCardComponent implements OnInit {
 
   constructor(
     private usersService: UsersService
-  ) {}
+  ) { }
 
   isOpen = false;
   currentUser: Users | null = null;
@@ -38,7 +38,7 @@ export class UserInfoCardComponent implements OnInit {
       try {
         const localUser = JSON.parse(userStr);
         const userEmail = localUser.email;
-        
+
         // Fetch fresh data from API
         this.usersService.getUserByEmail(userEmail).subscribe({
           next: (user) => {

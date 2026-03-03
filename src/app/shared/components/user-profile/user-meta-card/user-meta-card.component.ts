@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalService } from '../../../services/modal.service';
 import { Users } from '../../../../models/users';
-import { UsersService } from '../../../../services/users.service';
+import { UsersService } from '../../../../services/user/users.service';
 
 @Component({
   selector: 'app-user-meta-card',
@@ -13,7 +13,7 @@ export class UserMetaCardComponent implements OnInit {
   constructor(
     public modal: ModalService,
     private usersService: UsersService
-  ) {}
+  ) { }
 
   isOpen = false;
   currentUser: Users | null = null;
@@ -30,7 +30,7 @@ export class UserMetaCardComponent implements OnInit {
       try {
         const localUser = JSON.parse(userStr);
         const userEmail = localUser.email;
-        
+
         // Fetch fresh data from API
         this.usersService.getUserByEmail(userEmail).subscribe({
           next: (user) => {

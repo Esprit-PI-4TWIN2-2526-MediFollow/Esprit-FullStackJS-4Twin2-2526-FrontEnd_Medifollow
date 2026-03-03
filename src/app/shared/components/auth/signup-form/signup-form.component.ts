@@ -2,7 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Users } from '../../../../models/users';
-import { UsersService } from '../../../../services/users.service';
+import { UsersService } from '../../../../services/user/users.service';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
@@ -56,9 +56,9 @@ type RoleKey = 'patient' | 'doctor' | 'nurse' | 'coordinator' | 'auditor' | 'adm
 })
 export class SignupFormComponent implements OnInit {
 
-signupForm!:FormGroup;
-users!:Users[];
-message: string = '';
+  signupForm!: FormGroup;
+  users!: Users[];
+  message: string = '';
   error: string = '';
   step = 1;
   carouselStart = 0;
@@ -75,7 +75,7 @@ message: string = '';
   maxDateOfBirth = '';
   private readonly stepOneControlNames = ['firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address', 'dateOfBirth'];
 
-constructor(private usersService: UsersService,private fb:FormBuilder,private router:Router) {}
+  constructor(private usersService: UsersService, private fb: FormBuilder, private router: Router) { }
 
   roles = [
     { key: 'nurse' as const, label: 'Nurse' },
@@ -110,34 +110,34 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
   };
   profileImageName = '';
 
-// Get the currently displayed roles based on carousel position
+  // Get the currently displayed roles based on carousel position
   get displayedRoles() {
     return this.roles.slice(this.carouselStart, this.carouselStart + this.visibleRoles);
   }
 
-// Get the display title for the currently selected role
+  // Get the display title for the currently selected role
   get roleTitle(): string {
     const role = this.roles.find((r) => r.key === this.selectedRole);
     return role ? role.label : 'Role';
   }
-// Get the initial letter for a role label (used in carousel display)
+  // Get the initial letter for a role label (used in carousel display)
   roleInitial(label: string): string {
     return label.charAt(0).toUpperCase();
   }
-// Navigate to previous set of roles in the carousel
+  // Navigate to previous set of roles in the carousel
   prevRoles() {
     if (this.carouselStart > 0) this.carouselStart -= 1;
   }
-// Navigate to next set of roles in the carousel
+  // Navigate to next set of roles in the carousel
   nextRoles() {
     if (this.carouselStart + this.visibleRoles < this.roles.length) this.carouselStart += 1;
   }
-// Handle role selection and move to next step
+  // Handle role selection and move to next step
   selectRole(role: RoleKey) {
     this.selectedRole = role;
   }
 
-// Validate step one controls and proceed to step two if valid
+  // Validate step one controls and proceed to step two if valid
   continueToStepTwo() {
     if (!this.selectedRole) return;
 
@@ -326,32 +326,32 @@ constructor(private usersService: UsersService,private fb:FormBuilder,private ro
   }
 
 
-ngOnInit(): void {
-  const today = new Date();
-  const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());// Set minimum date to 120 years ago
-  const maxDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());// Set maximum date to 1 year ago
-  this.minDateOfBirth = this.formatDateForInput(minDate);
-  this.maxDateOfBirth = this.formatDateForInput(maxDate);
+  ngOnInit(): void {
+    const today = new Date();
+    const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());// Set minimum date to 120 years ago
+    const maxDate = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());// Set maximum date to 1 year ago
+    this.minDateOfBirth = this.formatDateForInput(minDate);
+    this.maxDateOfBirth = this.formatDateForInput(maxDate);
 
-  this.signupForm = this.fb.group({
-    firstName: ['',[Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
-    lastName: ['',[Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
-    email: ['',[Validators.required,Validators.email, Validators.minLength(4), Validators.maxLength(50)]],
-    password: ['',[Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
-    phoneNumber: ['',[Validators.required, Validators.pattern('^(\\+216\\s?)?\\d{2}\\s?\\d{3}\\s?\\d{3}$')]],
-    sexe: ['',[Validators.required]],
-    address: ['',[Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
-    dateOfBirth: ['',[Validators.required]],
-    primaryDoctor: ['',[Validators.minLength(4), Validators.maxLength(50)]],
-    specialization: ['',[Validators.minLength(4), Validators.maxLength(50)]],
-    grade: ['',[Validators.minLength(4), Validators.maxLength(50)]],
-    diploma: ['',[Validators.minLength(4), Validators.maxLength(50)]],
-    yearsOfExperience: [null],
-    assignedDepartment: ['',[Validators.minLength(4), Validators.maxLength(50)]],
-    auditScope: ['',[Validators.minLength(4), Validators.maxLength(50)]],
-  });
+    this.signupForm = this.fb.group({
+      firstName: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
+      lastName: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
+      email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(50)]],
+      password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern('^(\\+216\\s?)?\\d{2}\\s?\\d{3}\\s?\\d{3}$')]],
+      sexe: ['', [Validators.required]],
+      address: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
+      dateOfBirth: ['', [Validators.required]],
+      primaryDoctor: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+      specialization: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+      grade: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+      diploma: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+      yearsOfExperience: [null],
+      assignedDepartment: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+      auditScope: ['', [Validators.minLength(4), Validators.maxLength(50)]],
+    });
 
-}
+  }
 
 
 
