@@ -23,131 +23,144 @@ import { AllProfilesComponent } from './users/all-profiles/all-profiles.componen
 import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
 import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
+import { AuthGuard } from './services/auth/auth.guard';
 
 const routes: Routes = [
   {
-    path: '',
-    component: AppLayoutComponent,//ba3d nbadlou signin par defaut
-    children: [
-      {
-        path: '',
-        component: EcommerceComponent,
-        pathMatch: 'full',
-        title:
-          'Angular Ecommerce Dashboard | TailAdmin - Angular Admin Dashboard Template',
-      },
-      {
-        path: 'getAllUsers', component: AllProfilesComponent, title: 'MediFollow'
-
-      },
-      {
-        path: 'calendar',
-        component: CalenderComponent,
-        title: 'Angular Calender | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'profile',
-        component: ProfileComponent,
-        title: 'Angular Profile Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'form-elements',
-        component: FormElementsComponent,
-        title: 'Angular Form Elements Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'basic-tables',
-        component: BasicTablesComponent,
-        title: 'Angular Basic Tables Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'blank',
-        component: BlankComponent,
-        title: 'Angular Blank Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      // support tickets
-      {
-        path: 'invoice',
-        component: InvoicesComponent,
-        title: 'Angular Invoice Details Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'line-chart',
-        component: LineChartComponent,
-        title: 'Angular Line Chart Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'bar-chart',
-        component: BarChartComponent,
-        title: 'Angular Bar Chart Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'alerts',
-        component: AlertsComponent,
-        title: 'Angular Alerts Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'avatars',
-        component: AvatarElementComponent,
-        title: 'Angular Avatars Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'badge',
-        component: BadgesComponent,
-        title: 'Angular Badges Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'buttons',
-        component: ButtonsComponent,
-        title: 'Angular Buttons Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'images',
-        component: ImagesComponent,
-        title: 'Angular Images Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-      {
-        path: 'videos',
-        component: VideosComponent,
-        title: 'Angular Videos Dashboard | TailAdmin - Angular Admin Dashboard Template'
-      },
-    ]
-  },
-  // auth pages
-  {
     path: 'signin',
     component: SignInComponent,
-    title: 'Angular Sign In Dashboard | TailAdmin - Angular Admin Dashboard Template'
+    title: 'MediFollow - Connexion'
   },
   {
     path: 'signup',
     component: SignUpComponent,
-    title: 'Medifollow - Sign Up'
+    title: 'MediFollow - Inscription'
   },
   {
-
-    path:'forgot-password',
-    component:ForgotPasswordComponent,
-    title:'Angular Forgot Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
+    path: 'forgot-password',
+    component: ForgotPasswordComponent,
+    title: 'MediFollow - Mot de passe oublié'
   },
   {
-    path:'reset-password/:token',
-    component:ResetPasswordComponent,
-    title:'Angular Reset Password Dashboard | TailAdmin - Angular Admin Dashboard Template'
+    path: 'reset-password/:token',
+    component: ResetPasswordComponent,
+    title: 'MediFollow - Réinitialisation mot de passe'
   },
   {
     path: 'first-login/change-password',
     component: FirstLoginChangePasswordComponent,
     title: 'MediFollow - Première connexion'
   },
-  // les path te3 les modules
-  { path: 'users', loadChildren: () => import('./users/users.module').then(u => u.UsersModule) },
-  // error pages
 
   {
-    path: '**',
+    path: '',
+    component: AppLayoutComponent,
+    canActivate: [AuthGuard],
+    children: [
+      {
+        path: 'dashboard',
+        component: EcommerceComponent,
+        title: 'MediFollow - Tableau de bord',
+      },
+      {
+        path: 'getAllUsers',
+        component: AllProfilesComponent,
+        title: 'MediFollow - Tous les utilisateurs'
+      },
+      {
+        path: 'calendar',
+        component: CalenderComponent,
+        title: 'MediFollow - Calendrier'
+      },
+      {
+        path: 'profile',
+        component: ProfileComponent,
+        title: 'MediFollow - Profil'
+      },
+      {
+        path: 'form-elements',
+        component: FormElementsComponent,
+        title: 'MediFollow - Éléments de formulaire'
+      },
+      {
+        path: 'basic-tables',
+        component: BasicTablesComponent,
+        title: 'MediFollow - Tableaux'
+      },
+      {
+        path: 'blank',
+        component: BlankComponent,
+        title: 'MediFollow - Page vide'
+      },
+      {
+        path: 'invoice',
+        component: InvoicesComponent,
+        title: 'MediFollow - Factures'
+      },
+      {
+        path: 'line-chart',
+        component: LineChartComponent,
+        title: 'MediFollow - Graphique linéaire'
+      },
+      {
+        path: 'bar-chart',
+        component: BarChartComponent,
+        title: 'MediFollow - Graphique à barres'
+      },
+      {
+        path: 'alerts',
+        component: AlertsComponent,
+        title: 'MediFollow - Alertes'
+      },
+      {
+        path: 'avatars',
+        component: AvatarElementComponent,
+        title: 'MediFollow - Avatars'
+      },
+      {
+        path: 'badge',
+        component: BadgesComponent,
+        title: 'MediFollow - Badges'
+      },
+      {
+        path: 'buttons',
+        component: ButtonsComponent,
+        title: 'MediFollow - Boutons'
+      },
+      {
+        path: 'images',
+        component: ImagesComponent,
+        title: 'MediFollow - Images'
+      },
+      {
+        path: 'videos',
+        component: VideosComponent,
+        title: 'MediFollow - Vidéos'
+      },
+      // Module utilisateur
+      {
+        path: 'users',
+        loadChildren: () => import('./users/users.module').then(u => u.UsersModule),
+        title: 'MediFollow - Gestion utilisateurs'
+      },
+      // Redirection par défaut vers dashboard
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
+  },
+
+  // Page 404
+  {
+    path: '404',
     component: NotFoundComponent,
-    title: 'Medifollow - 404 Not Found'
+    title: 'MediFollow - Page non trouvée'
+  },
+  {
+    path: '**',
+    redirectTo: '404'
   }
 ];
 
