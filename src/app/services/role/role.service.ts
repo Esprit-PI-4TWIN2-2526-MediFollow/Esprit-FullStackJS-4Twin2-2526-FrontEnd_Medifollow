@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, of, switchMap } from 'rxjs';
 
 export type CarouselRole = {
   id?: string;
@@ -13,25 +13,47 @@ export type CarouselRole = {
 export type RoleApiItem = {
   _id?: string;
   id?: string;
+  roleId?: string;
   name?: string;
   label?: string;
+  title?: string;
+  role?: string;
   key?: string;
   slug?: string;
 };
 
-type RoleApiResponse = RoleApiItem[] | { data?: RoleApiItem[] };
+type RoleApiResponse =
+  | RoleApiItem[]
+  | {
+      data?: RoleApiItem[] | { roles?: RoleApiItem[]; items?: RoleApiItem[] };
+      roles?: RoleApiItem[];
+      items?: RoleApiItem[];
+      result?: RoleApiItem[];
+    };
 
 @Injectable({
   providedIn: 'root'
 })
 export class RoleService {
   private readonly rolesApiUrl = 'http://localhost:3000/api/roles';
+  private readonly legacyApiUrl = 'http://localhost:3000/api';
 
   constructor(private http: HttpClient) { }
 
   getAllRoles(): Observable<RoleApiItem[]> {
     return this.http.get<RoleApiResponse>(this.rolesApiUrl).pipe(
-      map((response) => this.extractApiRoles(response))
+      map((response) => this.extractApiRoles(response)),
+      switchMap((roles) => {
+        if (roles.length > 0) return of(roles);
+        return this.http.get<RoleApiResponse>(this.legacyApiUrl).pipe(
+          map((legacyResponse) => this.extractApiRoles(legacyResponse))
+        );
+      }),
+      catchError(() =>
+        this.http.get<RoleApiResponse>(this.legacyApiUrl).pipe(
+          map((legacyResponse) => this.extractApiRoles(legacyResponse))
+        )
+      )
     );
   }
 
@@ -83,13 +105,28 @@ export class RoleService {
 
   private extractApiRoles(response: RoleApiResponse | null | undefined): RoleApiItem[] {
     if (!response) return [];
-    return Array.isArray(response) ? response : (response.data || []);
+
+    if (Array.isArray(response)) return response;
+
+    if (Array.isArray(response.roles)) return response.roles;
+    if (Array.isArray(response.items)) return response.items;
+    if (Array.isArray(response.result)) return response.result;
+
+    const data = response.data;
+    if (Array.isArray(data)) return data;
+
+    if (data && typeof data === 'object') {
+      if (Array.isArray(data.roles)) return data.roles;
+      if (Array.isArray(data.items)) return data.items;
+    }
+
+    return [];
   }
 
   private mapApiItemToCarouselRole(item?: RoleApiItem, fallbackName = ''): CarouselRole {
-    const label = (item?.name || item?.label || fallbackName).trim();
+    const label = String(item?.name || item?.label || item?.title || item?.role || fallbackName).trim();
     return {
-      id: item?._id || item?.id || undefined,
+      id: item?._id || item?.id || item?.roleId || undefined,
       key: this.getStableRoleKey(label, item),
       label,
       imageKey: this.resolveImageKey(label),
