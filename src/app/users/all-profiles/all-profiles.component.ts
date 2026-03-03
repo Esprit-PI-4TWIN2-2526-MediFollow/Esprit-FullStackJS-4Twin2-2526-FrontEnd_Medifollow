@@ -179,26 +179,26 @@ export class AllProfilesComponent implements OnInit {
     return this.filteredUsers.slice(start, start + this.itemsPerPage);
   }
 
-  get filteredUsers(): Users[] {
-    const q = this.searchTerm.trim().toLowerCase();
-    return this.users.filter((u) => {
-      // Filtre par rôle
-      if (this.selectedRoleFilter) {
-        const roleLabel = this.selectedRoleFilter.toLowerCase();
-        if (!(u.role || '').toLowerCase().includes(roleLabel)) return false;
-      }
-      // Filtre par recherche texte
-      if (!q) return true;
-      const fn = (u.firstName || '').toLowerCase();
-      const ln = (u.lastName || '').toLowerCase();
-      const em = (u.email || '').toLowerCase().split('@')[0];
-      const ph = (u.phoneNumber || '').toLowerCase();
-      const ro = (u.role || '').toLowerCase();
-      return fn.startsWith(q) || ln.startsWith(q) || `${fn} ${ln}`.includes(q)
-        || em.includes(q) || ph.includes(q) || ro.includes(q);
-    });
-  }
-
+ get filteredUsers(): Users[] {
+  const q = this.searchTerm.trim().toLowerCase();
+  return this.users.filter((u) => {
+    if (this.selectedRoleFilter) {
+      const selectedRoleObj = this.roles.find(r => r._id === this.selectedRoleFilter);
+      if (!selectedRoleObj) return false;
+      const userRole = (u.role || '').toLowerCase();
+      const selectedRoleLabel = selectedRoleObj.label.toLowerCase();
+      if (!userRole.includes(selectedRoleLabel)) return false;
+    }
+    if (!q) return true;
+    const fn = (u.firstName || '').toLowerCase();
+    const ln = (u.lastName || '').toLowerCase();
+    const em = (u.email || '').toLowerCase().split('@')[0];
+    const ph = (u.phoneNumber || '').toLowerCase();
+    const ro = (u.role || '').toLowerCase();
+    return fn.startsWith(q) || ln.startsWith(q) || `${fn} ${ln}`.includes(q)
+      || em.includes(q) || ph.includes(q) || ro.includes(q);
+  });
+}
   onSearchInput(event: Event): void {
     this.searchTerm = (event.target as HTMLInputElement).value || '';
     this.currentPage = 1;
@@ -478,7 +478,7 @@ export class AllProfilesComponent implements OnInit {
       error: (err) => { this.isAddingRole = false; this.addRoleError = err?.error?.message || 'Error creating role.'; },
     });
   }
-//Affichage des rôles 
+//Affichage des rôles
 loadRoles(): void {
   this.roleService.getAllRoles().subscribe({
     next: (response: any) => {
