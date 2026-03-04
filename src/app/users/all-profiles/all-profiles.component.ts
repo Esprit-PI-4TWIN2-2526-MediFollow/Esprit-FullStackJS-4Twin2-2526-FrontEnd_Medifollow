@@ -95,7 +95,7 @@ export class AllProfilesComponent implements OnInit {
   manageRoleToDelete: CarouselRole | null = null;
 
   private readonly stepOneControlNames = [
-    'firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address', 'dateOfBirth',
+    'firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address',
   ];
   readonly knownRoleImageKeys = ['nurse', 'doctor', 'coordinator', 'auditor', 'patient', 'admin'] as const;
   readonly otherRole: CarouselRole = { key: '__other__', label: 'Other Role', isOther: true };
@@ -432,6 +432,7 @@ export class AllProfilesComponent implements OnInit {
     this.applyRoleSpecificValidators();
     if (this.signupForm.invalid) { this.signupForm.markAllAsTouched(); Swal.fire('Form invalid', 'Please verify required fields.', 'error'); return; }
     const payload: any = { ...this.signupForm.value, role: this.selectedRole, acceptedPolicy: this.isChecked };
+    if (!this.isSelectedRole('patient')) delete payload.dateOfBirth;
     this.usersService.createUser(payload, this.selectedAvatarFile || undefined).subscribe({
       next: () => { Swal.fire({ title: 'Success', text: 'Account created.', icon: 'success', timer: 2000, showConfirmButton: true }); this.closeAddUserModal(); this.loadUsers(); },
       error: (err) => Swal.fire('Error', err?.error?.message || 'Failed to create account.', 'error'),
@@ -801,8 +802,9 @@ loadRoles(): void {
   }
 
   private applyRoleSpecificValidators(): void {
-    const rc = ['primaryDoctor', 'specialization', 'grade', 'diploma', 'yearsOfExperience', 'assignedDepartment', 'auditScope'];
+    const rc = ['dateOfBirth', 'primaryDoctor', 'specialization', 'grade', 'diploma', 'yearsOfExperience', 'assignedDepartment', 'auditScope'];
     rc.forEach((n) => { this.signupForm.get(n)?.setValidators([]); this.signupForm.get(n)?.updateValueAndValidity({ emitEvent: false }); });
+    if (this.isSelectedRole('patient')) this.signupForm.get('dateOfBirth')?.setValidators([Validators.required]);
     if (this.isSelectedRole('patient')) this.signupForm.get('primaryDoctor')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
     if (this.isSelectedRole('doctor')) {
       ['specialization', 'grade', 'diploma'].forEach((f) => this.signupForm.get(f)?.setValidators([Validators.required, Validators.minLength(2), Validators.maxLength(50)]));
@@ -829,7 +831,7 @@ loadRoles(): void {
       phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.pattern('^\\+\\d{1,4}\\s[0-9 ]{6,15}$')]],
       sexe: ['', [Validators.required]],
       address: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
-      dateOfBirth: ['', [Validators.required]],
+      dateOfBirth: [''],
       primaryDoctor: [''],
       specialization: [''],
       grade: [''],
@@ -844,7 +846,7 @@ loadRoles(): void {
   private setDateRange(): void {
     const today = new Date();
     this.minDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()));
-    this.maxDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()));
+    this.maxDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
   }
 
   get uniqueRoles(): string[] {

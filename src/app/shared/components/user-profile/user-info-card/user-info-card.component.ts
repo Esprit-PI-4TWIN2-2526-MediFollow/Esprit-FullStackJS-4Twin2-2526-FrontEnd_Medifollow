@@ -18,6 +18,7 @@ export class UserInfoCardComponent implements OnInit {
   isLoading = true;
   isSaving = false;
   saveError = '';
+  showPassword = false;
 
   editForm = {
     firstName: '',
@@ -25,6 +26,7 @@ export class UserInfoCardComponent implements OnInit {
     email: '',
     phoneNumber: '',
     role: '',
+    password: '',
   };
 
   ngOnInit() {
@@ -64,6 +66,12 @@ export class UserInfoCardComponent implements OnInit {
   handleSave() {
     if (!this.currentUser?._id || this.isSaving) return;
 
+    const password = this.editForm.password.trim();
+    if (password && password.length < 6) {
+      this.saveError = 'Password must be at least 6 characters.';
+      return;
+    }
+
     this.isSaving = true;
     this.saveError = '';
 
@@ -74,6 +82,7 @@ export class UserInfoCardComponent implements OnInit {
       phoneNumber: this.editForm.phoneNumber.trim(),
       role: this.editForm.role.trim(),
     };
+    if (password) payload.password = password;
 
     this.usersService.updateUser(this.currentUser._id, payload).subscribe({
       next: (response: any) => {
@@ -95,11 +104,16 @@ export class UserInfoCardComponent implements OnInit {
   openModal() {
     this.fillEditForm();
     this.saveError = '';
+    this.showPassword = false;
     this.isOpen = true;
   }
 
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
   updateEditField(
-    field: 'firstName' | 'lastName' | 'email' | 'phoneNumber' | 'role',
+    field: 'firstName' | 'lastName' | 'email' | 'phoneNumber' | 'role' | 'password',
     value: string | number | null
   ) {
     this.editForm[field] = value == null ? '' : String(value);
@@ -111,6 +125,7 @@ export class UserInfoCardComponent implements OnInit {
     this.editForm.email = this.currentUser?.email || '';
     this.editForm.phoneNumber = this.currentUser?.phoneNumber || '';
     this.editForm.role = this.currentUser?.role ? String(this.currentUser.role) : '';
+    this.editForm.password = '';
   }
 
   private syncUserInLocalStorage(user: Users) {
