@@ -18,6 +18,7 @@ export class UserMetaCardComponent implements OnInit {
   isOpen = false;
   currentUser: Users | null = null;
   isLoading = true;
+  isAvatarSaving = false;
 
   ngOnInit() {
     this.loadCurrentUser();
@@ -87,5 +88,26 @@ export class UserMetaCardComponent implements OnInit {
     // Handle save logic here
     console.log('Saving changes...');
     this.modal.closeModal();
+  }
+
+  onAvatarSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file || !this.currentUser?._id || this.isAvatarSaving) return;
+
+    this.isAvatarSaving = true;
+    this.usersService.updateUser(this.currentUser._id, {}, file).subscribe({
+      next: (response: any) => {
+        const updatedUser = (response?.user ?? response) as Partial<Users>;
+        this.currentUser = { ...this.currentUser, ...updatedUser } as Users;
+        this.isAvatarSaving = false;
+        input.value = '';
+      },
+      error: (err) => {
+        console.error('Error updating avatar:', err);
+        this.isAvatarSaving = false;
+        input.value = '';
+      }
+    });
   }
 }

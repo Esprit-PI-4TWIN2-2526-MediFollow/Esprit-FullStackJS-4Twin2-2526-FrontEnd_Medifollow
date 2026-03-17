@@ -7,6 +7,7 @@ import { Users } from '../../models/users';
 import { UsersService } from '../../services/user/users.service';
 import { RoleService } from '../../services/role/role.service';
 import { Role } from '../../models/roles';
+import { SpeechRecognitionService } from '../../services/speech-recognition.service';
 
 type RoleKey = string;
 type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
@@ -95,7 +96,7 @@ export class AllProfilesComponent implements OnInit {
   manageRoleToDelete: CarouselRole | null = null;
 
   private readonly stepOneControlNames = [
-    'firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address', 'dateOfBirth',
+    'firstName', 'lastName', 'email', 'password', 'phoneNumber', 'sexe', 'address',
   ];
   readonly knownRoleImageKeys = ['nurse', 'doctor', 'coordinator', 'auditor', 'patient', 'admin'] as const;
   readonly otherRole: CarouselRole = { key: '__other__', label: 'Other Role', isOther: true };
@@ -139,7 +140,8 @@ export class AllProfilesComponent implements OnInit {
     private usersService: UsersService,
     private fb: FormBuilder,
     private readonly http: HttpClient,
-    private roleService: RoleService){ }
+    private roleService: RoleService,
+  public speech: SpeechRecognitionService ){ }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -414,7 +416,16 @@ export class AllProfilesComponent implements OnInit {
   }
 
   // ── Add User Modal ────────────────────────────────────────────
-  openAddUserModal(): void { this.isAddUserModalOpen = true; this.resetSignupState(); }
+  openAddUserModal(): void { this.isAddUserModalOpen = true;
+// Demande la permission micro dès l'ouverture
+  if (this.speech.isSupported) {
+    navigator.mediaDevices
+      .getUserMedia({ audio: true })
+      .catch(() => {
+        console.warn('Permission micro refusée');
+      });
+  }
+     this.resetSignupState(); }
   closeAddUserModal(): void { this.isAddUserModalOpen = false; this.showAddRoleModal = false; }
 
   private resetSignupState(): void {
@@ -431,7 +442,15 @@ export class AllProfilesComponent implements OnInit {
     if (!this.selectedRole) { Swal.fire('Role missing', 'Please select a role.', 'warning'); return; }
     this.applyRoleSpecificValidators();
     if (this.signupForm.invalid) { this.signupForm.markAllAsTouched(); Swal.fire('Form invalid', 'Please verify required fields.', 'error'); return; }
+
+    const email = String(this.signupForm.get('email')?.value || '').trim().toLowerCase();
+    if (email && this.users.some((u) => String(u.email || '').trim().toLowerCase() === email)) {
+      Swal.fire('Email exist', 'This Email already exist. Please use another one.', 'error');
+      return;
+    }
+
     const payload: any = { ...this.signupForm.value, role: this.selectedRole, acceptedPolicy: this.isChecked };
+    if (!this.isSelectedRole('patient')) delete payload.dateOfBirth;
     this.usersService.createUser(payload, this.selectedAvatarFile || undefined).subscribe({
       next: () => { Swal.fire({ title: 'Success', text: 'Account created.', icon: 'success', timer: 2000, showConfirmButton: true }); this.closeAddUserModal(); this.loadUsers(); },
       error: (err) => Swal.fire('Error', err?.error?.message || 'Failed to create account.', 'error'),
@@ -801,8 +820,9 @@ loadRoles(): void {
   }
 
   private applyRoleSpecificValidators(): void {
-    const rc = ['primaryDoctor', 'specialization', 'grade', 'diploma', 'yearsOfExperience', 'assignedDepartment', 'auditScope'];
+    const rc = ['dateOfBirth', 'primaryDoctor', 'specialization', 'grade', 'diploma', 'yearsOfExperience', 'assignedDepartment', 'auditScope'];
     rc.forEach((n) => { this.signupForm.get(n)?.setValidators([]); this.signupForm.get(n)?.updateValueAndValidity({ emitEvent: false }); });
+    if (this.isSelectedRole('patient')) this.signupForm.get('dateOfBirth')?.setValidators([Validators.required]);
     if (this.isSelectedRole('patient')) this.signupForm.get('primaryDoctor')?.setValidators([Validators.required, Validators.minLength(4), Validators.maxLength(50)]);
     if (this.isSelectedRole('doctor')) {
       ['specialization', 'grade', 'diploma'].forEach((f) => this.signupForm.get(f)?.setValidators([Validators.required, Validators.minLength(2), Validators.maxLength(50)]));
@@ -829,7 +849,7 @@ loadRoles(): void {
       phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.pattern('^\\+\\d{1,4}\\s[0-9 ]{6,15}$')]],
       sexe: ['', [Validators.required]],
       address: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
-      dateOfBirth: ['', [Validators.required]],
+      dateOfBirth: [''],
       primaryDoctor: [''],
       specialization: [''],
       grade: [''],
@@ -844,7 +864,7 @@ loadRoles(): void {
   private setDateRange(): void {
     const today = new Date();
     this.minDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()));
-    this.maxDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 1, today.getMonth(), today.getDate()));
+    this.maxDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
   }
 
   get uniqueRoles(): string[] {
@@ -853,4 +873,44 @@ loadRoles(): void {
       .filter(r => r.trim() !== '');
     return [...new Set(roles)].sort();
   }
+
+// Méthode unique pour tous les champs
+onVoiceInput(fieldName: string, transcript: string): void {
+  let value = transcript;
+
+  switch (fieldName) {
+    case 'email':
+      value = transcript
+        .toLowerCase()
+        .replace(/\s*arobase\s*/gi, '@')
+        .replace(/\s*point\s*/gi, '.')
+        .replace(/\s*tiret\s*/gi, '-')
+        .replace(/\s+/g, '');
+      break;
+
+    case 'phoneNumber':
+      // garde uniquement chiffres, +, espaces
+      value = transcript.replace(/[^\d+\s]/g, '');
+      break;
+
+    case 'yearsOfExperience':
+      // convertit "cinq" → 5 si le navigateur retourne du texte
+      const num = parseInt(transcript, 10);
+      value = isNaN(num) ? transcript : String(num);
+      break;
+
+    case 'firstName':
+    case 'lastName':
+      // capitalise la première lettre
+      value = transcript.charAt(0).toUpperCase() + transcript.slice(1).toLowerCase();
+      break;
+
+    default:
+      // address, specialization, grade, diploma → tel quel
+      value = transcript;
+  }
+
+  this.signupForm.get(fieldName)?.setValue(value);
+  this.signupForm.get(fieldName)?.markAsTouched();
+}
 }
