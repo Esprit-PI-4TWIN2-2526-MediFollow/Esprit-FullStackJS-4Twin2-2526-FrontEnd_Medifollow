@@ -3,9 +3,14 @@ import { CommonModule } from '@angular/common';
 
 import { UsersRoutingModule } from './users-routing.module';
 
+import { MicButtonComponent } from './mic-button/mic-button.component';
+import { AllProfilesComponent } from './all-profiles/all-profiles.component';
+
 
 @NgModule({
-  declarations: [],
+  declarations: [
+
+  ],
   imports: [
     CommonModule,
     UsersRoutingModule

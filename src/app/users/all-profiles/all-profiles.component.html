@@ -643,338 +643,6 @@
       <!-- Step 1 -->
       @if (step === 1) {
         <form [formGroup]="signupForm" class="space-y-6">
-          <!-- Role carousel -->
-          <div class="flex items-center gap-3">
-            <button type="button" (click)="prevRoles()" [disabled]="carouselStart === 0"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200
-                     text-gray-500 transition hover:border-brand-300 hover:text-brand-500
-                     disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-5">
-                <path d="M11.6667 5L6.66675 10L11.6667 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-            <div class="grid w-full grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-              @for (role of displayedRoles; track role.key) {
-                @if (isOtherRole(role)) {
-                  <button type="button" (click)="openAddRoleModal()"
-                    class="group rounded-xl border border-dashed border-brand-300 bg-brand-50/60 p-3
-                           text-left transition hover:-translate-y-0.5 hover:bg-brand-50
-                           dark:border-brand-700 dark:bg-brand-900/20">
-                    <span class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg
-                                 bg-white text-brand-500 shadow-theme-xs dark:bg-gray-900 dark:text-brand-400">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-6">
-                        <path d="M10 4.1665V15.8332" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                        <path d="M4.1665 10H15.8332" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-                      </svg>
-                    </span>
-                    <p class="text-sm font-semibold text-brand-600 dark:text-brand-400">{{ role.label }}</p>
-                  </button>
-                } @else {
-                  <button type="button" (click)="selectRoleFromCarousel(role)"
-                    class="group rounded-xl border p-3 text-left transition hover:-translate-y-0.5"
-                    [ngClass]="{
-                      'border-brand-500 bg-brand-50 dark:border-brand-600 dark:bg-brand-900/20': selectedRole === role.key,
-                      'border-gray-200 bg-gray-50 hover:border-brand-300 hover:bg-brand-50 dark:border-gray-700 dark:bg-gray-800/40': selectedRole !== role.key
-                    }">
-                    <span class="mb-2 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-white shadow-theme-xs dark:bg-gray-900">
-                      <img class="h-10 w-10 object-contain" [src]="getRoleImageSrc(role)" [alt]="role.label + ' icon'" />
-                    </span>
-                    <p class="text-sm font-semibold text-gray-800 dark:text-white/90">{{ role.label }}</p>
-                  </button>
-                }
-              }
-            </div>
-            <button type="button" (click)="nextRoles()" [disabled]="carouselStart + visibleRoles >= carouselRoles.length"
-              class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200
-                     text-gray-500 transition hover:border-brand-300 hover:text-brand-500
-                     disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-700 dark:text-gray-400">
-              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-5">
-                <path d="M8.3335 5L13.3335 10L8.3335 15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </button>
-          </div>
-
-          @if (selectedRole) {
-            <div class="flex items-center gap-2 border-b border-gray-200 pb-2 dark:border-gray-700">
-              <span class="text-brand-500 text-lg">*</span>
-              <span class="font-semibold text-gray-800 dark:text-white/90">{{ roleTitle }}</span>
-            </div>
-          }
-
-          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <app-label>First Name <span class="text-error-500">*</span></app-label>
-              <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="firstName" placeholder="Enter first name" />
-              @if (isFieldInvalid('firstName')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('firstName', 'First name') }}</p> }
-            </div>
-            <div>
-              <app-label>Last Name <span class="text-error-500">*</span></app-label>
-              <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="lastName" placeholder="Enter last name" />
-              @if (isFieldInvalid('lastName')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('lastName', 'Last name') }}</p> }
-            </div>
-          </div>
-
-          <div>
-            <app-label>Email <span class="text-error-500">*</span></app-label>
-            <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="email" formControlName="email" placeholder="Enter email" />
-            @if (isFieldInvalid('email')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('email', 'Email') }}</p> }
-          </div>
-
-          <div>
-            <app-label>Password <span class="text-error-500">*</span></app-label>
-            <div class="relative">
-              <input class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-24 text-sm"
-                [type]="showPassword ? 'text' : 'password'" formControlName="password"
-                placeholder="Enter password" (input)="onPasswordManualInput($event)" />
-              <div class="absolute right-3 top-1/2 z-30 flex -translate-y-1/2 items-center gap-2">
-                <button type="button" (click)="generateRandomPassword(6)" title="Generate"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-md text-brand-600 transition hover:bg-brand-100 dark:text-brand-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-4">
-                    <path d="M10.8333 2.5L9.27083 5.83333L5.83333 6.35417L8.33333 8.95833L7.70833 12.5L10.8333 10.7292L13.9583 12.5L13.3333 8.95833L15.8333 6.35417L12.3958 5.83333L10.8333 2.5Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M3.33325 13.3333L4.16659 15L5.83325 15.8333L4.16659 16.6667L3.33325 18.3333L2.49992 16.6667L0.833252 15.8333L2.49992 15L3.33325 13.3333Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </button>
-                <button type="button" (click)="togglePasswordVisibility()"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-md text-gray-500 transition hover:bg-gray-100 dark:text-gray-400">
-                  <svg *ngIf="showPassword" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-4 fill-current">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M10.0002 13.8619C7.23361 13.8619 4.86803 12.1372 3.92328 9.70241C4.86804 7.26761 7.23361 5.54297 10.0002 5.54297C12.7667 5.54297 15.1323 7.26762 16.0771 9.70243C15.1323 12.1372 12.7667 13.8619 10.0002 13.8619ZM10.0002 4.04297C6.48191 4.04297 3.49489 6.30917 2.4155 9.4593C2.3615 9.61687 2.3615 9.78794 2.41549 9.94552C3.49488 13.0957 6.48191 15.3619 10.0002 15.3619C13.5184 15.3619 16.5055 13.0957 17.5849 9.94555C17.6389 9.78797 17.6389 9.6169 17.5849 9.45932C16.5055 6.30919 13.5184 4.04297 10.0002 4.04297ZM9.99151 7.84413C8.96527 7.84413 8.13333 8.67606 8.13333 9.70231C8.13333 10.7286 8.96527 11.5605 9.99151 11.5605H10.0064C11.0326 11.5605 11.8646 10.7286 11.8646 9.70231C11.8646 8.67606 11.0326 7.84413 10.0064 7.84413H9.99151Z"/>
-                  </svg>
-                  <svg *ngIf="!showPassword" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-4 fill-current">
-                    <path fill-rule="evenodd" clip-rule="evenodd" d="M4.63803 3.57709C4.34513 3.2842 3.87026 3.2842 3.57737 3.57709C3.28447 3.86999 3.28447 4.34486 3.57737 4.63775L4.85323 5.91362C3.74609 6.84199 2.89363 8.06395 2.4155 9.45936C2.3615 9.61694 2.3615 9.78801 2.41549 9.94558C3.49488 13.0957 6.48191 15.3619 10.0002 15.3619C11.255 15.3619 12.4422 15.0737 13.4994 14.5598L15.3625 16.4229C15.6554 16.7158 16.1302 16.7158 16.4231 16.4229C16.716 16.13 16.716 15.6551 16.4231 15.3622L4.63803 3.57709Z"/>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            @if (isFieldInvalid('password')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('password', 'Password') }}</p> }
-            @if (showPasswordStrength && signupForm.get('password')?.value) {
-              <div class="mt-2">
-                <div class="mb-1 flex items-center justify-between text-xs">
-                  <span class="text-gray-500">Password strength</span>
-                  <span class="font-medium text-gray-700 dark:text-gray-200">{{ passwordStrengthLabel }}</span>
-                </div>
-                <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                  <div class="h-full transition-all duration-300" [ngClass]="passwordStrengthClass" [style.width.%]="passwordStrengthPercent"></div>
-                </div>
-              </div>
-            }
-          </div>
-
-          <div>
-            <app-label>Phone Number <span class="text-error-500">*</span></app-label>
-            <div class="flex h-11 items-center rounded-lg border border-gray-300 bg-transparent focus-within:border-brand-300 focus-within:ring-3 focus-within:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900">
-              <img [src]="getFlagUrl(selectedCountry.iso2)" [alt]="selectedCountry.name" class="ml-3 h-5 w-7 rounded-sm object-cover" />
-              <select class="h-full appearance-none border-0 bg-transparent pl-2 pr-6 text-sm text-gray-800 outline-none dark:text-white/90"
-                [value]="selectedDialCode" (change)="onCountryCodeChange($event)">
-                @for (country of countryOptions; track country.iso2) {
-                  <option [value]="country.dialCode">{{ country.name }} ({{ country.dialCode }})</option>
-                }
-              </select>
-              <span class="mx-1 h-6 w-px bg-gray-300 dark:bg-gray-700"></span>
-              <input class="h-full w-full bg-transparent px-3 text-sm text-gray-800 outline-none dark:text-white/90"
-                type="tel" formControlName="phoneNumber" placeholder="Phone number" (focus)="onPhoneNumberFocus()" />
-            </div>
-            @if (isFieldInvalid('phoneNumber')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('phoneNumber', 'Phone number') }}</p> }
-          </div>
-
-          <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <div>
-              <app-label>Sexe <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="sexe">
-                <option value="" disabled>Select sexe</option>
-                @for (s of sexeOptions; track s) { <option [value]="s">{{ s }}</option> }
-              </select>
-              @if (isFieldInvalid('sexe')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('sexe', 'Sexe') }}</p> }
-            </div>
-
-          </div>
-
-          <div>
-            <app-label>Address <span class="text-error-500">*</span></app-label>
-            <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="address" placeholder="Enter address" />
-            @if (isFieldInvalid('address')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('address', 'Address') }}</p> }
-          </div>
-
-          <div class="flex items-start gap-3">
-            <app-checkbox className="w-5 h-5 mt-0.5" [(checked)]="isChecked" />
-            <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
-              By creating an account you agree to the
-              <span class="text-gray-800 dark:text-white/90">Terms and Conditions</span> and
-              <span class="text-gray-800 dark:text-white">Privacy Policy</span>.
-            </p>
-          </div>
-
-          <button type="button" (click)="continueToStepTwo()" [disabled]="!selectedRole"
-            class="flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3
-                   text-sm font-medium text-white transition hover:bg-brand-600
-                   disabled:cursor-not-allowed disabled:opacity-50">
-            Continue
-          </button>
-        </form>
-
-      } @else {
-        <!-- Step 2 -->
-        <form [formGroup]="signupForm" class="space-y-6" (ngSubmit)="submitSignUp()">
-          <div class="flex items-center justify-between rounded-xl border border-brand-100 bg-brand-50/60 p-3 dark:border-brand-800 dark:bg-brand-900/20">
-            <div>
-              <p class="text-xs uppercase tracking-wide text-brand-500">Selected role</p>
-              <p class="text-sm font-semibold text-gray-800 dark:text-white/90">{{ roleTitle }}</p>
-            </div>
-            <button type="button" (click)="backToRoleSelection()"
-              class="rounded-lg border border-brand-200 px-3 py-2 text-xs font-medium text-brand-600
-                     transition hover:bg-brand-100 dark:border-brand-700 dark:text-brand-400">Back</button>
-          </div>
-
-          <div>
-            <app-label>Profile Image @if (requiresImage()) { <span class="text-error-500">*</span> }</app-label>
-            <label class="mt-1 flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-brand-300 bg-brand-50/40 px-4 py-3 text-sm text-gray-700 hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-gray-300">
-              <span>{{ profileImageName || 'Upload profile image (JPG/PNG)' }}</span>
-              <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-brand-600 dark:bg-gray-800 dark:text-brand-400">Browse</span>
-              <!-- FIX: uses corrected onImageSelected -->
-              <input type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
-            </label>
-          </div>
-
-          @if (isSelectedRole('patient')) {
-            <div>
-              <app-label>Primary Doctor <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="primaryDoctor">
-                <option value="" disabled>Select primary doctor</option>
-                @for (d of doctors; track d) { <option [value]="d">{{ d }}</option> }
-              </select>
-              @if (isFieldInvalid('primaryDoctor')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('primaryDoctor', 'Primary doctor') }}</p> }
-            </div>
-
-            <div>
-              <app-label>Date of Birth <span class="text-error-500">*</span></app-label>
-              <app-date-picker id="dob-create" placeholder="Select date of birth"
-                [defaultDate]="signupForm.get('dateOfBirth')?.value || undefined"
-                [minDate]="minDateOfBirth" [maxDate]="maxDateOfBirth"
-                [themeClass]="'flatpickr-theme-green'" (dateChange)="onDateOfBirthChange($event)" />
-              @if (isFieldInvalid('dateOfBirth')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('dateOfBirth', 'Date of birth') }}</p> }
-            </div>
-          }
-          @if (isSelectedRole('doctor')) {
-            <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <div>
-                <app-label>Specialization <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="specialization" placeholder="Cardiology…" />
-              </div>
-              <div>
-                <app-label>Grade <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="grade" placeholder="Senior / Junior" />
-              </div>
-              <div>
-                <app-label>Diploma <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="diploma" placeholder="MD, PhD…" />
-              </div>
-              <div>
-                <app-label>Years of Experience <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="number" formControlName="yearsOfExperience" placeholder="0" />
-                @if (isFieldInvalid('yearsOfExperience')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('yearsOfExperience', 'Years of experience') }}</p> }
-              </div>
-              <div class="sm:col-span-2">
-                <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
-                <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="assignedDepartment">
-                  <option value="" disabled>Select department</option>
-                  @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
-                </select>
-              </div>
-            </div>
-          }
-          @if (isSelectedRole('nurse') || isSelectedRole('coordinator')) {
-            <div>
-              <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="assignedDepartment">
-                <option value="" disabled>Select department</option>
-                @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
-              </select>
-            </div>
-          }
-          @if (isSelectedRole('auditor')) {
-            <div>
-              <app-label>Audit Scope <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="auditScope">
-                <option value="" disabled>Select audit scope</option>
-                @for (sc of auditScopes; track sc) { <option [value]="sc">{{ sc }}</option> }
-              </select>
-            </div>
-          }
-
-          <button type="submit"
-            class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white
-                   transition rounded-lg bg-brand-500 hover:bg-brand-600">
-            Create Account
-          </button>
-        </form>
-      }
-
-      <!-- Add Role sub-modal -->
-      @if (showAddRoleModal) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center">
-          <div class="absolute inset-0 bg-black/55 backdrop-blur-md" (click)="closeAddRoleModal()"></div>
-          <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
-            <div class="mb-4 flex items-start justify-between">
-              <div>
-                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Add Role</h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter role name.</p>
-              </div>
-              <button type="button" (click)="closeAddRoleModal()"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200
-                       text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">✕</button>
-            </div>
-            <form class="space-y-4" (ngSubmit)="submitAddRole()">
-              <div>
-                <app-label>Name <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90"
-                  type="text" placeholder="Role name" [(ngModel)]="newRoleName" name="newRoleName" required />
-                @if (addRoleError) { <p class="mt-2 text-sm text-error-500">{{ addRoleError }}</p> }
-              </div>
-              <div class="flex items-center justify-end gap-2 pt-2">
-                <button type="button" (click)="closeAddRoleModal()"
-                  class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
-                <button type="submit" [disabled]="isAddingRole"
-                  class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50">
-                  {{ isAddingRole ? 'Saving...' : 'Add' }}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      }
-
-    </div>
-  </div>
-</div>
-<!-- Add User Modal -->
-<div *ngIf="isAddUserModalOpen" class="fixed inset-0 z-50">
-  <div class="absolute inset-0 bg-black/50" (click)="closeAddUserModal()"></div>
-  <div class="relative z-10 flex h-full items-center justify-center p-4">
-    <div class="max-h-[95vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-gray-200
-                bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900 sm:p-8"
-      (click)="$event.stopPropagation()">
-
-      <div class="mb-6 sm:mb-8 flex items-start justify-between">
-        <div>
-          <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-            Create An Account
-          </h1>
-          @if (step === 1) {
-            <p class="text-sm text-gray-500 dark:text-gray-400">Select a role and fill common information.</p>
-          } @else {
-            <p class="text-sm text-gray-500 dark:text-gray-400">
-              Complete role-specific info for <span class="font-medium text-brand-500">{{ roleTitle }}</span>.
-            </p>
-          }
-        </div>
-        <button type="button" (click)="closeAddUserModal()"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200
-                 text-gray-500 transition hover:border-brand-300 hover:text-brand-500
-                 dark:border-gray-700 dark:text-gray-400">✕</button>
-      </div>
-
-      <!-- Step 1 -->
-      @if (step === 1) {
-        <form [formGroup]="signupForm" class="space-y-6">
 
           <!-- Role carousel -->
           <div class="flex items-center gap-3">
@@ -1034,25 +702,78 @@
             </div>
           }
 
+          <!-- First Name + Last Name -->
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+            <!-- First Name -->
             <div>
               <app-label>First Name <span class="text-error-500">*</span></app-label>
-              <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="firstName" placeholder="Enter first name" />
-              @if (isFieldInvalid('firstName')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('firstName', 'First name') }}</p> }
+              <div class="relative">
+                <input
+                  class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                  type="text"
+                  formControlName="firstName"
+                  placeholder="Enter first name" />
+                <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                  <app-mic-button
+                    lang="fr-FR"
+                    fieldName="firstName"
+                    (transcriptReady)="onVoiceInput('firstName', $event.toString())">
+                  </app-mic-button>
+                </div>
+              </div>
+              @if (isFieldInvalid('firstName')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('firstName', 'First name') }}</p>
+              }
             </div>
+
+            <!-- Last Name -->
             <div>
               <app-label>Last Name <span class="text-error-500">*</span></app-label>
-              <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="lastName" placeholder="Enter last name" />
-              @if (isFieldInvalid('lastName')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('lastName', 'Last name') }}</p> }
+              <div class="relative">
+                <input
+                  class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                  type="text"
+                  formControlName="lastName"
+                  placeholder="Enter last name" />
+                <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                  <app-mic-button
+                    lang="fr-FR"
+                    fieldName="lastName"
+                    (transcriptReady)="onVoiceInput('lastName', $event.toString())">
+                  </app-mic-button>
+                </div>
+              </div>
+              @if (isFieldInvalid('lastName')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('lastName', 'Last name') }}</p>
+              }
             </div>
+
           </div>
 
+          <!-- Email -->
           <div>
             <app-label>Email <span class="text-error-500">*</span></app-label>
-            <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="email" formControlName="email" placeholder="Enter email" />
-            @if (isFieldInvalid('email')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('email', 'Email') }}</p> }
+            <div class="relative">
+              <input
+                class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                type="email"
+                formControlName="email"
+                placeholder="Enter email" />
+              <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                <app-mic-button
+                  lang="en-US"
+                  fieldName="email"
+                  (transcriptReady)="onVoiceInput('email', $event.toString())">
+                </app-mic-button>
+              </div>
+            </div>
+            @if (isFieldInvalid('email')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('email', 'Email') }}</p>
+            }
           </div>
 
+          <!-- Password — pas de micro (sécurité) -->
           <div>
             <app-label>Password <span class="text-error-500">*</span></app-label>
             <div class="relative">
@@ -1078,7 +799,9 @@
                 </button>
               </div>
             </div>
-            @if (isFieldInvalid('password')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('password', 'Password') }}</p> }
+            @if (isFieldInvalid('password')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('password', 'Password') }}</p>
+            }
             @if (showPasswordStrength && signupForm.get('password')?.value) {
               <div class="mt-2">
                 <div class="mb-1 flex items-center justify-between text-xs">
@@ -1092,11 +815,16 @@
             }
           </div>
 
+          <!-- Phone Number -->
           <div>
             <app-label>Phone Number <span class="text-error-500">*</span></app-label>
-            <div class="flex h-11 items-center rounded-lg border border-gray-300 bg-transparent focus-within:border-brand-300 focus-within:ring-3 focus-within:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900">
-              <img [src]="getFlagUrl(selectedCountry.iso2)" [alt]="selectedCountry.name" class="ml-3 h-5 w-7 rounded-sm object-cover" />
-              <select class="h-full appearance-none border-0 bg-transparent pl-2 pr-6 text-sm text-gray-800 outline-none dark:text-white/90"
+            <div class="flex h-11 items-center rounded-lg border border-gray-300 bg-transparent
+                        focus-within:border-brand-300 focus-within:ring-3 focus-within:ring-brand-500/20
+                        dark:border-gray-700 dark:bg-gray-900">
+              <img [src]="getFlagUrl(selectedCountry.iso2)" [alt]="selectedCountry.name"
+                   class="ml-3 h-5 w-7 rounded-sm object-cover" />
+              <select class="h-full appearance-none border-0 bg-transparent pl-2 pr-6 text-sm
+                             text-gray-800 outline-none dark:text-white/90"
                 [value]="selectedDialCode" (change)="onCountryCodeChange($event)">
                 @for (country of countryOptions; track country.iso2) {
                   <option [value]="country.dialCode">{{ country.name }} ({{ country.dialCode }})</option>
@@ -1104,29 +832,62 @@
               </select>
               <span class="mx-1 h-6 w-px bg-gray-300 dark:bg-gray-700"></span>
               <input class="h-full w-full bg-transparent px-3 text-sm text-gray-800 outline-none dark:text-white/90"
-                type="tel" formControlName="phoneNumber" placeholder="Phone number" (focus)="onPhoneNumberFocus()" />
+                type="tel" formControlName="phoneNumber"
+                placeholder="Phone number" (focus)="onPhoneNumberFocus()" />
+              <!-- Micro à l'intérieur du wrapper -->
+              <div class="mr-2 flex-shrink-0">
+                <app-mic-button
+                  lang="fr-FR"
+                  fieldName="phoneNumber"
+                  (transcriptReady)="onVoiceInput('phoneNumber', $event.toString())">
+                </app-mic-button>
+              </div>
             </div>
-            @if (isFieldInvalid('phoneNumber')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('phoneNumber', 'Phone number') }}</p> }
+            @if (isFieldInvalid('phoneNumber')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('phoneNumber', 'Phone number') }}</p>
+            }
           </div>
 
+          <!-- Sexe — select, pas de micro -->
           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
             <div>
               <app-label>Sexe <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="sexe">
+              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                             text-gray-800 focus:border-brand-300 focus:outline-none
+                             dark:border-gray-700 dark:text-white/90"
+                formControlName="sexe">
                 <option value="" disabled>Select sexe</option>
                 @for (s of sexeOptions; track s) { <option [value]="s">{{ s }}</option> }
               </select>
-              @if (isFieldInvalid('sexe')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('sexe', 'Sexe') }}</p> }
+              @if (isFieldInvalid('sexe')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('sexe', 'Sexe') }}</p>
+              }
             </div>
-
           </div>
 
+          <!-- Address -->
           <div>
             <app-label>Address <span class="text-error-500">*</span></app-label>
-            <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="address" placeholder="Enter address" />
-            @if (isFieldInvalid('address')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('address', 'Address') }}</p> }
+            <div class="relative">
+              <input
+                class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                type="text"
+                formControlName="address"
+                placeholder="Enter address" />
+              <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                <app-mic-button
+                  lang="fr-FR"
+                  fieldName="address"
+                  (transcriptReady)="onVoiceInput('address', $event.toString())">
+                </app-mic-button>
+              </div>
+            </div>
+            @if (isFieldInvalid('address')) {
+              <p class="mt-1 text-xs text-error-500">{{ getFieldError('address', 'Address') }}</p>
+            }
           </div>
 
+          <!-- Terms checkbox -->
           <div class="flex items-start gap-3">
             <app-checkbox className="w-5 h-5 mt-0.5" [(checked)]="isChecked" />
             <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
@@ -1145,9 +906,11 @@
         </form>
 
       } @else {
+
         <!-- Step 2 -->
         <form [formGroup]="signupForm" class="space-y-6" (ngSubmit)="submitSignUp()">
-          <div class="flex items-center justify-between rounded-xl border border-brand-100 bg-brand-50/60 p-3 dark:border-brand-800 dark:bg-brand-900/20">
+          <div class="flex items-center justify-between rounded-xl border border-brand-100
+                      bg-brand-50/60 p-3 dark:border-brand-800 dark:bg-brand-900/20">
             <div>
               <p class="text-xs uppercase tracking-wide text-brand-500">Selected role</p>
               <p class="text-sm font-semibold text-gray-800 dark:text-white/90">{{ roleTitle }}</p>
@@ -1157,24 +920,33 @@
                      transition hover:bg-brand-100 dark:border-brand-700 dark:text-brand-400">Back</button>
           </div>
 
+          <!-- Profile Image -->
           <div>
             <app-label>Profile Image @if (requiresImage()) { <span class="text-error-500">*</span> }</app-label>
-            <label class="mt-1 flex cursor-pointer items-center justify-between rounded-lg border border-dashed border-brand-300 bg-brand-50/40 px-4 py-3 text-sm text-gray-700 hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-gray-300">
+            <label class="mt-1 flex cursor-pointer items-center justify-between rounded-lg border
+                          border-dashed border-brand-300 bg-brand-50/40 px-4 py-3 text-sm text-gray-700
+                          hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-gray-300">
               <span>{{ profileImageName || 'Upload profile image (JPG/PNG)' }}</span>
-              <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-brand-600 dark:bg-gray-800 dark:text-brand-400">Browse</span>
-              <!-- FIX: uses corrected onImageSelected -->
+              <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-brand-600
+                           dark:bg-gray-800 dark:text-brand-400">Browse</span>
               <input type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
             </label>
           </div>
 
+          <!-- Patient fields -->
           @if (isSelectedRole('patient')) {
             <div>
               <app-label>Primary Doctor <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="primaryDoctor">
+              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                             text-gray-800 focus:border-brand-300 focus:outline-none
+                             dark:border-gray-700 dark:text-white/90"
+                formControlName="primaryDoctor">
                 <option value="" disabled>Select primary doctor</option>
                 @for (d of doctors; track d) { <option [value]="d">{{ d }}</option> }
               </select>
-              @if (isFieldInvalid('primaryDoctor')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('primaryDoctor', 'Primary doctor') }}</p> }
+              @if (isFieldInvalid('primaryDoctor')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('primaryDoctor', 'Primary doctor') }}</p>
+              }
             </div>
 
             <div>
@@ -1182,52 +954,134 @@
               <app-date-picker id="dob-create" placeholder="Select date of birth"
                 [defaultDate]="signupForm.get('dateOfBirth')?.value || undefined"
                 [minDate]="minDateOfBirth" [maxDate]="maxDateOfBirth"
-                [themeClass]="'flatpickr-theme-green'" (dateChange)="onDateOfBirthChange($event)" />
-              @if (isFieldInvalid('dateOfBirth')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('dateOfBirth', 'Date of birth') }}</p> }
+                [themeClass]="'flatpickr-theme-green'"
+                (dateChange)="onDateOfBirthChange($event)" />
+              @if (isFieldInvalid('dateOfBirth')) {
+                <p class="mt-1 text-xs text-error-500">{{ getFieldError('dateOfBirth', 'Date of birth') }}</p>
+              }
             </div>
-
           }
+
+          <!-- Doctor fields -->
           @if (isSelectedRole('doctor')) {
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+              <!-- Specialization -->
               <div>
                 <app-label>Specialization <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="specialization" placeholder="Cardiology…" />
+                <div class="relative">
+                  <input
+                    class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                    type="text"
+                    formControlName="specialization"
+                    placeholder="Cardiology…" />
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <app-mic-button
+                      lang="fr-FR"
+                      fieldName="specialization"
+                      (transcriptReady)="onVoiceInput('specialization', $event.toString())">
+                    </app-mic-button>
+                  </div>
+                </div>
               </div>
+
+              <!-- Grade -->
               <div>
                 <app-label>Grade <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="grade" placeholder="Senior / Junior" />
+                <div class="relative">
+                  <input
+                    class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                    type="text"
+                    formControlName="grade"
+                    placeholder="Senior / Junior" />
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <app-mic-button
+                      lang="fr-FR"
+                      fieldName="grade"
+                      (transcriptReady)="onVoiceInput('grade', $event.toString())">
+                    </app-mic-button>
+                  </div>
+                </div>
               </div>
+
+              <!-- Diploma -->
               <div>
                 <app-label>Diploma <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="text" formControlName="diploma" placeholder="MD, PhD…" />
+                <div class="relative">
+                  <input
+                    class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                    type="text"
+                    formControlName="diploma"
+                    placeholder="MD, PhD…" />
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <app-mic-button
+                      lang="fr-FR"
+                      fieldName="diploma"
+                      (transcriptReady)="onVoiceInput('diploma', $event.toString())">
+                    </app-mic-button>
+                  </div>
+                </div>
               </div>
+
+              <!-- Years of Experience -->
               <div>
                 <app-label>Years of Experience <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 px-4 text-sm" type="number" formControlName="yearsOfExperience" placeholder="0" />
-                @if (isFieldInvalid('yearsOfExperience')) { <p class="mt-1 text-xs text-error-500">{{ getFieldError('yearsOfExperience', 'Years of experience') }}</p> }
+                <div class="relative">
+                  <input
+                    class="h-11 w-full rounded-lg border border-gray-300 px-4 pr-12 text-sm"
+                    type="number"
+                    formControlName="yearsOfExperience"
+                    placeholder="0" />
+                  <div class="absolute right-2 top-1/2 -translate-y-1/2">
+                    <app-mic-button
+                      lang="fr-FR"
+                      fieldName="yearsOfExperience"
+                      (transcriptReady)="onVoiceInput('yearsOfExperience', $event.toString())">
+                    </app-mic-button>
+                  </div>
+                </div>
+                @if (isFieldInvalid('yearsOfExperience')) {
+                  <p class="mt-1 text-xs text-error-500">{{ getFieldError('yearsOfExperience', 'Years of experience') }}</p>
+                }
               </div>
+
+              <!-- Assigned Department (doctor) — select, pas de micro -->
               <div class="sm:col-span-2">
                 <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
-                <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="assignedDepartment">
+                <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                               text-gray-800 focus:border-brand-300 focus:outline-none
+                               dark:border-gray-700 dark:text-white/90"
+                  formControlName="assignedDepartment">
                   <option value="" disabled>Select department</option>
                   @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
                 </select>
               </div>
+
             </div>
           }
+
+          <!-- Nurse / Coordinator fields -->
           @if (isSelectedRole('nurse') || isSelectedRole('coordinator')) {
             <div>
               <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="assignedDepartment">
+              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                             text-gray-800 focus:border-brand-300 focus:outline-none
+                             dark:border-gray-700 dark:text-white/90"
+                formControlName="assignedDepartment">
                 <option value="" disabled>Select department</option>
                 @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
               </select>
             </div>
           }
+
+          <!-- Auditor fields -->
           @if (isSelectedRole('auditor')) {
             <div>
               <app-label>Audit Scope <span class="text-error-500">*</span></app-label>
-              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90" formControlName="auditScope">
+              <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                             text-gray-800 focus:border-brand-300 focus:outline-none
+                             dark:border-gray-700 dark:text-white/90"
+                formControlName="auditScope">
                 <option value="" disabled>Select audit scope</option>
                 @for (sc of auditScopes; track sc) { <option [value]="sc">{{ sc }}</option> }
               </select>
@@ -1246,7 +1100,8 @@
       @if (showAddRoleModal) {
         <div class="fixed inset-0 z-50 flex items-center justify-center">
           <div class="absolute inset-0 bg-black/55 backdrop-blur-md" (click)="closeAddRoleModal()"></div>
-          <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
+          <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6
+                      shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
             <div class="mb-4 flex items-start justify-between">
               <div>
                 <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Add Role</h2>
@@ -1254,20 +1109,28 @@
               </div>
               <button type="button" (click)="closeAddRoleModal()"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200
-                       text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">✕</button>
+                       text-gray-500 transition hover:border-brand-300 hover:text-brand-500
+                       dark:border-gray-700 dark:text-gray-400">✕</button>
             </div>
             <form class="space-y-4" (ngSubmit)="submitAddRole()">
               <div>
                 <app-label>Name <span class="text-error-500">*</span></app-label>
-                <input class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90"
-                  type="text" placeholder="Role name" [(ngModel)]="newRoleName" name="newRoleName" required />
-                @if (addRoleError) { <p class="mt-2 text-sm text-error-500">{{ addRoleError }}</p> }
+                <input class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                              text-gray-800 focus:border-brand-300 focus:outline-none
+                              dark:border-gray-700 dark:text-white/90"
+                  type="text" placeholder="Role name"
+                  [(ngModel)]="newRoleName" name="newRoleName" required />
+                @if (addRoleError) {
+                  <p class="mt-2 text-sm text-error-500">{{ addRoleError }}</p>
+                }
               </div>
               <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" (click)="closeAddRoleModal()"
-                  class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+                  class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium
+                         text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
                 <button type="submit" [disabled]="isAddingRole"
-                  class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50">
+                  class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white
+                         hover:bg-brand-600 disabled:opacity-50">
                   {{ isAddingRole ? 'Saving...' : 'Add' }}
                 </button>
               </div>
@@ -1279,3 +1142,4 @@
     </div>
   </div>
 </div>
+
