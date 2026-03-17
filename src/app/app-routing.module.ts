@@ -25,6 +25,7 @@ import { ResetPasswordComponent } from './shared/components/auth/reset-password/
 import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
 import { AuthGuard } from './services/auth/auth.guard';
 import { RoleManageComponent } from './roles/role-manage/role-manage.component';
+import { SpeechRecognitionService } from './services/speech-recognition.service';
 
 const routes: Routes = [
   {
