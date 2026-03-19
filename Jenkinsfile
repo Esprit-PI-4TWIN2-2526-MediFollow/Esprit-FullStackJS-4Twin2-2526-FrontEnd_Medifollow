@@ -2,7 +2,7 @@
         agent any
 
         tools {
-            nodejs 'nodejs'
+            nodejs 'node'
         }
 
         environment {
