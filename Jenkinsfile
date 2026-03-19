@@ -24,13 +24,13 @@
             }
 
            stage('Test & Coverage') {
-    steps {
-        sh '''
-        export CHROME_BIN=/usr/bin/chromium-browser
-        npm run test:cov
-        '''
-    }
-}
+                 steps {
+                    sh '''
+                    export CHROME_BIN=/usr/bin/chromium
+                    npm run test:cov
+                    '''
+                }
+            }
 
             stage('SonarQube') {
                 steps {
