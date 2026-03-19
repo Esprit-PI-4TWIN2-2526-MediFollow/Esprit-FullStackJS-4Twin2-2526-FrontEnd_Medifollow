@@ -1,6 +1,9 @@
 pipeline {
     agent any
-    
+
+    tools {
+        nodejs 'nodejs-18'
+    }
 
     environment {
         SONAR_TOKEN = credentials('sonar-token')
@@ -27,22 +30,22 @@ pipeline {
         }
 
         stage('SonarQube') {
-    steps {
-        withSonarQubeEnv('SonarQube') {
-            script {
-                def scannerHome = tool 'sonar-scanner'
-                sh """
-                ${scannerHome}/bin/sonar-scanner \
-                -Dsonar.projectKey=MediFollow-Frontend \
-                -Dsonar.sources=src \
-                -Dsonar.host.url=http://localhost:9000 \
-                -Dsonar.login=$SONAR_TOKEN \
-                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
-                """
+            steps {
+                withSonarQubeEnv('SonarQube') {
+                    script {
+                        def scannerHome = tool 'sonar-scanner'
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                        -Dsonar.projectKey=MediFollow-Frontend \
+                        -Dsonar.sources=src \
+                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.login=$SONAR_TOKEN \
+                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+                        """
+                    }
+                }
             }
         }
-    }
-}
 
         stage('Quality Gate') {
             steps {
