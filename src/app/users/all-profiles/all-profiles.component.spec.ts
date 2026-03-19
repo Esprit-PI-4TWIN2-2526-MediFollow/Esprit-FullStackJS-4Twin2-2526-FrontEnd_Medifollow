@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { AllProfilesComponent } from './all-profiles.component';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 describe('AllProfilesComponent', () => {
   let component: AllProfilesComponent;
   let fixture: ComponentFixture<AllProfilesComponent>;
