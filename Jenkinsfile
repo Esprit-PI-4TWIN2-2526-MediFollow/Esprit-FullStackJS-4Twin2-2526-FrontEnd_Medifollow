@@ -27,7 +27,7 @@
                 steps {
                      sh '''
                     export CHROME_BIN=/usr/bin/google-chrome
-                     npm run test:cov
+                     ng test --code-coverage --watch=false --browsers=ChromeHeadless
                      '''
                 }
             }
