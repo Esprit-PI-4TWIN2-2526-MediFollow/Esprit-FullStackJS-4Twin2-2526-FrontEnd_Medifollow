@@ -26,7 +26,7 @@
            stage('Test & Coverage') {
                 steps {
                      sh '''
-                    export CHROME_BIN=/usr/bin/chromium-browser
+                    export CHROME_BIN=/usr/bin/google-chrome
                      npm run test:cov
                      '''
                 }
