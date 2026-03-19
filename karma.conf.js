@@ -10,13 +10,7 @@ module.exports = function (config) {
       require('@angular-devkit/build-angular/plugins/karma')
     ],
     client: {
-      jasmine: {
-        // options
-      },
       clearContext: false
-    },
-    jasmineHtmlReporter: {
-      suppressAll: true
     },
     coverageReporter: {
       dir: require('path').join(__dirname, './coverage'),
@@ -27,7 +21,16 @@ module.exports = function (config) {
       ]
     },
     reporters: ['progress', 'kjhtml', 'coverage'],
-    browsers: ['Chrome'],
+
+    browsers: ['ChromeHeadlessNoSandbox'],
+
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-gpu']
+      }
+    },
+
     restartOnFileChange: true
   });
 };
