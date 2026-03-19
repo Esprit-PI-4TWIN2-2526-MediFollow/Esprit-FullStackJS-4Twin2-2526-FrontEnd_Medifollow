@@ -6,6 +6,7 @@
 
         environment {
             SONAR_TOKEN = credentials('sonar-token')
+            CHROME_BIN = '/usr/bin/chromium-browser'
         }
 
         stages {
@@ -22,11 +23,14 @@
                 }
             }
 
-            stage('Test & Coverage') {
-                steps {
-                    sh 'npm run test:cov'
-                }
-            }
+           stage('Test & Coverage') {
+    steps {
+        sh '''
+        export CHROME_BIN=/usr/bin/chromium-browser
+        npm run test:cov
+        '''
+    }
+}
 
             stage('SonarQube') {
                 steps {
