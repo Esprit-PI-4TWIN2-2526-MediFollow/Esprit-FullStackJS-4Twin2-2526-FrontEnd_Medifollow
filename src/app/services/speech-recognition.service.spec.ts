@@ -1,18 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { TestBed } from '@angular/core/testing';
 import { SpeechRecognitionService } from './speech-recognition.service';
 
 describe('SpeechRecognitionService', () => {
   let service: SpeechRecognitionService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [SpeechRecognitionService],
-    }).compile();
-
-    service = module.get<SpeechRecognitionService>(SpeechRecognitionService);
+  beforeEach(() => {
+    TestBed.configureTestingModule({});
+    service = TestBed.inject(SpeechRecognitionService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('should be created', () => {
+    expect(service).toBeTruthy();
   });
 });
