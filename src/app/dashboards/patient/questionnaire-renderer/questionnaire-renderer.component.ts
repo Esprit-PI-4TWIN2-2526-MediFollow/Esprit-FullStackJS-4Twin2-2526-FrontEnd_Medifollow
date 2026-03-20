@@ -105,17 +105,22 @@ export class QuestionnaireRendererComponent implements OnInit {
   // ── Validation ──────────────────────────────────────────
 
   canGoNext(): boolean {
-    const q = this.currentQuestion;
-      // Champ non requis : valide seulement si pas d'erreur sur ce qui est saisi
+  const q = this.currentQuestion;
+  const val = this.answers[q._id!];
+
+  // Champ non requis — valide si pas d'erreur sur ce qui est saisi
   if (!q.required) {
     return this.getFieldError() === '';
   }
-    const val = this.answers[q._id!];
-    if (val === null || val === undefined) return false;
-    if (typeof val === 'string' && val.trim() === '') return false;
-    if (Array.isArray(val) && val.length === 0) return false;
-    return true;
-  }
+
+  // Champ requis — vérifier valeur + erreur
+  if (val === null || val === undefined) return false;
+  if (typeof val === 'string' && val.trim() === '') return false;
+  if (Array.isArray(val) && val.length === 0) return false;
+
+  // ← ajouter la vérification d'erreur pour les champs requis aussi
+  return this.getFieldError() === '';
+}
 
   // ── Navigation ──────────────────────────────────────────
 
@@ -161,20 +166,19 @@ getFieldError(): string {
   const q = this.currentQuestion;
   const val = this.answers[q._id!];
 
-  // Pas encore touché
   if (val === null || val === undefined) return '';
 
   switch (q.type) {
 
     case 'text':
-      if (typeof val === 'string' && val.trim() === '')
-        return 'This field cannot be empty.';
-      if (typeof val === 'string' && val.trim().length < 3)
-        return 'Please enter at least 3 characters.';
+      // ← s'assurer que c'est bien une string
+      if (typeof val !== 'string') return '';
+      if (val.trim() === '') return 'This field cannot be empty.';
+      if (val.trim().length < 3) return 'Please enter at least 3 characters.';
       break;
 
     case 'number':
-      if (val === '') return '';
+      if (val === '' || val === null) return '';
       const num = Number(val);
       if (isNaN(num)) return 'Please enter a valid number.';
       if (q.validation?.min !== undefined && num < q.validation.min)
@@ -184,7 +188,9 @@ getFieldError(): string {
       break;
 
     case 'scale':
+      // ← un nombre est toujours valide pour scale
       if (val === null) return 'Please select a value.';
+      return ''; // ← pas d'autre validation
       break;
 
     case 'single_choice':
@@ -205,6 +211,7 @@ getFieldError(): string {
 
     case 'boolean':
       if (val === null) return 'Please select Yes or No.';
+      return ''; // ← true/false toujours valide
       break;
   }
   return '';
@@ -213,9 +220,17 @@ getFieldError(): string {
 // Indique si le champ a été "touché" (valeur non null)
 isTouched(): boolean {
   const val = this.answers[this.currentQuestion._id!];
+
+  // null/undefined = pas touché
   if (val === null || val === undefined) return false;
+
+  // string vide = pas touché
   if (typeof val === 'string' && val === '') return false;
+
+  // tableau vide = pas touché
   if (Array.isArray(val) && val.length === 0) return false;
+
+  // ← 0, false, et tout autre valeur = touché
   return true;
 }
 

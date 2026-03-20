@@ -44,16 +44,38 @@ export class DashboardQuestionnaireComponent implements OnInit {
     });
   }
 
+// ── Search + Filter ─────────────────────────────────────
+searchTerm = '';
+statusFilter: 'all' | 'active' | 'inactive' = 'all';
+
+get filteredQuestionnaires(): Questionnaire[] {
+  return this.questionnaires.filter(q => {
+    const matchSearch = q.title.toLowerCase()
+      .includes(this.searchTerm.toLowerCase())
+      || q.medicalService.toLowerCase()
+      .includes(this.searchTerm.toLowerCase());
+    const matchStatus =
+      this.statusFilter === 'all'
+      || q.status === this.statusFilter;
+    return matchSearch && matchStatus;
+  });
+}
+
+onSearchInput(event: Event): void {
+  this.searchTerm = (event.target as HTMLInputElement).value;
+  this.currentPage = 1;
+}
+
 // ── Pagination ──────────────────────────────────────────
 
-  get totalPages(): number {
-    return Math.ceil(this.questionnaires.length / this.itemsPerPage);
-  }
-
   get paginatedQuestionnaires(): Questionnaire[] {
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    return this.questionnaires.slice(start, start + this.itemsPerPage);
-  }
+  const start = (this.currentPage - 1) * this.itemsPerPage;
+  return this.filteredQuestionnaires.slice(start, start + this.itemsPerPage);
+}
+
+get totalPages(): number {
+  return Math.ceil(this.filteredQuestionnaires.length / this.itemsPerPage);
+}
 
   get totalPagesArray(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i + 1);
