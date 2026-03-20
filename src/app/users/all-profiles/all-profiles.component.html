@@ -960,6 +960,17 @@
                 <p class="mt-1 text-xs text-error-500">{{ getFieldError('dateOfBirth', 'Date of birth') }}</p>
               }
             </div>
+            <!-- Assigned Department (doctor) — select, pas de micro -->
+              <div class="sm:col-span-2">
+                <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
+                <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
+                               text-gray-800 focus:border-brand-300 focus:outline-none
+                               dark:border-gray-700 dark:text-white/90"
+                  formControlName="assignedDepartment">
+                  <option value="" disabled>Select department</option>
+                  @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
+                </select>
+              </div>
           }
 
           <!-- Doctor fields -->
