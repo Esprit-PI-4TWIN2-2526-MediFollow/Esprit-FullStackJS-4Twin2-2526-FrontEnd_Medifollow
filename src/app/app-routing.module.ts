@@ -30,14 +30,8 @@ import { SpeechRecognitionService } from './services/speech-recognition.service'
 const routes: Routes = [
 
 
-  // les path te3 les modules
-  { path: 'auditor', loadChildren: () => import('./dashboards/auditor/auditor.module').then(m => m.AuditorModule) },
-  { path: 'coordinator', loadChildren: () => import('./dashboards/coordinator/coordinator.module').then(m => m.CoordinatorModule) },
- { path: 'nurse', loadChildren: () => import('./dashboards/nurse/nurse.module').then(m => m.NurseModule) },
- { path: 'patient', loadChildren: () => import('./dashboards/patient/patient.module').then(m => m.PatientModule) },
- { path: 'physician', loadChildren: () => import('./dashboards/physician/physician.module').then(m => m.PhysicianModule) },
- { path: 'super-admin', loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule) },
-   {path: 'signin',
+
+ {path: 'signin',
     component: SignInComponent,
     title: 'MediFollow - Connexion'
   },
@@ -70,8 +64,20 @@ const routes: Routes = [
       {
         path: 'dashboard',
         component: EcommerceComponent,
-        title: 'MediFollow - Tableau de bord',
+        title: 'MediFollow - Dashboard',
       },
+
+       // les path te3 les modules
+      //actors
+      { path: 'auditor', loadChildren: () => import('./dashboards/auditor/auditor.module').then(m => m.AuditorModule) },
+      { path: 'coordinator', loadChildren: () => import('./dashboards/coordinator/coordinator.module').then(m => m.CoordinatorModule) },
+      { path: 'nurse', loadChildren: () => import('./dashboards/nurse/nurse.module').then(m => m.NurseModule) },
+      { path: 'patient', loadChildren: () => import('./dashboards/patient/patient.module').then(m => m.PatientModule) },
+      { path: 'physician', loadChildren: () => import('./dashboards/physician/physician.module').then(m => m.PhysicianModule) },
+      { path: 'super-admin', loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule) },
+      //questionnaire
+      { path: 'questionnaire', loadChildren: () => import('./questionnaire/questionnaire.module').then(m => m.QuestionnaireModule) },
+
       {
         path: 'getAllUsers',
         component: AllProfilesComponent,

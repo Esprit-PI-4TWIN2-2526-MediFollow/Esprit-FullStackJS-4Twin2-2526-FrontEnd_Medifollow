@@ -50,6 +50,11 @@ export class UsersService {
     return this.http.get<Users>(`${this.apiUrl}/users/email/${email}`);
   }
 
+  //get user by role
+  getUserByRole(role: string) {
+    return this.http.get<Users[]>(`${this.apiUrl}/users/role/${role}`);
+  }
+
   //update user avec image
   updateUser(id: string, user: Partial<Users>, avatarFile?: File) {
     const formData = new FormData();

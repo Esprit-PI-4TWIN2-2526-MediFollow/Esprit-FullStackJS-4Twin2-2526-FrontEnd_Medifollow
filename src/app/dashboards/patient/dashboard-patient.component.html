@@ -1,1 +1,197 @@
-<p>dashboard-patient works!</p>
+<div class="mb-6 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 py-4 text-white lg:px-6 lg:py-5">
+    <h4 class="text-xl font-semibold lg:text-2xl">
+      Welcome back, {{ getWelcomeName() }}
+    </h4>
+    <p class="mt-1 text-sm text-white/80 lg:text-base">
+      Here's your Dashboard overview .
+    </p>
+    <div class="mt-4 inline-flex items-center gap-2 text-sm text-white/90">
+      <svg
+        class="h-4 w-4"
+        viewBox="0 0 20 20"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6.66667 1.66666V4.16666M13.3333 1.66666V4.16666M2.91667 7.57499H17.0833M5.83333 10.8333H5.84167M10 10.8333H10.0083M14.1667 10.8333H14.175M5.83333 14.1667H5.84167M10 14.1667H10.0083M14.1667 14.1667H14.175M5.33333 18.3333H14.6667C16.0668 18.3333 16.7669 18.3333 17.3016 18.0608C17.772 17.8211 18.1545 17.4387 18.3942 16.9682C18.6667 16.4336 18.6667 15.7335 18.6667 14.3333V7.16666C18.6667 5.76652 18.6667 5.06646 18.3942 4.53168C18.1545 4.06128 17.772 3.67882 17.3016 3.43914C16.7669 3.16666 16.0668 3.16666 14.6667 3.16666H5.33333C3.9332 3.16666 3.23314 3.16666 2.69836 3.43914C2.22795 3.67882 1.8455 4.06128 1.60582 4.53168C1.33333 5.06646 1.33333 5.76652 1.33333 7.16666V14.3333C1.33333 15.7335 1.33333 16.4336 1.60582 16.9682C1.8455 17.4387 2.22795 17.8211 2.69836 18.0608C3.23314 18.3333 3.9332 18.3333 5.33333 18.3333Z"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        />
+      </svg>
+      <span>{{ today | date: 'EEEE, MMMM d, y' }}</span>
+    </div>
+  </div>
+
+<!-- ── Medical Questionnaires ──────────────────────────── -->
+<div class="mt-6">
+  <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
+    Medical Questionnaires
+  </h3>
+
+  <!-- Loading -->
+  <div *ngIf="isLoadingQuestionnaires"
+       class="flex items-center justify-center gap-3 py-10 text-gray-400">
+    <svg class="h-6 w-6 animate-spin text-brand-500"
+         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10"
+              stroke="currentColor" stroke-width="4"/>
+      <path class="opacity-75" fill="currentColor"
+            d="M4 12a8 8 0 018-8v8z"/>
+    </svg>
+    <span class="text-sm">Loading questionnaires...</span>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!isLoadingQuestionnaires && questionnaires.length === 0"
+       class="rounded-2xl border border-dashed border-gray-200 bg-white
+              px-6 py-12 text-center dark:border-white/[0.06]
+              dark:bg-white/[0.03]">
+    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center
+                rounded-full bg-brand-50 text-brand-500
+                dark:bg-brand-500/10 dark:text-brand-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
+                 a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19
+                 a2 2 0 01-2 2z"/>
+      </svg>
+    </div>
+    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+      No questionnaires available
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      No questionnaires are assigned to your medical service at the moment.
+    </p>
+  </div>
+
+  <!-- Cards -->
+  <div *ngIf="!isLoadingQuestionnaires && questionnaires.length > 0"
+       class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+    <div *ngFor="let q of questionnaires"
+         class="relative flex flex-col rounded-2xl border border-gray-200
+                bg-white p-5 shadow-theme-xs transition
+                hover:border-brand-200 hover:shadow-md
+                dark:border-white/[0.05] dark:bg-white/[0.03]
+                dark:hover:border-brand-800">
+
+      <!-- Completed badge -->
+      <div *ngIf="isCompleted(q._id!)"
+           class="absolute right-4 top-4 inline-flex items-center gap-1
+                  rounded-full border border-success-200 bg-success-50
+                  px-2.5 py-1 text-xs font-medium text-success-600
+                  dark:border-success-800 dark:bg-success-900/20
+                  dark:text-success-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Completed
+      </div>
+
+     <!-- Icon + Title -->
+<div class="mb-3 flex items-start gap-3">
+  <div class="flex h-10 w-10 shrink-0 items-center justify-center
+              rounded-xl bg-brand-50 text-brand-500
+              dark:bg-brand-900/30 dark:text-brand-400">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+         viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.8" stroke-linecap="round"
+         stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0
+               002-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+  </div>
+  <div class="flex-1 min-w-0">
+
+    <!-- Titre + badge sur la même ligne -->
+    <div class="flex items-start justify-between gap-2">
+      <h3 class="text-sm font-semibold text-gray-800
+                 dark:text-white/90 leading-snug">
+        {{ q.title }}
+      </h3>
+
+      <!-- Completed badge — inline, plus en absolute -->
+      <div *ngIf="isCompleted(q._id!)"
+           class="inline-flex shrink-0 items-center gap-1
+                  rounded-full border border-success-200 bg-success-50
+                  px-2.5 py-1 text-xs font-medium text-success-600
+                  dark:border-success-800 dark:bg-success-900/20
+                  dark:text-success-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2.5" stroke-linecap="round"
+             stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Completed
+      </div>
+    </div>
+
+    <p *ngIf="q.description"
+       class="mt-0.5 text-xs text-gray-500 dark:text-gray-400
+              line-clamp-2">
+      {{ q.description }}
+    </p>
+  </div>
+</div>
+
+      <!-- Meta -->
+      <div class="mb-4 flex items-center gap-4 text-xs text-gray-400
+                  dark:text-gray-500">
+        <span class="flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0
+                     002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          {{ q.questions.length }} questions
+        </span>
+        <span class="flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          {{ estimateTime(q.questions.length) }}
+        </span>
+      </div>
+
+      <!-- CTA -->
+      <div class="mt-auto">
+        <button *ngIf="!isCompleted(q._id!)"
+          (click)="startQuestionnaire(q._id!)"
+          class="flex w-full items-center justify-center rounded-xl
+                 bg-brand-500 px-4 py-3 text-sm font-semibold text-white
+                 transition hover:bg-brand-600 active:scale-[0.98]">
+          Start Questionnaire
+        </button>
+
+        <button *ngIf="isCompleted(q._id!)"
+          disabled
+          class="flex w-full items-center justify-center rounded-xl
+                 border border-gray-200 bg-gray-100 px-4 py-3 text-sm
+                 font-medium text-gray-400 cursor-not-allowed
+                 dark:border-gray-700 dark:bg-gray-800/50
+                 dark:text-gray-500">
+          Questionnaire completed
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

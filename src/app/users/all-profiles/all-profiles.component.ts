@@ -103,8 +103,8 @@ export class AllProfilesComponent implements OnInit {
 
 
 
-  departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'Emergency'];
-  doctors = ['Dr. Ahmed Ben Ali', 'Dr. Salma Trabelsi', 'Dr. Youssef Gharbi', 'Dr. Ines Jaziri'];
+  departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'General Medicine', 'Orthopedics', 'Dermatology', 'Psychiatry', 'Radiology', 'Surgery'];
+  doctors: string[] = [];
   auditScopes = ['Logs', 'Data', 'Full Access'];
   sexeOptions = ['Male', 'Female'];
   countryOptions = [
@@ -166,10 +166,25 @@ export class AllProfilesComponent implements OnInit {
     this.usersService.getUsers().subscribe({
       next: (res: Users[]) => {
         this.users = res;
+        this.doctors = this.extractDoctorNames(res);
+        console.log('Doctors extracted:', this.doctors);
         this.sanitizeSelectedUsers();
       },
       error: (err) => console.error(err),
     });
+  }
+
+  private extractDoctorNames(users: Users[]): string[] {
+    return (users || [])
+      .filter((user) => this.isRoleType(user.role, 'doctor'))
+      .map((doctor) => this.getUserFullName(doctor))
+      .filter((name) => !!name);
+  }
+
+  private getUserFullName(user: Users): string {
+    const firstName = String((user as any)?.firstName ?? (user as any)?.firstname ?? '').trim();
+    const lastName = String((user as any)?.lastName ?? (user as any)?.lastname ?? '').trim();
+    return `${firstName} ${lastName}`.trim();
   }
 
   get totalPages(): number {

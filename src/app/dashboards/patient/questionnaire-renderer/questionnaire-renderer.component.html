@@ -1,0 +1,413 @@
+<div class="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 sm:p-6">
+  <div class="mx-auto max-w-2xl">
+
+    <!-- ── Loading ──────────────────────────────────────── -->
+    <div *ngIf="isLoading"
+         class="flex flex-col items-center justify-center gap-3 py-24">
+      <svg class="h-8 w-8 animate-spin text-brand-500"
+           xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10"
+                stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v8z"/>
+      </svg>
+      <span class="text-sm text-gray-400">Loading...</span>
+    </div>
+
+    <!-- ── Success ───────────────────────────────────────── -->
+    <div *ngIf="isSubmitted"
+         class="flex flex-col items-center justify-center gap-4 py-24
+                text-center">
+      <div class="flex h-20 w-20 items-center justify-center rounded-full
+                  bg-brand-50 text-brand-500
+                  dark:bg-brand-900/30 dark:text-brand-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-gray-800 dark:text-white/90">
+        Questionnaire submitted!
+      </h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Your answers have been successfully sent to your doctor.
+      </p>
+      <button (click)="goBack()"
+        class="mt-2 inline-flex h-11 items-center justify-center rounded-xl
+               bg-brand-500 px-6 text-sm font-medium text-white
+               transition hover:bg-brand-600">
+        Back to dashboard
+      </button>
+    </div>
+
+    <!-- ── Main ─────────────────────────────────────────── -->
+    <div *ngIf="!isLoading && !isSubmitted && questionnaire">
+
+      <!-- Back + Header -->
+      <div class="mb-6">
+        <button (click)="goBack()"
+          class="mb-4 flex items-center gap-2 text-sm text-gray-500
+                 transition hover:text-brand-500
+                 dark:text-gray-400 dark:hover:text-brand-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+               viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Back to dashboard
+        </button>
+
+        <div class="flex items-center gap-3">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center
+                      rounded-xl bg-brand-50 text-brand-500
+                      dark:bg-brand-900/30 dark:text-brand-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round"
+                 stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0
+                       002-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <polyline points="10 9 9 9 8 9"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-semibold text-gray-800
+                       dark:text-white/90">
+              {{ questionnaire.title }}
+            </h1>
+            <p *ngIf="questionnaire.description"
+               class="text-sm text-gray-500 dark:text-gray-400">
+              {{ questionnaire.description }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="mb-4 rounded-2xl border border-gray-200 bg-white p-4
+                  dark:border-white/[0.05] dark:bg-white/[0.03]">
+        <div class="mb-2 flex items-center justify-between text-sm">
+          <span class="text-gray-500 dark:text-gray-400">
+            Question {{ currentIndex + 1 }} of {{ totalQuestions }}
+          </span>
+          <span class="font-semibold text-brand-500">
+            {{ progressPercent }}%
+          </span>
+        </div>
+        <div class="h-2 w-full overflow-hidden rounded-full
+                    bg-gray-100 dark:bg-gray-800">
+          <div class="h-full rounded-full bg-brand-500 transition-all
+                      duration-300"
+               [style.width.%]="progressPercent">
+          </div>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="errorMessage"
+           class="mb-4 rounded-lg border border-error-200 bg-error-50
+                  px-4 py-3 text-sm text-error-600
+                  dark:border-error-800 dark:bg-error-900/20
+                  dark:text-error-400">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Question card -->
+      <div class="rounded-2xl border border-gray-200 bg-white p-6
+                  dark:border-white/[0.05] dark:bg-white/[0.03]">
+
+        <!-- Label -->
+        <p class="mb-5 text-base font-semibold text-gray-800
+                  dark:text-white/90">
+          {{ currentQuestion.label }}
+          <span *ngIf="currentQuestion.required"
+                class="ml-1 text-error-500">*</span>
+        </p>
+
+        <!-- TEXT -->
+       <ng-container *ngIf="currentQuestion.type === 'text'">
+  <textarea
+    [(ngModel)]="answers[currentQuestion._id!]"
+    rows="4"
+    placeholder="Your answer..."
+    class="w-full rounded-xl border px-4 py-3 text-sm text-gray-700
+           placeholder:text-gray-400 focus:outline-none
+           focus:ring-3 focus:ring-brand-500/10
+           dark:text-gray-200 resize-none transition"
+    [ngClass]="isTouched() && getFieldError()
+      ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+      : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'">
+  </textarea>
+  <div class="mt-1.5 flex items-center justify-between text-xs">
+    <span *ngIf="isTouched() && getFieldError()"
+          class="text-error-500">
+      {{ getFieldError() }}
+    </span>
+    <span *ngIf="!getFieldError()" class="text-gray-400">
+      Minimum 3 characters
+    </span>
+    <span class="ml-auto"
+          [ngClass]="isTouched() && getFieldError()
+            ? 'text-error-500'
+            : 'text-gray-400'">
+      {{ answers[currentQuestion._id!]?.length || 0 }} chars
+    </span>
+  </div>
+</ng-container>
+
+        <!-- NUMBER -->
+        <ng-container *ngIf="currentQuestion.type === 'number'">
+  <input
+    [(ngModel)]="answers[currentQuestion._id!]"
+    type="number"
+    [min]="currentQuestion.validation?.min ?? null"
+    [max]="currentQuestion.validation?.max ?? null"
+    placeholder="Enter a number..."
+    class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
+           placeholder:text-gray-400 focus:outline-none
+           focus:ring-3 focus:ring-brand-500/10
+           dark:text-gray-200 transition"
+    [ngClass]="isTouched() && getFieldError()
+      ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+      : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'" />
+  <div class="mt-1.5 flex items-center justify-between text-xs">
+    <span *ngIf="isTouched() && getFieldError()"
+          class="text-error-500">
+      {{ getFieldError() }}
+    </span>
+    <span *ngIf="!getFieldError() && currentQuestion.validation?.min !== undefined"
+          class="text-gray-400">
+      Accepted range:
+      {{ currentQuestion.validation?.min }} → {{ currentQuestion.validation?.max }}
+    </span>
+    <span *ngIf="isTouched() && !getFieldError()"
+          class="ml-auto font-medium text-brand-500">
+      {{ answers[currentQuestion._id!] }}
+    </span>
+  </div>
+</ng-container>
+
+        <!-- DATE -->
+        <ng-container *ngIf="currentQuestion.type === 'date'">
+  <input
+    [(ngModel)]="answers[currentQuestion._id!]"
+    type="date"
+    class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
+           focus:outline-none focus:ring-3 focus:ring-brand-500/10
+           dark:text-gray-200 transition"
+    [ngClass]="isTouched() && getFieldError()
+      ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+      : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'" />
+  <p *ngIf="isTouched() && getFieldError()"
+     class="mt-1.5 text-xs text-error-500">
+    {{ getFieldError() }}
+  </p>
+  <p *ngIf="!getFieldError()"
+     class="mt-1.5 text-xs text-gray-400">
+    Date cannot be in the future.
+  </p>
+</ng-container>
+
+        <!-- BOOLEAN -->
+  <ng-container *ngIf="currentQuestion.type === 'boolean'">
+  <div class="flex flex-col gap-3">
+    <button *ngFor="let opt of ['Yes', 'No']"
+      (click)="answers[currentQuestion._id!] = (opt === 'Yes')"
+      class="flex items-center gap-3 rounded-xl border px-4
+             py-3.5 text-sm text-left transition"
+      [ngClass]="answers[currentQuestion._id!] === (opt === 'Yes')
+        && answers[currentQuestion._id!] !== null
+        ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
+        : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
+      <span class="inline-flex h-5 w-5 shrink-0 items-center
+                   justify-center rounded-full border-2"
+        [ngClass]="answers[currentQuestion._id!] === (opt === 'Yes')
+          && answers[currentQuestion._id!] !== null
+          ? 'border-brand-500 bg-brand-500'
+          : 'border-gray-300'">
+        <span *ngIf="answers[currentQuestion._id!] === (opt === 'Yes')
+                     && answers[currentQuestion._id!] !== null"
+              class="h-2 w-2 rounded-full bg-white">
+        </span>
+      </span>
+      {{ opt }}
+    </button>
+  </div>
+  <p *ngIf="currentQuestion.required
+            && answers[currentQuestion._id!] === null"
+     class="mt-2 text-xs text-gray-400">
+    Please select an option to continue.
+  </p>
+</ng-container>
+
+        <!-- SINGLE CHOICE -->
+       <ng-container *ngIf="currentQuestion.type === 'single_choice'">
+  <div class="flex flex-col gap-3">
+    <button *ngFor="let opt of currentQuestion.options"
+      (click)="answers[currentQuestion._id!] = opt"
+      class="flex items-center gap-3 rounded-xl border px-4
+             py-3.5 text-sm text-left transition"
+      [ngClass]="answers[currentQuestion._id!] === opt
+        ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
+        : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
+      <span class="inline-flex h-5 w-5 shrink-0 items-center
+                   justify-center rounded-full border-2"
+        [ngClass]="answers[currentQuestion._id!] === opt
+          ? 'border-brand-500 bg-brand-500'
+          : 'border-gray-300'">
+        <span *ngIf="answers[currentQuestion._id!] === opt"
+              class="h-2 w-2 rounded-full bg-white">
+        </span>
+      </span>
+      {{ opt }}
+    </button>
+  </div>
+  <p *ngIf="currentQuestion.required
+            && !answers[currentQuestion._id!]"
+     class="mt-2 text-xs text-gray-400">
+    Please select an option to continue.
+  </p>
+</ng-container>
+
+        <!-- MULTIPLE CHOICE -->
+       <ng-container *ngIf="currentQuestion.type === 'multiple_choice'">
+  <div class="flex flex-col gap-3">
+    <button *ngFor="let opt of currentQuestion.options"
+      (click)="onMultipleChoiceToggle(opt)"
+      class="flex items-center gap-3 rounded-xl border px-4
+             py-3.5 text-sm text-left transition"
+      [ngClass]="isOptionChecked(opt)
+        ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
+        : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
+      <span class="inline-flex h-5 w-5 shrink-0 items-center
+                   justify-center rounded-lg border-2"
+        [ngClass]="isOptionChecked(opt)
+          ? 'border-brand-500 bg-brand-500'
+          : 'border-gray-300'">
+        <svg *ngIf="isOptionChecked(opt)"
+             xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+             viewBox="0 0 24 24" fill="none" stroke="white"
+             stroke-width="3" stroke-linecap="round"
+             stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+      </span>
+      {{ opt }}
+    </button>
+  </div>
+  <div class="mt-2 flex items-center justify-between text-xs">
+    <p *ngIf="currentQuestion.required
+              && answers[currentQuestion._id!]?.length === 0"
+       class="text-gray-400">
+      Please select at least one option to continue.
+    </p>
+    <span *ngIf="answers[currentQuestion._id!]?.length > 0"
+          class="ml-auto font-medium text-brand-500">
+      {{ answers[currentQuestion._id!]?.length }} selected
+    </span>
+  </div>
+</ng-container>
+
+        <!-- SCALE -->
+        <ng-container *ngIf="currentQuestion.type === 'scale'">
+  <div class="flex flex-wrap gap-2">
+    <button *ngFor="let n of scaleValues"
+      (click)="onScaleSelect(n)"
+      class="flex h-11 w-11 items-center justify-center rounded-xl
+             border text-sm font-medium transition"
+      [ngClass]="isScaleSelected(n)
+        ? 'border-brand-500 bg-brand-500 text-white'
+        : 'border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:bg-transparent dark:text-gray-400'">
+      {{ n }}
+    </button>
+  </div>
+  <div class="mt-2 flex justify-between text-xs text-gray-400">
+    <span>Low</span>
+    <span *ngIf="isScaleSelected(answers[currentQuestion._id!])"
+          class="font-medium text-brand-500">
+      Selected: {{ answers[currentQuestion._id!] }}
+    </span>
+    <span>High</span>
+  </div>
+  <p *ngIf="currentQuestion.required
+            && answers[currentQuestion._id!] === null"
+     class="mt-1.5 text-xs text-gray-400">
+    Please select a value to continue.
+  </p>
+</ng-container>
+
+      </div>
+
+      <!-- Notes — last question only -->
+      <div *ngIf="isLastQuestion" class="mt-4">
+        <label class="mb-1.5 block text-sm font-medium text-gray-700
+                      dark:text-gray-300">
+          Additional notes
+          <span class="text-gray-400">(optional)</span>
+        </label>
+        <textarea
+          [(ngModel)]="notes"
+          rows="3"
+          placeholder="Add any additional information for your doctor..."
+          class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3
+                 text-sm text-gray-700 placeholder:text-gray-400
+                 focus:border-brand-300 focus:outline-none
+                 focus:ring-3 focus:ring-brand-500/10
+                 dark:border-gray-700 dark:bg-white/[0.03]
+                 dark:text-gray-200 resize-none">
+        </textarea>
+      </div>
+
+      <!-- Navigation -->
+      <div class="mt-4 flex items-center justify-between">
+
+        <button (click)="previous()"
+          [disabled]="isFirstQuestion"
+          class="inline-flex h-11 items-center justify-center rounded-xl
+                 border border-gray-200 bg-white px-5 text-sm font-medium
+                 text-gray-600 transition hover:bg-gray-50
+                 disabled:cursor-not-allowed disabled:opacity-40
+                 dark:border-gray-700 dark:bg-transparent
+                 dark:text-gray-400">
+          Previous
+        </button>
+
+        <!-- Next -->
+        <button *ngIf="!isLastQuestion"
+          (click)="next()"
+          [disabled]="!canGoNext()"
+          class="inline-flex h-11 items-center justify-center rounded-xl
+                 bg-brand-500 px-6 text-sm font-medium text-white
+                 transition hover:bg-brand-600
+                 disabled:cursor-not-allowed disabled:opacity-40">
+          Next
+        </button>
+
+        <!-- Submit -->
+        <button *ngIf="isLastQuestion"
+          (click)="submit()"
+          [disabled]="!canGoNext() || isSubmitting"
+          class="inline-flex h-11 items-center justify-center gap-2
+                 rounded-xl bg-brand-500 px-6 text-sm font-medium text-white
+                 transition hover:bg-brand-600
+                 disabled:cursor-not-allowed disabled:opacity-40">
+          <svg *ngIf="isSubmitting"
+               class="animate-spin" xmlns="http://www.w3.org/2000/svg"
+               width="15" height="15" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10"
+                    stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"/>
+          </svg>
+          {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+</div>
