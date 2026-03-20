@@ -25,6 +25,8 @@ export interface QuestionnaireResponsePopulated {
     firstName: string;
     lastName: string;
     email: string;
+    avatarUrl?: string;
+    profileImageName?: string;
   };
   answers: Answer[];
   notes?: string;
