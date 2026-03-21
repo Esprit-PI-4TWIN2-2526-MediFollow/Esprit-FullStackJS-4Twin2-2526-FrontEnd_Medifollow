@@ -112,6 +112,7 @@ import { FirstLoginChangePasswordComponent } from './shared/components/auth/firs
 import { provideHttpClient } from '@angular/common/http';
 import { RoleManageComponent } from './roles/role-manage/role-manage.component';
 import { MicButtonComponent } from './users/mic-button/mic-button.component';
+import { ManageServiceComponent } from './manage-service/manage-service.component';
 
 
 
@@ -220,6 +221,7 @@ import { MicButtonComponent } from './users/mic-button/mic-button.component';
     MicButtonComponent,
     FirstLoginChangePasswordComponent,
     RoleManageComponent,
+    ManageServiceComponent,
 
 
   ],

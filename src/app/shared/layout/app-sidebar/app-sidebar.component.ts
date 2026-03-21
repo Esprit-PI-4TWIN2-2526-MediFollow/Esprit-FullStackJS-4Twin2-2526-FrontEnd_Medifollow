@@ -56,6 +56,13 @@ export class AppSidebarComponent {
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M3 3.75C3 2.50736 4.00736 1.5 5.25 1.5H18.75C19.9926 1.5 21 2.50736 21 3.75V22.5H16.5V18.75C16.5 17.5074 15.4926 16.5 14.25 16.5H9.75C8.50736 16.5 7.5 17.5074 7.5 18.75V22.5H3V3.75ZM4.5 3.75V21H6V18.75C6 16.6789 7.67893 15 9.75 15H14.25C16.3211 15 18 16.6789 18 18.75V21H19.5V3.75C19.5 3.33579 19.1642 3 18.75 3H5.25C4.83579 3 4.5 3.33579 4.5 3.75ZM9 18.75V21H15V18.75C15 18.3358 14.6642 18 14.25 18H9.75C9.33579 18 9 18.3358 9 18.75ZM11.25 6C11.25 5.58579 11.5858 5.25 12 5.25C12.4142 5.25 12.75 5.58579 12.75 6V7.5H14.25C14.6642 7.5 15 7.83579 15 8.25C15 8.66421 14.6642 9 14.25 9H12.75V10.5C12.75 10.9142 12.4142 11.25 12 11.25C11.5858 11.25 11.25 10.9142 11.25 10.5V9H9.75C9.33579 9 9 8.66421 9 8.25C9 7.83579 9.33579 7.5 9.75 7.5H11.25V6Z" fill="currentColor"/>
+  </svg>`,
+      name: "Manage Services",
+      path: "/services",
+    },
+    {
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M8 3.75H16C17.7949 3.75 19.25 5.20507 19.25 7V17C19.25 18.7949 17.7949 20.25 16 20.25H8C6.20507 20.25 4.75 18.7949 4.75 17V7C4.75 5.20507 6.20507 3.75 8 3.75Z" stroke="currentColor" stroke-width="1.5"/>
   <path d="M8 8.5H9.5V10H8V8.5Z" fill="currentColor"/>
   <path d="M11 9.25H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -66,7 +73,8 @@ export class AppSidebarComponent {
 </svg>`,
       name: "Manage Questionnaires",
       path: "/questionnaire",
-    }
+    },
+
 
 
     // {

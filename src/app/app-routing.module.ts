@@ -26,12 +26,14 @@ import { FirstLoginChangePasswordComponent } from './shared/components/auth/firs
 import { AuthGuard } from './services/auth/auth.guard';
 import { RoleManageComponent } from './roles/role-manage/role-manage.component';
 import { SpeechRecognitionService } from './services/speech-recognition.service';
+import { ManageServiceComponent } from './manage-service/manage-service.component';
 
 const routes: Routes = [
 
 
 
- {path: 'signin',
+  {
+    path: 'signin',
     component: SignInComponent,
     title: 'MediFollow - Connexion'
   },
@@ -67,7 +69,7 @@ const routes: Routes = [
         title: 'MediFollow - Dashboard',
       },
 
-       // les path te3 les modules
+      // les path te3 les modules
       //actors
       { path: 'auditor', loadChildren: () => import('./dashboards/auditor/auditor.module').then(m => m.AuditorModule) },
       { path: 'coordinator', loadChildren: () => import('./dashboards/coordinator/coordinator.module').then(m => m.CoordinatorModule) },
@@ -77,6 +79,13 @@ const routes: Routes = [
       { path: 'super-admin', loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule) },
       //questionnaire
       { path: 'questionnaire', loadChildren: () => import('./questionnaire/questionnaire.module').then(m => m.QuestionnaireModule) },
+
+      //services
+      {
+        path: 'services',
+        component: ManageServiceComponent,
+        title: 'MediFollow - Tous les services '
+      },
 
       {
         path: 'getAllUsers',
