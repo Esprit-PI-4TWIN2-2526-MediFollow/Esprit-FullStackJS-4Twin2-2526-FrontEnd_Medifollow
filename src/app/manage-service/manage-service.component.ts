@@ -20,30 +20,27 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   private svc = inject(ServiceManagementService);
   private fb = inject(FormBuilder);
 
-  // ── State ──────────────────────────────────────────
-  services          = signal<Service[]>([]);
-  loading           = signal(false);
-  error             = signal<string | null>(null);
-  searchQuery       = signal('');
-  filterStatus      = signal<FilterStatus>('ALL');
-  viewMode          = signal<ViewMode>('grid');
-  selectedService   = signal<Service | null>(null);
-  showModal         = signal(false);
-  modalMode         = signal<'create' | 'edit' | 'view'>('create');
-  showDeleteConfirm = signal(false);
-  serviceToDelete   = signal<string | null>(null);
-  toastMessage      = signal<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // ── Step state ─────────────────────────────────────
+  services = signal<Service[]>([]);
+  loading = signal(false);
+  error = signal<string | null>(null);
+  searchQuery = signal('');
+  filterStatus = signal<FilterStatus>('ALL');
+  viewMode = signal<ViewMode>('grid');
+  selectedService = signal<Service | null>(null);
+  showModal = signal(false);
+  modalMode = signal<'create' | 'edit' | 'view'>('create');
+  showDeleteConfirm = signal(false);
+  serviceToDelete = signal<string | null>(null);
+  toastMessage = signal<{ text: string; type: 'success' | 'error' } | null>(null);
+
   currentStep = signal<1 | 2 | 3>(1);
 
-  // ── AI state ───────────────────────────────────────
-  showAiModal   = signal(false);
+  showAiModal = signal(false);
   aiDescription = signal('');
-  aiLoading     = signal(false);
-  aiError       = signal<string | null>(null);
+  aiLoading = signal(false);
+  aiError = signal<string | null>(null);
 
-  // ── Computed ───────────────────────────────────────
   filteredServices = computed(() => {
     let list = this.services();
     const q = this.searchQuery().toLowerCase();
@@ -63,8 +60,8 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   stats = computed(() => {
     const all = this.services();
     return {
-      total:    all.length,
-      active:   all.filter(s => s.statut === 'ACTIF').length,
+      total: all.length,
+      active: all.filter(s => s.statut === 'ACTIF').length,
       inactive: all.filter(s => s.statut === 'INACTIF').length,
       emergency: all.filter(s => s.estUrgence).length,
     };
@@ -72,8 +69,8 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
 
   form!: FormGroup;
 
-  readonly SERVICE_TYPES = ['Medical','Emergency','Consultation','Surgery','Laboratory','Radiology','Pharmacy','Administrative'];
-  readonly DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  readonly SERVICE_TYPES = ['Medical', 'Emergency', 'Consultation', 'Surgery', 'Laboratory', 'Radiology', 'Pharmacy', 'Administrative'];
+  readonly DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   ngOnInit(): void {
     this.initForm();
@@ -85,21 +82,20 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Form ───────────────────────────────────────────
   initForm(): void {
     this.form = this.fb.group({
-      nom:               ['', [Validators.required, Validators.minLength(2)]],
-      description:       [''],
-      localisation:      [''],
-      type:              [''],
-      telephone:         [''],
-      email:             ['', Validators.email],
-      capacite:          [0, Validators.min(0)],
-      statut:            ['ACTIF'],
+      nom: ['', [Validators.required, Validators.minLength(2)]],
+      description: [''],
+      localisation: [''],
+      type: [''],
+      telephone: [''],
+      email: ['', Validators.email],
+      capacite: [0, Validators.min(0)],
+      statut: ['ACTIF'],
       tempsAttenteMoyen: [0, Validators.min(0)],
-      estUrgence:        [false],
-      responsableId:     [''],
-      horaires:          this.fb.array([]),
+      estUrgence: [false],
+      responsableId: [''],
+      horaires: this.fb.array([]),
     });
   }
 
@@ -128,21 +124,20 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
 
     switch (type) {
       case 'weekdays':
-        days(['Monday','Tuesday','Wednesday','Thursday','Friday'], '08:00', '17:00');
+        days(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'], '08:00', '17:00');
         break;
       case 'extended':
-        days(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], '07:30', '16:00');
+        days(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], '07:30', '16:00');
         break;
       case '24h':
-        days(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], '00:00', '23:59');
+        days(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], '00:00', '23:59');
         break;
       case 'pharmacy':
-        days(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], '08:00', '20:00');
+        days(['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'], '08:00', '20:00');
         break;
     }
   }
 
-  // ── Step navigation ────────────────────────────────
   goToStep(step: 1 | 2 | 3): void {
     this.currentStep.set(step);
   }
@@ -167,13 +162,13 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     if (step > 1) this.currentStep.set((step - 1) as 1 | 2 | 3);
   }
 
-  // ── CRUD ──────────────────────────────────────────
+
   loadServices(): void {
     this.loading.set(true);
     this.error.set(null);
     this.svc.getAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: data => { this.services.set(data); this.loading.set(false); },
-      error: ()  => { this.error.set('Failed to load services. Please try again.'); this.loading.set(false); },
+      error: () => { this.error.set('Failed to load services. Please try again.'); this.loading.set(false); },
     });
   }
 
@@ -213,7 +208,7 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   submitForm(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const value = this.form.value;
-    const mode  = this.modalMode();
+    const mode = this.modalMode();
 
     if (mode === 'create') {
       this.svc.create(value).pipe(takeUntil(this.destroy$)).subscribe({
@@ -263,7 +258,7 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── AI Generation ─────────────────────────────────
+  // AI
   openAiModal(): void { this.aiDescription.set(''); this.aiError.set(null); this.showAiModal.set(true); }
   closeAiModal(): void { this.showAiModal.set(false); this.aiError.set(null); }
 
@@ -286,17 +281,17 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
         );
 
         this.form.patchValue({
-          nom:               generated.nom               ?? '',
-          description:       generated.description       ?? '',
-          localisation:      generated.localisation      ?? '',
-          type:              generated.type              ?? '',
-          telephone:         generated.telephone         ?? '',
-          email:             generated.email             ?? '',
-          capacite:          generated.capacite          ?? 0,
+          nom: generated.nom ?? '',
+          description: generated.description ?? '',
+          localisation: generated.localisation ?? '',
+          type: generated.type ?? '',
+          telephone: generated.telephone ?? '',
+          email: generated.email ?? '',
+          capacite: generated.capacite ?? 0,
           tempsAttenteMoyen: generated.tempsAttenteMoyen ?? 0,
-          statut:            generated.statut            ?? 'ACTIF',
-          estUrgence:        generated.estUrgence        ?? false,
-          responsableId:     generated.responsableId     ?? '',
+          statut: generated.statut ?? 'ACTIF',
+          estUrgence: generated.estUrgence ?? false,
+          responsableId: generated.responsableId ?? '',
         });
 
         this.currentStep.set(1);
@@ -312,14 +307,13 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Utils ──────────────────────────────────────────
   showToast(text: string, type: 'success' | 'error'): void {
     this.toastMessage.set({ text, type });
     setTimeout(() => this.toastMessage.set(null), 3500);
   }
 
-  setView(mode: ViewMode): void         { this.viewMode.set(mode); }
+  setView(mode: ViewMode): void { this.viewMode.set(mode); }
   setFilter(status: FilterStatus): void { this.filterStatus.set(status); }
-  onSearch(val: string): void           { this.searchQuery.set(val); }
-  trackById(_: number, s: Service)      { return s._id; }
+  onSearch(val: string): void { this.searchQuery.set(val); }
+  trackById(_: number, s: Service) { return s._id; }
 }
