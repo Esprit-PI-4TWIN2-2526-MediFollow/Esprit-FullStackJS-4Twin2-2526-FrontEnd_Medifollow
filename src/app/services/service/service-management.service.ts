@@ -33,7 +33,7 @@ export interface Service {
 export class ServiceManagementService {
   private readonly apiUrl = 'http://localhost:3000/services';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAll(): Observable<Service[]> {
     return this.http.get<Service[]>(this.apiUrl);
@@ -61,5 +61,9 @@ export class ServiceManagementService {
 
   deactivate(id: string): Observable<Service> {
     return this.http.put<Service>(`${this.apiUrl}/${id}/deactivate`, {});
+  }
+
+  generateWithAI(description: string): Observable<Partial<Service>> {
+    return this.http.post<Partial<Service>>(`${this.apiUrl}/ai-generate`, { description });
   }
 }

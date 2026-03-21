@@ -1,10 +1,6 @@
 import {
-  Component,
-  OnInit,
-  OnDestroy,
-  signal,
-  computed,
-  inject,
+  Component, OnInit, OnDestroy,
+  signal, computed, inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
@@ -12,7 +8,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { Service, ServiceManagementService } from '../services/service/service-management.service';
 
 type ViewMode = 'grid' | 'list';
-type FilterStatus = 'ALL' | 'ACTIF' | 'INACTIF';
+type FilterStatus = 'ALL' | 'ACTIVE' | 'INACTIVE';
 
 @Component({
   selector: 'app-manage-service',
@@ -24,36 +20,42 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   private svc = inject(ServiceManagementService);
   private fb = inject(FormBuilder);
 
-  // State signals
-  services = signal<Service[]>([]);
-  loading = signal(false);
-  error = signal<string | null>(null);
-  searchQuery = signal('');
-  filterStatus = signal<FilterStatus>('ALL');
-  viewMode = signal<ViewMode>('grid');
-  selectedService = signal<Service | null>(null);
-  showModal = signal(false);
-  modalMode = signal<'create' | 'edit' | 'view'>('create');
+  // ── State ──────────────────────────────────────────
+  services          = signal<Service[]>([]);
+  loading           = signal(false);
+  error             = signal<string | null>(null);
+  searchQuery       = signal('');
+  filterStatus      = signal<FilterStatus>('ALL');
+  viewMode          = signal<ViewMode>('grid');
+  selectedService   = signal<Service | null>(null);
+  showModal         = signal(false);
+  modalMode         = signal<'create' | 'edit' | 'view'>('create');
   showDeleteConfirm = signal(false);
-  serviceToDelete = signal<string | null>(null);
-  toastMessage = signal<{ text: string; type: 'success' | 'error' } | null>(null);
+  serviceToDelete   = signal<string | null>(null);
+  toastMessage      = signal<{ text: string; type: 'success' | 'error' } | null>(null);
 
-  // Computed
+  // ── Step state ─────────────────────────────────────
+  currentStep = signal<1 | 2 | 3>(1);
+
+  // ── AI state ───────────────────────────────────────
+  showAiModal   = signal(false);
+  aiDescription = signal('');
+  aiLoading     = signal(false);
+  aiError       = signal<string | null>(null);
+
+  // ── Computed ───────────────────────────────────────
   filteredServices = computed(() => {
     let list = this.services();
     const q = this.searchQuery().toLowerCase();
     const status = this.filterStatus();
-
-    if (q) {
-      list = list.filter(
-        (s) =>
-          s.nom.toLowerCase().includes(q) ||
-          s.type?.toLowerCase().includes(q) ||
-          s.localisation?.toLowerCase().includes(q)
-      );
-    }
+    if (q) list = list.filter(s =>
+      s.nom.toLowerCase().includes(q) ||
+      s.type?.toLowerCase().includes(q) ||
+      s.localisation?.toLowerCase().includes(q)
+    );
     if (status !== 'ALL') {
-      list = list.filter((s) => s.statut === status);
+      const mapped = status === 'ACTIVE' ? 'ACTIF' : 'INACTIF';
+      list = list.filter(s => s.statut === mapped);
     }
     return list;
   });
@@ -61,18 +63,17 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   stats = computed(() => {
     const all = this.services();
     return {
-      total: all.length,
-      actif: all.filter((s) => s.statut === 'ACTIF').length,
-      inactif: all.filter((s) => s.statut === 'INACTIF').length,
-      urgence: all.filter((s) => s.estUrgence).length,
+      total:    all.length,
+      active:   all.filter(s => s.statut === 'ACTIF').length,
+      inactive: all.filter(s => s.statut === 'INACTIF').length,
+      emergency: all.filter(s => s.estUrgence).length,
     };
   });
 
-  // Form
   form!: FormGroup;
 
-  readonly SERVICE_TYPES = ['Médical', 'Urgence', 'Consultation', 'Chirurgie', 'Laboratoire', 'Radiologie', 'Pharmacie', 'Administratif'];
-  readonly JOURS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+  readonly SERVICE_TYPES = ['Medical','Emergency','Consultation','Surgery','Laboratory','Radiology','Pharmacy','Administrative'];
+  readonly DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
 
   ngOnInit(): void {
     this.initForm();
@@ -84,20 +85,21 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // ── Form ───────────────────────────────────────────
   initForm(): void {
     this.form = this.fb.group({
-      nom: ['', [Validators.required, Validators.minLength(2)]],
-      description: [''],
-      localisation: [''],
-      type: [''],
-      telephone: [''],
-      email: ['', Validators.email],
-      capacite: [0, Validators.min(0)],
-      statut: ['ACTIF'],
+      nom:               ['', [Validators.required, Validators.minLength(2)]],
+      description:       [''],
+      localisation:      [''],
+      type:              [''],
+      telephone:         [''],
+      email:             ['', Validators.email],
+      capacite:          [0, Validators.min(0)],
+      statut:            ['ACTIF'],
       tempsAttenteMoyen: [0, Validators.min(0)],
-      estUrgence: [false],
-      responsableId: [''],
-      horaires: this.fb.array([]),
+      estUrgence:        [false],
+      responsableId:     [''],
+      horaires:          this.fb.array([]),
     });
   }
 
@@ -106,40 +108,79 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   }
 
   addHoraire(): void {
-    this.horairesArray.push(
-      this.fb.group({
-        jour: ['Lundi'],
-        ouverture: ['08:00'],
-        fermeture: ['18:00'],
-      })
-    );
+    this.horairesArray.push(this.fb.group({
+      jour: ['Monday'], ouverture: ['08:00'], fermeture: ['17:00'],
+    }));
   }
 
   removeHoraire(i: number): void {
     this.horairesArray.removeAt(i);
   }
 
+  // ── Schedule presets ───────────────────────────────
+  applyPreset(type: string): void {
+    this.horairesArray.clear();
+
+    const days = (dayList: string[], open: string, close: string) =>
+      dayList.forEach(jour => this.horairesArray.push(
+        this.fb.group({ jour: [jour], ouverture: [open], fermeture: [close] })
+      ));
+
+    switch (type) {
+      case 'weekdays':
+        days(['Monday','Tuesday','Wednesday','Thursday','Friday'], '08:00', '17:00');
+        break;
+      case 'extended':
+        days(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'], '07:30', '16:00');
+        break;
+      case '24h':
+        days(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], '00:00', '23:59');
+        break;
+      case 'pharmacy':
+        days(['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], '08:00', '20:00');
+        break;
+    }
+  }
+
+  // ── Step navigation ────────────────────────────────
+  goToStep(step: 1 | 2 | 3): void {
+    this.currentStep.set(step);
+  }
+
+  nextStep(): void {
+    const step = this.currentStep();
+    if (step === 1) {
+      const nomCtrl = this.form.get('nom');
+      nomCtrl?.markAsTouched();
+      if (nomCtrl?.invalid) return;
+    }
+    if (step === 2) {
+      const emailCtrl = this.form.get('email');
+      emailCtrl?.markAsTouched();
+      if (emailCtrl?.invalid) return;
+    }
+    if (step < 3) this.currentStep.set((step + 1) as 1 | 2 | 3);
+  }
+
+  prevStep(): void {
+    const step = this.currentStep();
+    if (step > 1) this.currentStep.set((step - 1) as 1 | 2 | 3);
+  }
+
+  // ── CRUD ──────────────────────────────────────────
   loadServices(): void {
     this.loading.set(true);
     this.error.set(null);
-    this.svc
-      .getAll()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.services.set(data);
-          this.loading.set(false);
-        },
-        error: (err) => {
-          this.error.set('Erreur lors du chargement des services');
-          this.loading.set(false);
-        },
-      });
+    this.svc.getAll().pipe(takeUntil(this.destroy$)).subscribe({
+      next: data => { this.services.set(data); this.loading.set(false); },
+      error: ()  => { this.error.set('Failed to load services. Please try again.'); this.loading.set(false); },
+    });
   }
 
   openCreateModal(): void {
     this.form.reset({ statut: 'ACTIF', estUrgence: false, capacite: 0, tempsAttenteMoyen: 0 });
     this.horairesArray.clear();
+    this.currentStep.set(1);
     this.modalMode.set('create');
     this.selectedService.set(null);
     this.showModal.set(true);
@@ -148,8 +189,9 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   openEditModal(service: Service): void {
     this.selectedService.set(service);
     this.modalMode.set('edit');
+    this.currentStep.set(1);
     this.horairesArray.clear();
-    service.horaires?.forEach((h) =>
+    service.horaires?.forEach(h =>
       this.horairesArray.push(this.fb.group({ jour: [h.jour], ouverture: [h.ouverture], fermeture: [h.fermeture] }))
     );
     this.form.patchValue(service);
@@ -165,87 +207,119 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   closeModal(): void {
     this.showModal.set(false);
     this.selectedService.set(null);
+    this.currentStep.set(1);
   }
 
   submitForm(): void {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     const value = this.form.value;
-    const mode = this.modalMode();
+    const mode  = this.modalMode();
 
     if (mode === 'create') {
-      this.svc
-        .create(value)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (created) => {
-            this.services.update((list) => [created, ...list]);
-            this.closeModal();
-            this.showToast('Service créé avec succès', 'success');
-          },
-          error: () => this.showToast('Erreur lors de la création', 'error'),
-        });
+      this.svc.create(value).pipe(takeUntil(this.destroy$)).subscribe({
+        next: created => {
+          this.services.update(list => [created, ...list]);
+          this.closeModal();
+          this.showToast('Service created successfully', 'success');
+        },
+        error: () => this.showToast('Failed to create service', 'error'),
+      });
     } else if (mode === 'edit' && this.selectedService()?._id) {
-      this.svc
-        .update(this.selectedService()!._id!, value)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (updated) => {
-            this.services.update((list) =>
-              list.map((s) => (s._id === updated._id ? updated : s))
-            );
-            this.closeModal();
-            this.showToast('Service mis à jour', 'success');
-          },
-          error: () => this.showToast('Erreur lors de la mise à jour', 'error'),
-        });
+      this.svc.update(this.selectedService()!._id!, value).pipe(takeUntil(this.destroy$)).subscribe({
+        next: updated => {
+          this.services.update(list => list.map(s => s._id === updated._id ? updated : s));
+          this.closeModal();
+          this.showToast('Service updated successfully', 'success');
+        },
+        error: () => this.showToast('Failed to update service', 'error'),
+      });
     }
   }
 
   toggleStatus(service: Service): void {
     const action = service.statut === 'ACTIF' ? this.svc.deactivate(service._id!) : this.svc.activate(service._id!);
     action.pipe(takeUntil(this.destroy$)).subscribe({
-      next: (updated) => {
-        this.services.update((list) =>
-          list.map((s) => (s._id === updated._id ? updated : s))
-        );
-        this.showToast(`Service ${updated.statut === 'ACTIF' ? 'activé' : 'désactivé'}`, 'success');
+      next: updated => {
+        this.services.update(list => list.map(s => s._id === updated._id ? updated : s));
+        this.showToast(`Service ${updated.statut === 'ACTIF' ? 'activated' : 'deactivated'}`, 'success');
       },
-      error: () => this.showToast('Erreur lors du changement de statut', 'error'),
+      error: () => this.showToast('Failed to update status', 'error'),
     });
   }
 
-  confirmDelete(id: string): void {
-    this.serviceToDelete.set(id);
-    this.showDeleteConfirm.set(true);
-  }
+  confirmDelete(id: string): void { this.serviceToDelete.set(id); this.showDeleteConfirm.set(true); }
 
   deleteService(): void {
     const id = this.serviceToDelete();
     if (!id) return;
-    this.svc
-      .delete(id)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.services.update((list) => list.filter((s) => s._id !== id));
-          this.showDeleteConfirm.set(false);
-          this.serviceToDelete.set(null);
-          this.showToast('Service supprimé', 'success');
-        },
-        error: () => this.showToast('Erreur lors de la suppression', 'error'),
-      });
+    this.svc.delete(id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.services.update(list => list.filter(s => s._id !== id));
+        this.showDeleteConfirm.set(false);
+        this.serviceToDelete.set(null);
+        this.showToast('Service deleted successfully', 'success');
+      },
+      error: () => this.showToast('Failed to delete service', 'error'),
+    });
   }
 
+  // ── AI Generation ─────────────────────────────────
+  openAiModal(): void { this.aiDescription.set(''); this.aiError.set(null); this.showAiModal.set(true); }
+  closeAiModal(): void { this.showAiModal.set(false); this.aiError.set(null); }
+
+  generateWithAI(): void {
+    const desc = this.aiDescription().trim();
+    if (!desc) return;
+    this.aiLoading.set(true);
+    this.aiError.set(null);
+
+    this.svc.generateWithAI(desc).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (generated: Partial<Service>) => {
+        this.aiLoading.set(false);
+        this.closeAiModal();
+
+        this.form.reset({ statut: 'ACTIF', estUrgence: false, capacite: 0, tempsAttenteMoyen: 0 });
+        this.horairesArray.clear();
+
+        generated.horaires?.forEach(h =>
+          this.horairesArray.push(this.fb.group({ jour: [h.jour], ouverture: [h.ouverture], fermeture: [h.fermeture] }))
+        );
+
+        this.form.patchValue({
+          nom:               generated.nom               ?? '',
+          description:       generated.description       ?? '',
+          localisation:      generated.localisation      ?? '',
+          type:              generated.type              ?? '',
+          telephone:         generated.telephone         ?? '',
+          email:             generated.email             ?? '',
+          capacite:          generated.capacite          ?? 0,
+          tempsAttenteMoyen: generated.tempsAttenteMoyen ?? 0,
+          statut:            generated.statut            ?? 'ACTIF',
+          estUrgence:        generated.estUrgence        ?? false,
+          responsableId:     generated.responsableId     ?? '',
+        });
+
+        this.currentStep.set(1);
+        this.modalMode.set('create');
+        this.selectedService.set(null);
+        this.showModal.set(true);
+        this.showToast('Form pre-filled by AI ✨', 'success');
+      },
+      error: () => {
+        this.aiLoading.set(false);
+        this.aiError.set('Generation failed. Please check your connection and try again.');
+      },
+    });
+  }
+
+  // ── Utils ──────────────────────────────────────────
   showToast(text: string, type: 'success' | 'error'): void {
     this.toastMessage.set({ text, type });
     setTimeout(() => this.toastMessage.set(null), 3500);
   }
 
-  setView(mode: ViewMode): void { this.viewMode.set(mode); }
+  setView(mode: ViewMode): void         { this.viewMode.set(mode); }
   setFilter(status: FilterStatus): void { this.filterStatus.set(status); }
-  onSearch(val: string): void { this.searchQuery.set(val); }
-  trackById(_: number, s: Service) { return s._id; }
+  onSearch(val: string): void           { this.searchQuery.set(val); }
+  trackById(_: number, s: Service)      { return s._id; }
 }

@@ -12,14 +12,24 @@
   <!-- HEADER -->
   <header class="page-header">
     <div class="page-header__left">
-      <div class="page-header__badge">Gestion</div>
+      <div class="page-header__badge">Management</div>
       <h1 class="page-header__title">Services</h1>
-      <p class="page-header__sub">Gérez l'ensemble de vos services médicaux</p>
+      <p class="page-header__sub">Manage all your medical services</p>
     </div>
-    <button class="btn btn--primary" (click)="openCreateModal()">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Nouveau service
-    </button>
+    <div class="page-header__actions">
+      <button class="btn btn--ai" (click)="openAiModal()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+        </svg>
+        Generate with AI
+      </button>
+      <button class="btn btn--primary" (click)="openCreateModal()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        New Service
+      </button>
+    </div>
   </header>
 
   <!-- STATS STRIP -->
@@ -29,54 +39,51 @@
       <div class="stat-card__label">Total</div>
     </div>
     <div class="stat-card stat-card--green">
-      <div class="stat-card__value">{{ stats().actif }}</div>
-      <div class="stat-card__label">Actifs</div>
+      <div class="stat-card__value">{{ stats().active }}</div>
+      <div class="stat-card__label">Active</div>
     </div>
     <div class="stat-card stat-card--gray">
-      <div class="stat-card__value">{{ stats().inactif }}</div>
-      <div class="stat-card__label">Inactifs</div>
+      <div class="stat-card__value">{{ stats().inactive }}</div>
+      <div class="stat-card__label">Inactive</div>
     </div>
     <div class="stat-card stat-card--red">
-      <div class="stat-card__value">{{ stats().urgence }}</div>
-      <div class="stat-card__label">Urgences</div>
+      <div class="stat-card__value">{{ stats().emergency }}</div>
+      <div class="stat-card__label">Emergency</div>
     </div>
   </div>
 
   <!-- TOOLBAR -->
   <div class="toolbar">
     <div class="search-box">
-      <svg class="search-box__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input
-        class="search-box__input"
-        type="text"
-        placeholder="Rechercher par nom, type, localisation…"
-        [value]="searchQuery()"
-        (input)="onSearch($any($event.target).value)"
-      />
+      <svg class="search-box__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input class="search-box__input" type="text" placeholder="Search by name, type, location…"
+        [value]="searchQuery()" (input)="onSearch($any($event.target).value)" />
     </div>
-
     <div class="filter-tabs">
-      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ALL'" (click)="setFilter('ALL')">Tous</button>
-      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ACTIF'" (click)="setFilter('ACTIF')">Actifs</button>
-      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'INACTIF'" (click)="setFilter('INACTIF')">Inactifs</button>
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ALL'"      (click)="setFilter('ALL')">All</button>
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ACTIVE'"   (click)="setFilter('ACTIVE')">Active</button>
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'INACTIVE'" (click)="setFilter('INACTIVE')">Inactive</button>
     </div>
-
     <div class="view-toggle">
-      <button class="view-btn" [class.view-btn--active]="viewMode() === 'grid'" (click)="setView('grid')" title="Vue grille">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <button class="view-btn" [class.view-btn--active]="viewMode() === 'grid'" (click)="setView('grid')" title="Grid view">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
       </button>
-      <button class="view-btn" [class.view-btn--active]="viewMode() === 'list'" (click)="setView('list')" title="Vue liste">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <button class="view-btn" [class.view-btn--active]="viewMode() === 'list'" (click)="setView('list')" title="List view">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
       </button>
     </div>
   </div>
 
   <!-- LOADING -->
   @if (loading()) {
-    <div class="loading-state">
-      <div class="spinner"></div>
-      <p>Chargement des services…</p>
-    </div>
+    <div class="loading-state"><div class="spinner"></div><p>Loading services…</p></div>
   }
 
   <!-- ERROR -->
@@ -84,7 +91,7 @@
     <div class="error-state">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <p>{{ error() }}</p>
-      <button class="btn btn--secondary" (click)="loadServices()">Réessayer</button>
+      <button class="btn btn--secondary" (click)="loadServices()">Retry</button>
     </div>
   }
 
@@ -92,9 +99,15 @@
   @if (!loading() && !error() && filteredServices().length === 0) {
     <div class="empty-state">
       <div class="empty-state__icon">🏥</div>
-      <h3>Aucun service trouvé</h3>
-      <p>Créez votre premier service ou modifiez vos filtres</p>
-      <button class="btn btn--primary" (click)="openCreateModal()">Créer un service</button>
+      <h3>No services found</h3>
+      <p>Create your first service or let the AI help you</p>
+      <div class="empty-state__actions">
+        <button class="btn btn--ai" (click)="openAiModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          Generate with AI
+        </button>
+        <button class="btn btn--primary" (click)="openCreateModal()">Create manually</button>
+      </div>
     </div>
   }
 
@@ -103,22 +116,16 @@
     <div class="services-grid">
       @for (service of filteredServices(); track service._id) {
         <div class="service-card" [class.service-card--inactive]="service.statut === 'INACTIF'">
-
           <div class="service-card__header">
             <div class="service-card__type-badge">{{ service.type || 'N/A' }}</div>
-            @if (service.estUrgence) {
-              <div class="urgence-badge">🚨 Urgence</div>
-            }
+            @if (service.estUrgence) { <div class="urgence-badge">🚨 Emergency</div> }
             <div class="service-card__status" [class.service-card__status--active]="service.statut === 'ACTIF'">
-              {{ service.statut }}
+              {{ service.statut === 'ACTIF' ? 'Active' : 'Inactive' }}
             </div>
           </div>
-
           <div class="service-card__body">
             <h3 class="service-card__name">{{ service.nom }}</h3>
-            @if (service.description) {
-              <p class="service-card__desc">{{ service.description }}</p>
-            }
+            @if (service.description) { <p class="service-card__desc">{{ service.description }}</p> }
             <div class="service-card__meta">
               @if (service.localisation) {
                 <div class="meta-item">
@@ -128,8 +135,8 @@
               }
               @if (service.capacite) {
                 <div class="meta-item">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                  {{ service.capacite }} places
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  {{ service.capacite }} beds
                 </div>
               }
               @if (service.tempsAttenteMoyen) {
@@ -140,26 +147,13 @@
               }
             </div>
           </div>
-
           <div class="service-card__footer">
-            <button class="icon-btn icon-btn--view" (click)="openViewModal(service)" title="Voir">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <button class="icon-btn icon-btn--view"  (click)="openViewModal(service)" title="View"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button class="icon-btn icon-btn--edit"  (click)="openEditModal(service)" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut==='ACTIF'" [class.icon-btn--toggle-on]="service.statut==='INACTIF'" (click)="toggleStatus(service)" [title]="service.statut==='ACTIF'?'Deactivate':'Activate'">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut==='ACTIF'?'16':'8'" cy="12" r="3" fill="currentColor"/></svg>
             </button>
-            <button class="icon-btn icon-btn--edit" (click)="openEditModal(service)" title="Modifier">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button
-              class="icon-btn"
-              [class.icon-btn--toggle-off]="service.statut === 'ACTIF'"
-              [class.icon-btn--toggle-on]="service.statut === 'INACTIF'"
-              (click)="toggleStatus(service)"
-              [title]="service.statut === 'ACTIF' ? 'Désactiver' : 'Activer'"
-            >
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut === 'ACTIF' ? '16' : '8'" cy="12" r="3" fill="currentColor"/></svg>
-            </button>
-            <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)" title="Supprimer">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-            </button>
+            <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)" title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
           </div>
         </div>
       }
@@ -171,39 +165,26 @@
     <div class="services-table-wrap">
       <table class="services-table">
         <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Type</th>
-            <th>Localisation</th>
-            <th>Capacité</th>
-            <th>Attente moy.</th>
-            <th>Statut</th>
-            <th>Actions</th>
-          </tr>
+          <tr><th>Name</th><th>Type</th><th>Location</th><th>Capacity</th><th>Avg. Wait</th><th>Status</th><th>Actions</th></tr>
         </thead>
         <tbody>
           @for (service of filteredServices(); track service._id) {
             <tr class="table-row" [class.table-row--inactive]="service.statut === 'INACTIF'">
-              <td>
-                <div class="table-name">
-                  {{ service.nom }}
-                  @if (service.estUrgence) { <span class="urgence-dot" title="Urgence">🚨</span> }
-                </div>
-              </td>
+              <td><div class="table-name">{{ service.nom }} @if (service.estUrgence) { <span title="Emergency">🚨</span> }</div></td>
               <td><span class="type-pill">{{ service.type || '—' }}</span></td>
               <td>{{ service.localisation || '—' }}</td>
               <td>{{ service.capacite || '—' }}</td>
               <td>{{ service.tempsAttenteMoyen ? service.tempsAttenteMoyen + ' min' : '—' }}</td>
               <td>
                 <span class="status-chip" [class.status-chip--active]="service.statut === 'ACTIF'">
-                  {{ service.statut }}
+                  {{ service.statut === 'ACTIF' ? 'Active' : 'Inactive' }}
                 </span>
               </td>
               <td>
                 <div class="table-actions">
-                  <button class="icon-btn icon-btn--view" (click)="openViewModal(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                  <button class="icon-btn icon-btn--edit" (click)="openEditModal(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                  <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut === 'ACTIF'" [class.icon-btn--toggle-on]="service.statut === 'INACTIF'" (click)="toggleStatus(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut === 'ACTIF' ? '16' : '8'" cy="12" r="3" fill="currentColor"/></svg></button>
+                  <button class="icon-btn icon-btn--view"  (click)="openViewModal(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="icon-btn icon-btn--edit"  (click)="openEditModal(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut==='ACTIF'" [class.icon-btn--toggle-on]="service.statut==='INACTIF'" (click)="toggleStatus(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut==='ACTIF'?'16':'8'" cy="12" r="3" fill="currentColor"/></svg></button>
                   <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
                 </div>
               </td>
@@ -215,130 +196,282 @@
   }
 </div>
 
-<!-- ===== CREATE / EDIT MODAL ===== -->
+<!-- ═══════════════════════ AI MODAL ═══════════════════════ -->
+@if (showAiModal()) {
+  <div class="modal-backdrop" (click)="closeAiModal()">
+    <div class="modal modal--ai" (click)="$event.stopPropagation()">
+      <div class="modal__header">
+        <div class="ai-modal-title">
+          <div class="ai-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+              <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+            </svg>
+          </div>
+          <div>
+            <h2>Generate with AI</h2>
+            <p class="ai-modal-sub">Describe the service — AI fills the entire form</p>
+          </div>
+        </div>
+        <button class="modal__close" (click)="closeAiModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal__body">
+        <div class="ai-stepper">
+          <div class="ai-stepper__step"><div class="ai-stepper__num">1</div><span>Describe</span></div>
+          <span class="ai-stepper__arrow">→</span>
+          <div class="ai-stepper__step"><div class="ai-stepper__num ai-stepper__num--inactive">2</div><span class="ai-stepper__label--muted">Review</span></div>
+          <span class="ai-stepper__arrow">→</span>
+          <div class="ai-stepper__step"><div class="ai-stepper__num ai-stepper__num--inactive">3</div><span class="ai-stepper__label--muted">Save</span></div>
+        </div>
+        <div class="form-field">
+          <label class="form-label">Your description <span class="required">*</span></label>
+          <textarea class="form-input form-textarea ai-textarea" rows="4"
+            placeholder="Ex: Neurology unit on the 4th floor, 15 beds, open Monday to Friday…"
+            [value]="aiDescription()"
+            (input)="aiDescription.set($any($event.target).value)"></textarea>
+          <div class="ai-textarea-hints">
+            <span class="ai-hint">One word is enough — AI fills the rest</span>
+            <span class="ai-char-count">{{ aiDescription().length }} / 500</span>
+          </div>
+        </div>
+        @if (aiError()) {
+          <div class="ai-error">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            {{ aiError() }}
+          </div>
+        }
+      </div>
+      <div class="modal__footer ai-modal__footer">
+        <span class="ai-footer-tip">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          You can edit the form before saving
+        </span>
+        <div class="ai-footer-actions">
+          <button class="btn btn--secondary" (click)="closeAiModal()" [disabled]="aiLoading()">Cancel</button>
+          <button class="btn btn--ai" (click)="generateWithAI()" [disabled]="aiLoading() || !aiDescription().trim()">
+            @if (aiLoading()) {
+              <span class="ai-spinner"></span> Generating…
+            } @else {
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              Generate form
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════ CREATE / EDIT MODAL (3 STEPS) ═══════════════════ -->
 @if (showModal() && modalMode() !== 'view') {
   <div class="modal-backdrop" (click)="closeModal()">
-    <div class="modal" (click)="$event.stopPropagation()">
-      <div class="modal__header">
-        <h2>{{ modalMode() === 'create' ? 'Créer un service' : 'Modifier le service' }}</h2>
+    <div class="modal modal--steps" (click)="$event.stopPropagation()">
+
+      <div class="modal__header modal__header--steps">
+        <div class="step-header">
+          <h2>{{ modalMode() === 'create' ? 'New Service' : 'Edit Service' }}</h2>
+
+          <div class="step-progress">
+            <div class="step-progress__bar">
+              <div class="step-progress__fill" [style.width.%]="(currentStep() / 3) * 100"></div>
+            </div>
+            <span class="step-progress__label">Step {{ currentStep() }} of 3</span>
+          </div>
+
+          <div class="step-pills">
+            <div class="step-pill" [class.step-pill--active]="currentStep() === 1" [class.step-pill--done]="currentStep() > 1" (click)="goToStep(1)">
+              <div class="step-pill__num">
+                @if (currentStep() > 1) {
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                } @else { 1 }
+              </div>
+              <span>General Info</span>
+            </div>
+            <div class="step-pill__connector" [class.step-pill__connector--done]="currentStep() > 1"></div>
+            <div class="step-pill" [class.step-pill--active]="currentStep() === 2" [class.step-pill--done]="currentStep() > 2" (click)="currentStep() > 1 && goToStep(2)">
+              <div class="step-pill__num">
+                @if (currentStep() > 2) {
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                } @else { 2 }
+              </div>
+              <span>Contact & Config</span>
+            </div>
+            <div class="step-pill__connector" [class.step-pill__connector--done]="currentStep() > 2"></div>
+            <div class="step-pill" [class.step-pill--active]="currentStep() === 3" (click)="currentStep() > 2 && goToStep(3)">
+              <div class="step-pill__num">3</div>
+              <span>Schedule</span>
+            </div>
+          </div>
+        </div>
         <button class="modal__close" (click)="closeModal()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
-      <form [formGroup]="form" class="modal__body" (ngSubmit)="submitForm()">
-        <div class="form-grid">
+      <form [formGroup]="form" (ngSubmit)="submitForm()">
 
-          <!-- Nom -->
-          <div class="form-field form-field--full">
-            <label class="form-label">Nom du service <span class="required">*</span></label>
-            <input class="form-input" formControlName="nom" placeholder="Ex: Cardiologie" [class.form-input--error]="form.get('nom')?.invalid && form.get('nom')?.touched" />
-            @if (form.get('nom')?.invalid && form.get('nom')?.touched) {
-              <span class="form-error">Le nom est obligatoire</span>
-            }
-          </div>
-
-          <!-- Description -->
-          <div class="form-field form-field--full">
-            <label class="form-label">Description</label>
-            <textarea class="form-input form-textarea" formControlName="description" placeholder="Description du service…" rows="2"></textarea>
-          </div>
-
-          <!-- Type -->
-          <div class="form-field">
-            <label class="form-label">Type</label>
-            <select class="form-input form-select" formControlName="type">
-              <option value="">Sélectionner…</option>
-              @for (t of SERVICE_TYPES; track t) {
-                <option [value]="t">{{ t }}</option>
-              }
-            </select>
-          </div>
-
-          <!-- Localisation -->
-          <div class="form-field">
-            <label class="form-label">Localisation</label>
-            <input class="form-input" formControlName="localisation" placeholder="Ex: Bâtiment A - 2ème étage" />
-          </div>
-
-          <!-- Téléphone -->
-          <div class="form-field">
-            <label class="form-label">Téléphone</label>
-            <input class="form-input" formControlName="telephone" placeholder="+216 XX XXX XXX" />
-          </div>
-
-          <!-- Email -->
-          <div class="form-field">
-            <label class="form-label">Email</label>
-            <input class="form-input" formControlName="email" type="email" placeholder="service@hopital.tn" [class.form-input--error]="form.get('email')?.invalid && form.get('email')?.touched" />
-            @if (form.get('email')?.invalid && form.get('email')?.touched) {
-              <span class="form-error">Email invalide</span>
-            }
-          </div>
-
-          <!-- Capacité -->
-          <div class="form-field">
-            <label class="form-label">Capacité</label>
-            <input class="form-input" formControlName="capacite" type="number" min="0" placeholder="0" />
-          </div>
-
-          <!-- Temps d'attente -->
-          <div class="form-field">
-            <label class="form-label">Temps d'attente moy. (min)</label>
-            <input class="form-input" formControlName="tempsAttenteMoyen" type="number" min="0" placeholder="0" />
-          </div>
-
-          <!-- Statut -->
-          <div class="form-field">
-            <label class="form-label">Statut</label>
-            <select class="form-input form-select" formControlName="statut">
-              <option value="ACTIF">Actif</option>
-              <option value="INACTIF">Inactif</option>
-            </select>
-          </div>
-
-          <!-- Urgence -->
-          <div class="form-field form-field--checkbox">
-            <label class="checkbox-label">
-              <input type="checkbox" formControlName="estUrgence" class="checkbox-input" />
-              <span class="checkbox-custom"></span>
-              Service d'urgence
-            </label>
-          </div>
-
-          <!-- Responsable -->
-          <div class="form-field form-field--full">
-            <label class="form-label">ID Responsable</label>
-            <input class="form-input" formControlName="responsableId" placeholder="ID du responsable" />
-          </div>
-        </div>
-
-        <!-- Horaires -->
-        <div class="horaires-section" formArrayName="horaires">
-          <div class="horaires-header">
-            <h4 class="horaires-title">Horaires d'ouverture</h4>
-            <button type="button" class="btn-link" (click)="addHoraire()">+ Ajouter</button>
-          </div>
-          @for (h of horairesArray.controls; track $index; let i = $index) {
-            <div class="horaire-row" [formGroupName]="i">
-              <select class="form-input form-select" formControlName="jour">
-                @for (j of JOURS; track j) { <option [value]="j">{{ j }}</option> }
-              </select>
-              <input class="form-input" formControlName="ouverture" type="time" />
-              <span class="horaire-sep">→</span>
-              <input class="form-input" formControlName="fermeture" type="time" />
-              <button type="button" class="icon-btn icon-btn--delete" (click)="removeHoraire(i)">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-              </button>
+        <!-- STEP 1 : General Information -->
+        @if (currentStep() === 1) {
+          <div class="modal__body step-body">
+            <div class="step-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              General Information
             </div>
-          }
-        </div>
+            <div class="form-grid">
+              <div class="form-field form-field--full">
+                <label class="form-label">Service name <span class="required">*</span></label>
+                <input class="form-input" formControlName="nom" placeholder="e.g. Cardiology, Pediatric Emergency…"
+                  [class.form-input--error]="form.get('nom')?.invalid && form.get('nom')?.touched" />
+                @if (form.get('nom')?.invalid && form.get('nom')?.touched) {
+                  <span class="form-error">Service name is required (min. 2 characters)</span>
+                }
+              </div>
+              <div class="form-field form-field--full">
+                <label class="form-label">Description</label>
+                <textarea class="form-input form-textarea" formControlName="description"
+                  placeholder="Professional description of the service…" rows="3"></textarea>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Service type</label>
+                <select class="form-input form-select" formControlName="type">
+                  <option value="">Select a type…</option>
+                  @for (t of SERVICE_TYPES; track t) { <option [value]="t">{{ t }}</option> }
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Location</label>
+                <input class="form-input" formControlName="localisation" placeholder="e.g. Building A - 2nd floor" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Status</label>
+                <select class="form-input form-select" formControlName="statut">
+                  <option value="ACTIF">Active</option>
+                  <option value="INACTIF">Inactive</option>
+                </select>
+              </div>
+              <div class="form-field form-field--checkbox">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="estUrgence" class="checkbox-input" />
+                  <span class="checkbox-custom"></span>
+                  Emergency service
+                </label>
+              </div>
+            </div>
+          </div>
+        }
 
-        <div class="modal__footer">
-          <button type="button" class="btn btn--secondary" (click)="closeModal()">Annuler</button>
-          <button type="submit" class="btn btn--primary">
-            {{ modalMode() === 'create' ? 'Créer le service' : 'Enregistrer' }}
-          </button>
+        <!-- STEP 2 : Contact & Configuration -->
+        @if (currentStep() === 2) {
+          <div class="modal__body step-body">
+            <div class="step-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.54a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/></svg>
+              Contact & Configuration
+            </div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label class="form-label">Phone</label>
+                <input class="form-input" formControlName="telephone" placeholder="+216 71 234 567" />
+              </div>
+              <div class="form-field">
+                <label class="form-label">Email</label>
+                <input class="form-input" formControlName="email" type="email" placeholder="service@hospital.tn"
+                  [class.form-input--error]="form.get('email')?.invalid && form.get('email')?.touched" />
+                @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                  <span class="form-error">Invalid email address</span>
+                }
+              </div>
+              <div class="form-field">
+                <label class="form-label">Capacity (patients / beds)</label>
+                <div class="input-with-unit">
+                  <input class="form-input" formControlName="capacite" type="number" min="0" placeholder="0" />
+                  <span class="input-unit">beds</span>
+                </div>
+              </div>
+              <div class="form-field">
+                <label class="form-label">Average waiting time</label>
+                <div class="input-with-unit">
+                  <input class="form-input" formControlName="tempsAttenteMoyen" type="number" min="0" placeholder="0" />
+                  <span class="input-unit">min</span>
+                </div>
+              </div>
+              <div class="form-field form-field--full">
+                <label class="form-label">Manager ID</label>
+                <input class="form-input" formControlName="responsableId" placeholder="Service manager identifier" />
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- STEP 3 : Schedule -->
+        @if (currentStep() === 3) {
+          <div class="modal__body step-body">
+            <div class="step-section-title">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              Opening Hours
+            </div>
+            <div class="horaires-presets">
+              <p class="horaires-presets__label">Apply a template:</p>
+              <div class="horaires-presets__list">
+                <button type="button" class="preset-chip" (click)="applyPreset('weekdays')">Mon–Fri 8am–5pm</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('extended')">Mon–Sat 7:30am–4pm</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('24h')">24/7</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('pharmacy')">Daily 8am–8pm</button>
+              </div>
+            </div>
+            <div class="horaires-section" formArrayName="horaires">
+              <div class="horaires-list-header">
+                <span class="horaires-count">{{ horairesArray.length }} schedule(s)</span>
+                <button type="button" class="btn-link" (click)="addHoraire()">+ Add a day</button>
+              </div>
+              @if (horairesArray.length === 0) {
+                <div class="horaires-empty">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  <p>No schedule defined — use a template or add manually</p>
+                </div>
+              }
+              @for (h of horairesArray.controls; track $index; let i = $index) {
+                <div class="horaire-row" [formGroupName]="i">
+                  <select class="form-input form-select" formControlName="jour">
+                    @for (j of DAYS; track j) { <option [value]="j">{{ j }}</option> }
+                  </select>
+                  <input class="form-input" formControlName="ouverture" type="time" />
+                  <span class="horaire-sep">→</span>
+                  <input class="form-input" formControlName="fermeture" type="time" />
+                  <button type="button" class="icon-btn icon-btn--delete" (click)="removeHoraire(i)">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Footer navigation -->
+        <div class="modal__footer step-footer">
+          <div class="step-footer__left">
+            @if (currentStep() > 1) {
+              <button type="button" class="btn btn--secondary" (click)="prevStep()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                Previous
+              </button>
+            } @else {
+              <button type="button" class="btn btn--secondary" (click)="closeModal()">Cancel</button>
+            }
+          </div>
+          <div class="step-footer__right">
+            @if (currentStep() < 3) {
+              <button type="button" class="btn btn--primary" (click)="nextStep()">
+                Next
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+              </button>
+            } @else {
+              <button type="submit" class="btn btn--primary">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                {{ modalMode() === 'create' ? 'Create Service' : 'Save Changes' }}
+              </button>
+            }
+          </div>
         </div>
       </form>
     </div>
@@ -358,55 +491,34 @@
       <div class="modal__body">
         <div class="view-header">
           <span class="type-pill">{{ selectedService()!.type || 'N/A' }}</span>
-          <span class="status-chip" [class.status-chip--active]="selectedService()!.statut === 'ACTIF'">{{ selectedService()!.statut }}</span>
-          @if (selectedService()!.estUrgence) { <span class="urgence-badge">🚨 Urgence</span> }
+          <span class="status-chip" [class.status-chip--active]="selectedService()!.statut === 'ACTIF'">
+            {{ selectedService()!.statut === 'ACTIF' ? 'Active' : 'Inactive' }}
+          </span>
+          @if (selectedService()!.estUrgence) { <span class="urgence-badge">🚨 Emergency</span> }
         </div>
-        @if (selectedService()!.description) {
-          <p class="view-description">{{ selectedService()!.description }}</p>
-        }
+        @if (selectedService()!.description) { <p class="view-description">{{ selectedService()!.description }}</p> }
         <div class="view-grid">
-          <div class="view-item">
-            <span class="view-item__label">Localisation</span>
-            <span class="view-item__value">{{ selectedService()!.localisation || '—' }}</span>
-          </div>
-          <div class="view-item">
-            <span class="view-item__label">Téléphone</span>
-            <span class="view-item__value">{{ selectedService()!.telephone || '—' }}</span>
-          </div>
-          <div class="view-item">
-            <span class="view-item__label">Email</span>
-            <span class="view-item__value">{{ selectedService()!.email || '—' }}</span>
-          </div>
-          <div class="view-item">
-            <span class="view-item__label">Capacité</span>
-            <span class="view-item__value">{{ selectedService()!.capacite || '—' }}</span>
-          </div>
-          <div class="view-item">
-            <span class="view-item__label">Temps d'attente</span>
-            <span class="view-item__value">{{ selectedService()!.tempsAttenteMoyen ? selectedService()!.tempsAttenteMoyen + ' min' : '—' }}</span>
-          </div>
-          <div class="view-item">
-            <span class="view-item__label">Responsable</span>
-            <span class="view-item__value">{{ selectedService()!.responsableId || '—' }}</span>
-          </div>
+          <div class="view-item"><span class="view-item__label">Location</span><span class="view-item__value">{{ selectedService()!.localisation || '—' }}</span></div>
+          <div class="view-item"><span class="view-item__label">Phone</span><span class="view-item__value">{{ selectedService()!.telephone || '—' }}</span></div>
+          <div class="view-item"><span class="view-item__label">Email</span><span class="view-item__value">{{ selectedService()!.email || '—' }}</span></div>
+          <div class="view-item"><span class="view-item__label">Capacity</span><span class="view-item__value">{{ selectedService()!.capacite || '—' }}</span></div>
+          <div class="view-item"><span class="view-item__label">Avg. Wait</span><span class="view-item__value">{{ selectedService()!.tempsAttenteMoyen ? selectedService()!.tempsAttenteMoyen + ' min' : '—' }}</span></div>
+          <div class="view-item"><span class="view-item__label">Manager</span><span class="view-item__value">{{ selectedService()!.responsableId || '—' }}</span></div>
         </div>
-
         @if (selectedService()!.horaires && selectedService()!.horaires.length) {
           <div class="view-horaires">
-            <h4>Horaires</h4>
+            <h4>Opening Hours</h4>
             <div class="horaires-list">
               @for (h of selectedService()!.horaires; track $index) {
-                <div class="horaire-chip">
-                  <strong>{{ h.jour }}</strong> {{ h.ouverture }} – {{ h.fermeture }}
-                </div>
+                <div class="horaire-chip"><strong>{{ h.jour }}</strong> {{ h.ouverture }} – {{ h.fermeture }}</div>
               }
             </div>
           </div>
         }
       </div>
       <div class="modal__footer">
-        <button class="btn btn--secondary" (click)="closeModal()">Fermer</button>
-        <button class="btn btn--primary" (click)="openEditModal(selectedService()!)">Modifier</button>
+        <button class="btn btn--secondary" (click)="closeModal()">Close</button>
+        <button class="btn btn--primary" (click)="openEditModal(selectedService()!)">Edit</button>
       </div>
     </div>
   </div>
@@ -417,11 +529,11 @@
   <div class="modal-backdrop" (click)="showDeleteConfirm.set(false)">
     <div class="confirm-dialog" (click)="$event.stopPropagation()">
       <div class="confirm-dialog__icon">⚠️</div>
-      <h3>Supprimer ce service ?</h3>
-      <p>Cette action est irréversible.</p>
+      <h3>Delete this service?</h3>
+      <p>This action cannot be undone.</p>
       <div class="confirm-dialog__actions">
-        <button class="btn btn--secondary" (click)="showDeleteConfirm.set(false)">Annuler</button>
-        <button class="btn btn--danger" (click)="deleteService()">Supprimer</button>
+        <button class="btn btn--secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
+        <button class="btn btn--danger" (click)="deleteService()">Delete</button>
       </div>
     </div>
   </div>
