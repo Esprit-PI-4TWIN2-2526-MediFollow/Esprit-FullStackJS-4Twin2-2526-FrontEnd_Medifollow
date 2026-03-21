@@ -23,6 +23,10 @@ export class BuilderComponent implements OnInit {
   description = '';
   medicalService = '';
   questions: Question[] = [];
+//generation with ai
+isGenerating = false;
+generateError = '';
+generateCount = 7;//nb max of questions to generate
 
  // ── Validation state ────────────────────────────────────
   submitted = false; // true après le premier clic sur Save
@@ -281,6 +285,41 @@ isQuestionValid(index: number): boolean {
   cancel(): void {
     this.router.navigate(['/questionnaire']);
   }
+
+//generate questions with ai
+
+generateWithAI(): void {
+  if (!this.title.trim() || !this.medicalService) {
+    this.generateError = 'Please fill in the title and medical service first.';
+    return;
+  }
+
+  this.isGenerating = true;
+  this.generateError = '';
+
+  this.questionnaireService.generateQuestionsWithAI(
+    this.medicalService,
+    this.title,
+    this.description,
+    this.generateCount
+  ).subscribe({
+    next: (result) => {
+      // Ajouter les questions générées à la liste existante
+      this.questions = [
+        ...this.questions,
+        ...result.questions.map((q, i) => ({
+          ...q,
+          order: this.questions.length + i
+        }))
+      ];
+      this.isGenerating = false;
+    },
+    error: () => {
+      this.generateError = 'Failed to generate questions. Please try again.';
+      this.isGenerating = false;
+    }
+  });
+}
 
   // ── Helpers template ────────────────────────────────────
 

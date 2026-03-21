@@ -44,7 +44,18 @@ export class QuestionnaireService {
   toggleStatus(id: string): Observable<Questionnaire> {
     return this.http.patch<Questionnaire>(`${this.API}/${id}/toggle-status`, {});
   }
-
+//generate with ai
+generateQuestionsWithAI(
+  medicalService: string,
+  title: string,
+  description: string,
+  count: number = 7
+): Observable<{ questions: Question[] }> {
+  return this.http.post<{ questions: Question[] }>(
+    'http://localhost:3000/ai/generate-questions',
+    { medicalService, title, description, count }
+  );
+}
   // ── Questions ────────────────────────────────────────────
 
   addQuestion(questionnaireId: string, question: Partial<Question>): Observable<Questionnaire> {
