@@ -8,7 +8,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { QuestionnaireService } from '../../services/questionnaire.service';
 import { UsersService } from '../../services/user/users.service';
 import { PatientResponsesComponent } from './patient-responses/patient-responses.component';
-
+import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
@@ -19,7 +19,8 @@ import { PatientResponsesComponent } from './patient-responses/patient-responses
     CommonModule,
     FormsModule,
     HttpClientModule,
-    PhysicianRoutingModule
+    PhysicianRoutingModule,
+    NgChartsModule,
   ],
   providers: [
     QuestionnaireService,
