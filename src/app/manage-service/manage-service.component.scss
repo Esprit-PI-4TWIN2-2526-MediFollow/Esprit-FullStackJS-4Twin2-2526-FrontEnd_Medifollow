@@ -1391,3 +1391,15 @@
   flex-wrap: wrap;
   justify-content: center;
 }
+
+.confirm-dialog__icon {
+  display: flex;
+  justify-content: center; /* centre horizontalement */
+  align-items: center;     /* centre verticalement */
+  margin-bottom: 1rem;     /* espace sous l'icône */
+}
+
+.confirm-dialog svg {
+  width: 60px;  /* taille adaptée */
+  height: 40px;
+}
