@@ -1,44 +1,280 @@
 <div class="p-6">
 
-  <!-- ── Welcome ──────────────────────────────────────────── -->
-  <div class="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center
+ <!-- ── Welcome ──────────────────────────────────────────── -->
+<div class="mb-6 rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600
+            px-5 py-4 text-white lg:px-6 lg:py-5">
+
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-center
               sm:justify-between">
+
+    <!-- Gauche : titre + date -->
     <div>
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-        Welcome, Dr. {{ getWelcomeName() }}
-      </h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        {{ today | date:'EEEE, MMMM d, yyyy' }}
+      <h4 class="text-xl font-semibold lg:text-2xl">
+        Welcome back, Dr. {{ getWelcomeName() }}
+      </h4>
+      <p class="mt-1 text-sm text-white/80 lg:text-base">
+        Here's your Dashboard overview.
       </p>
+      <div class="mt-4 inline-flex items-center gap-2 text-sm text-white/90">
+        <svg class="h-4 w-4" viewBox="0 0 20 20" fill="none"
+             xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.66667 1.66666V4.16666M13.3333 1.66666V4.16666M2.91667
+                   7.57499H17.0833M5.83333 10.8333H5.84167M10 10.8333H10.0083
+                   M14.1667 10.8333H14.175M5.83333 14.1667H5.84167M10
+                   14.1667H10.0083M14.1667 14.1667H14.175M5.33333
+                   18.3333H14.6667C16.0668 18.3333 16.7669 18.3333 17.3016
+                   18.0608C17.772 17.8211 18.1545 17.4387 18.3942
+                   16.9682C18.6667 16.4336 18.6667 15.7335 18.6667
+                   14.3333V7.16666C18.6667 5.76652 18.6667 5.06646 18.3942
+                   4.53168C18.1545 4.06128 17.772 3.67882 17.3016
+                   3.43914C16.7669 3.16666 16.0668 3.16666 14.6667
+                   3.16666H5.33333C3.9332 3.16666 3.23314 3.16666 2.69836
+                   3.43914C2.22795 3.67882 1.8455 4.06128 1.60582
+                   4.53168C1.33333 5.06646 1.33333 5.76652 1.33333
+                   7.16666V14.3333C1.33333 15.7335 1.33333 16.4336 1.60582
+                   16.9682C1.8455 17.4387 2.22795 17.8211 2.69836
+                   18.0608C3.23314 18.3333 3.9332 18.3333 5.33333 18.3333Z"
+                stroke="currentColor" stroke-width="1.7"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span>{{ today | date:'EEEE, MMMM d, y' }}</span>
+      </div>
     </div>
 
-    <!-- Stats summary -->
-    <div class="flex items-center gap-4">
-      <div class="rounded-xl border border-gray-200 bg-white px-4 py-2.5
-                  dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <p class="text-xs text-gray-400 dark:text-gray-500">
-          Total patients
-        </p>
-        <p class="text-xl font-semibold text-gray-800 dark:text-white/90">
+    <!-- Droite : 3 stats avec fond semi-transparent -->
+    <div class="flex items-center gap-3">
+      <div class="rounded-xl bg-white/20 px-4 py-2.5 backdrop-blur-sm">
+        <p class="text-xs text-white/70">Total patients</p>
+        <p class="text-xl font-semibold text-white">
           {{ patients.length }}
         </p>
       </div>
-      <div class="rounded-xl border border-gray-200 bg-white px-4 py-2.5
-                  dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <p class="text-xs text-gray-400 dark:text-gray-500">Active</p>
-        <p class="text-xl font-semibold text-success-600">
-          {{ activeCount }}
-        </p>
+      <div class="rounded-xl bg-white/20 px-4 py-2.5 backdrop-blur-sm">
+        <p class="text-xs text-white/70">Active</p>
+        <p class="text-xl font-semibold text-white">{{ activeCount }}</p>
       </div>
-      <div class="rounded-xl border border-gray-200 bg-white px-4 py-2.5
-                  dark:border-white/[0.05] dark:bg-white/[0.03]">
-        <p class="text-xs text-gray-400 dark:text-gray-500">Inactive</p>
-        <p class="text-xl font-semibold text-error-500">
-          {{ inactiveCount }}
-        </p>
-      </div>
+      <div class="rounded-xl bg-white/20 px-4 py-2.5 backdrop-blur-sm">
+  <p class="text-xs text-white/70">Inactive</p>
+  <p class="text-xl font-semibold"
+     [ngClass]="inactiveCount > 0 ? 'text-red-300' : 'text-white'">
+    {{ inactiveCount }}
+  </p>
+</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Charts ───────────────────────────────────────────── -->
+<div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+
+  <!-- Gender -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <h4 class="mb-4 text-sm font-semibold text-gray-700
+               dark:text-gray-300">
+      Gender Distribution
+    </h4>
+    <div class="relative h-48">
+      <canvas baseChart
+        [data]="genderChartData"
+        [options]="genderChartOptions"
+        type="doughnut">
+      </canvas>
     </div>
   </div>
+
+  <!-- Age -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <h4 class="mb-4 text-sm font-semibold text-gray-700
+               dark:text-gray-300">
+      Age Distribution
+    </h4>
+    <div class="relative h-48">
+      <canvas baseChart
+        [data]="ageChartData"
+        [options]="ageChartOptions"
+        type="bar">
+      </canvas>
+    </div>
+  </div>
+
+  <!-- Trend -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <h4 class="mb-4 text-sm font-semibold text-gray-700
+               dark:text-gray-300">
+      Responses (last 8 weeks)
+    </h4>
+    <div class="relative h-48">
+      <canvas baseChart
+        [data]="trendChartData"
+        [options]="trendChartOptions"
+        type="line">
+      </canvas>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+<!-- ── Medical Statistics ───────────────────────────────── -->
+<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+
+  <!-- Total Responses -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        Total Responses
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-brand-50 text-brand-500
+                  dark:bg-brand-900/30 dark:text-brand-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0
+                   002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+      {{ totalResponses }}
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      From {{ patients.length }} patient{{ patients.length !== 1 ? 's' : '' }}
+    </p>
+  </div>
+
+  <!-- Compliance Rate -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        Compliance Rate
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  dark:bg-opacity-20"
+           [ngClass]="complianceRate >= 70
+             ? 'bg-success-50 text-success-600 dark:bg-success-900/30 dark:text-success-400'
+             : complianceRate >= 40
+               ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+               : 'bg-error-50 text-error-500 dark:bg-error-900/30 dark:text-error-400'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold"
+       [ngClass]="complianceRate >= 70
+         ? 'text-success-600'
+         : complianceRate >= 40
+           ? 'text-amber-600'
+           : 'text-error-500'">
+      {{ complianceRate }}%
+    </p>
+    <!-- Progress bar -->
+    <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full
+                bg-gray-100 dark:bg-gray-800">
+      <div class="h-full rounded-full transition-all duration-300"
+           [style.width.%]="complianceRate"
+           [ngClass]="complianceRate >= 70
+             ? 'bg-success-500'
+             : complianceRate >= 40
+               ? 'bg-amber-500'
+               : 'bg-error-500'">
+      </div>
+    </div>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      Questionnaire completion
+    </p>
+  </div>
+
+  <!-- Patients responded -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        Patients Responded
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-success-50 text-success-600
+                  dark:bg-success-900/30 dark:text-success-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <polyline points="17 11 19 13 23 9"/>
+        </svg>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+      {{ patientsWithResponse }}
+      <span class="text-sm font-normal text-gray-400">
+        / {{ patients.length }}
+      </span>
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      <span class="font-medium text-error-500">
+        {{ patientsWithNoResponse }}
+      </span>
+      pending response{{ patientsWithNoResponse !== 1 ? 's' : '' }}
+    </p>
+  </div>
+
+  <!-- This week -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        This Week
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-purple-50 text-purple-600
+                  dark:bg-purple-900/30 dark:text-purple-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+      {{ responsesThisWeek }}
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      <ng-container *ngIf="lastResponseDate">
+        Last:
+        <span class="font-medium text-gray-600 dark:text-gray-300">
+          {{ lastResponseDate | date:'MMM d' }}
+        </span>
+      </ng-container>
+      <ng-container *ngIf="!lastResponseDate">
+        No responses yet
+      </ng-container>
+    </p>
+  </div>
+
+</div>
+
+
 
   <!-- ── Table card ───────────────────────────────────────── -->
   <div class="rounded-2xl border border-gray-200 bg-white pt-4
@@ -449,7 +685,7 @@
   <p class="text-sm text-gray-400 dark:text-gray-500">
     {{ questionnaireSearch
        ? 'No questionnaire matches your search.'
-       : 'No active questionnaires for this service.' }}
+       : 'No inactive questionnaires for this service.' }}
   </p>
 </div>
 
@@ -486,7 +722,7 @@
 
       <!-- TBODY -->
       <tbody>
-        <tr *ngFor="let q of filteredQuestionnaires"
+        <tr *ngFor="let q of paginatedQuestionnaires"
             class="border-b border-gray-100 dark:border-white/[0.05]
                    hover:bg-gray-50/40 dark:hover:bg-white/[0.015]
                    transition-colors">
@@ -552,6 +788,56 @@
       </tbody>
     </table>
   </div>
+
+
+
+    <!-- Pagination questionnaire -->
+<div *ngIf="!isLoadingQuestionnaires && totalPagesQuestionnaire > 1"
+     class="px-6 py-4 border-t border-gray-100 dark:border-white/[0.05]">
+  <div class="flex items-center justify-between">
+
+    <button (click)="goToPageQuestionnaire(currentPageQuestionnaire - 1)"
+      [disabled]="currentPageQuestionnaire === 1"
+      class="inline-flex h-10 items-center justify-center rounded-lg
+             border border-gray-300 bg-white px-4 text-sm font-medium
+             text-gray-700 transition hover:bg-gray-50
+             disabled:cursor-not-allowed disabled:opacity-50
+             dark:border-gray-600 dark:bg-transparent
+             dark:text-gray-300 dark:hover:bg-white/[0.05]">
+      Previous
+    </button>
+
+    <span class="block text-sm font-medium text-gray-700
+                 dark:text-gray-400 sm:hidden">
+      Page {{ currentPageQuestionnaire }} of {{ totalPagesQuestionnaire }}
+    </span>
+
+    <ul class="hidden items-center gap-0.5 sm:flex">
+      <li *ngFor="let page of totalPagesArrayQu">
+        <button (click)="goToPageQuestionnaire(page)"
+          class="flex h-10 w-10 items-center justify-center
+                 rounded-lg text-sm font-medium transition"
+          [ngClass]="currentPageQuestionnaire === page
+            ? 'bg-brand-500 text-white'
+            : 'text-gray-700 hover:bg-brand-500/[0.08] hover:text-brand-500 dark:text-gray-400 dark:hover:bg-brand-500 dark:hover:text-white'">
+          {{ page }}
+        </button>
+      </li>
+    </ul>
+
+    <button (click)="goToPageQuestionnaire(currentPageQuestionnaire + 1)"
+      [disabled]="currentPageQuestionnaire === totalPagesQuestionnaire"
+      class="inline-flex h-10 items-center justify-center rounded-lg
+             border border-gray-300 bg-white px-4 text-sm font-medium
+             text-gray-700 transition hover:bg-gray-50
+             disabled:cursor-not-allowed disabled:opacity-50
+             dark:border-gray-600 dark:bg-transparent
+             dark:text-gray-300 dark:hover:bg-white/[0.05]">
+      Next
+    </button>
+
+  </div>
+</div>
 
   <!-- Bottom padding -->
   <div class="pb-2"></div>
