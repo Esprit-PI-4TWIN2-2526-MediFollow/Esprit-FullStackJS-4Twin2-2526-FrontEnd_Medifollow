@@ -298,7 +298,7 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
         this.modalMode.set('create');
         this.selectedService.set(null);
         this.showModal.set(true);
-        this.showToast('Form pre-filled by AI ✨', 'success');
+        this.showToast('Form pre-filled by AI', 'success');
       },
       error: () => {
         this.aiLoading.set(false);
