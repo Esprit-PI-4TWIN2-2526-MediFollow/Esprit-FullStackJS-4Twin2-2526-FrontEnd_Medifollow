@@ -9,6 +9,7 @@ import {
   SignInResponse,
 } from '../../models/auth';
 import { Router } from '@angular/router';
+import { Role } from '../../models/roles';
 
 
 @Injectable({
@@ -38,11 +39,19 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(user));
   }
 
-  getPostLoginRoute(user: Users): string {
-    const role = user?.role;
-    return role === 'SUPERADMIN' || role === 'ADMIN' ? '/dashboard' : '/';
-  }
 
+  getPostLoginRoute(user: Users): string {
+    const roleName = typeof user?.role === 'string'
+      ? user.role
+      : (user?.role as any)?.name ?? '';
+
+    if (!roleName) return '/signin';
+
+    const adminRoles = ['SUPERADMIN', 'ADMIN'];
+    if (adminRoles.includes(roleName.toUpperCase())) return '/dashboard';
+
+    return `/${roleName.toLowerCase()}`;
+  }
   setOnboardingToken(token: string): void {
     sessionStorage.setItem(this.ONBOARDING_TOKEN_KEY, token);
   }
@@ -57,8 +66,9 @@ export class AuthService {
 
   logout() {
     localStorage.clear();
-      sessionStorage.clear();
-     this.router.navigate(['/signin']);
+    sessionStorage.clear();
+    this.router.navigate(['/signin']);
   }
+
 }
 

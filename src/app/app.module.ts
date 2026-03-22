@@ -113,6 +113,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { RoleManageComponent } from './roles/role-manage/role-manage.component';
 import { MicButtonComponent } from './users/mic-button/mic-button.component';
 import { ManageServiceComponent } from './manage-service/manage-service.component';
+import { UnauthorizedComponent } from './pages/other-page/unauthorized/unauthorized.component';
 
 
 
@@ -222,6 +223,7 @@ import { ManageServiceComponent } from './manage-service/manage-service.componen
     FirstLoginChangePasswordComponent,
     RoleManageComponent,
     ManageServiceComponent,
+    UnauthorizedComponent,
 
 
   ],

@@ -1,0 +1,79 @@
+<div class="unauth-page">
+
+  <!-- Decorative background circles -->
+  <div class="unauth-bg-circle unauth-bg-circle--1"></div>
+  <div class="unauth-bg-circle unauth-bg-circle--2"></div>
+  <div class="unauth-bg-circle unauth-bg-circle--3"></div>
+
+  <div class="unauth-content">
+
+    <!-- Shield -->
+    <div class="unauth-shield">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+
+    <!-- Error code -->
+    <div class="unauth-code">
+      <span class="unauth-code__dot"></span>
+      403 · Unauthorized
+    </div>
+
+    <!-- Title -->
+    <h1 class="unauth-title">Access Denied</h1>
+
+    <p class="unauth-subtitle">
+      You don't have permission to view this page.<br/>
+      Contact your administrator if you believe this is a mistake.
+    </p>
+
+    <!-- Divider line -->
+    <div class="unauth-divider">
+      <span></span>
+      <span class="unauth-divider__label">Why am I seeing this?</span>
+      <span></span>
+    </div>
+
+    <!-- Reasons -->
+    <div class="unauth-reasons">
+      <div class="unauth-reason">
+        <div class="unauth-reason__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        </div>
+        <span>Your account role does not have access to this resource</span>
+      </div>
+      <div class="unauth-reason">
+        <div class="unauth-reason__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        </div>
+        <span>Your session may have expired — try signing in again</span>
+      </div>
+      <div class="unauth-reason">
+        <div class="unauth-reason__icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+        </div>
+        <span>This page may require additional permissions from an admin</span>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="unauth-actions">
+      <button class="unauth-btn unauth-btn--secondary" (click)="goBack()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        Go Back
+      </button>
+      <button class="unauth-btn unauth-btn--primary" (click)="goHome()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Go to Dashboard
+      </button>
+    </div>
+
+    <p class="unauth-footer">
+      Need help? <a href="mailto:admin@hospital.tn">Contact support</a>
+    </p>
+
+  </div>
+</div>
