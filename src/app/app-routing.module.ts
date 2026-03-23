@@ -57,7 +57,6 @@ const routes: Routes = [
     component: FirstLoginChangePasswordComponent,
     title: 'MediFollow - Première connexion'
   },
-
   {
     path: '',
     component: AppLayoutComponent,
@@ -79,6 +78,7 @@ const routes: Routes = [
       { path: 'super-admin', loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule) },
       //questionnaire
       { path: 'questionnaire', loadChildren: () => import('./questionnaire/questionnaire.module').then(m => m.QuestionnaireModule) },
+      { path: 'symptoms', loadChildren: () => import('./symptoms/symptoms.module').then(m => m.SymptomsModule) },
 
       //services
       {

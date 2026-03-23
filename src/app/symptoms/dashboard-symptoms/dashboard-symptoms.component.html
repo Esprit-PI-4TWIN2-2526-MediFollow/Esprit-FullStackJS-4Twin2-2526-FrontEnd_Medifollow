@@ -1,0 +1,203 @@
+<div class="rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
+  <div class="flex flex-col gap-3 px-5 mb-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
+      Symptoms Creation
+    </h3>
+
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+      <div class="relative">
+        <select
+          [(ngModel)]="statusFilter"
+          (ngModelChange)="currentPage = 1"
+          class="h-[42px] rounded-lg border border-gray-300 bg-white py-2.5 pl-3 pr-8 text-sm text-gray-800 appearance-none cursor-pointer focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90"
+        >
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+        <span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 20 20" fill="none">
+            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+
+      <div class="relative">
+        <button class="absolute -translate-y-1/2 left-4 top-1/2" type="button">
+          <svg class="fill-gray-500 dark:fill-gray-400" width="16" height="16" viewBox="0 0 20 20">
+            <path d="M3.042 9.374C3.042 5.877 5.877 3.042 9.375 3.042 12.873 3.042 15.709 5.877 15.709 9.374c0 3.497-2.835 6.332-6.334 6.332-3.498 0-6.334-2.835-6.334-6.332z"/>
+          </svg>
+        </button>
+        <input
+          type="text"
+          placeholder="Search by form title..."
+          (input)="onSearchInput($event)"
+          class="h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-[42px] pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 xl:w-[280px]"
+        />
+      </div>
+
+      <button
+        type="button"
+        (click)="goToCreate()"
+        class="inline-flex h-[42px] items-center justify-center gap-2 rounded-full bg-brand-500 px-5 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="none">
+          <path d="M10 4.1665V15.8332" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+          <path d="M4.1665 10H15.8332" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+        </svg>
+        Create Form
+      </button>
+    </div>
+  </div>
+
+  <div
+    *ngIf="errorMessage"
+    class="mx-5 mb-4 flex items-center justify-between rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20 dark:text-error-400 sm:mx-6"
+  >
+    <span>{{ errorMessage }}</span>
+    <button type="button" (click)="errorMessage = ''" class="ml-3 text-error-400 hover:text-error-600">✕</button>
+  </div>
+
+  <div *ngIf="isLoading" class="flex flex-col items-center justify-center gap-3 py-16 text-gray-400 dark:text-gray-500">
+    <svg class="h-8 w-8 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+    </svg>
+    <span class="text-sm">Loading symptoms forms...</span>
+  </div>
+
+  <div
+    *ngIf="!isLoading && filteredForms.length === 0 && !errorMessage"
+    class="mx-5 mb-6 rounded-2xl border border-dashed border-gray-300 bg-gradient-to-br from-gray-50 to-white px-6 py-12 text-center dark:border-gray-700 dark:from-gray-900 dark:to-gray-900 sm:mx-6"
+  >
+    <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-brand-50 text-brand-500 dark:bg-brand-500/10 dark:text-brand-400">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+      </svg>
+    </div>
+    <h4 class="text-base font-semibold text-gray-800 dark:text-white/90">
+      No symptoms forms available
+    </h4>
+    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      {{ searchTerm ? 'No form matches your search.' : 'Create the first form to start collecting patient symptom data.' }}
+    </p>
+  </div>
+
+  <div *ngIf="!isLoading && filteredForms.length > 0" class="max-w-full overflow-x-auto px-5 pb-4 sm:px-6">
+    <table class="min-w-full">
+      <thead class="border-y border-gray-100 dark:border-white/[0.05]">
+        <tr>
+          <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">NAME</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">QUESTIONS</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">STATUS</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">RESPONSES</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">CREATED</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">ACTIONS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let form of paginatedForms"
+          class="border-b border-gray-100 transition-colors hover:bg-gray-50/40 dark:border-white/[0.05] dark:hover:bg-white/[0.015]"
+        >
+          <td class="py-3 pr-4">
+            <div class="flex flex-col gap-0.5">
+              <span class="text-sm font-medium text-gray-800 dark:text-white/90">
+                {{ form.title }}
+              </span>
+              <span class="text-xs text-gray-400 dark:text-gray-500">
+                Symptoms follow-up form
+              </span>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+            {{ form.questions.length }}
+            question{{ form.questions.length !== 1 ? 's' : '' }}
+          </td>
+          <td class="px-4 py-3">
+            <span
+              class="inline-flex items-center rounded-full px-3 py-1 text-xs font-medium"
+              [ngClass]="getFormStatus(form) === 'active'
+                ? 'bg-success-50 text-success-700 border border-success-200 dark:bg-success-500/10 dark:text-success-400 dark:border-success-800'
+                : 'bg-gray-100 text-gray-500 border border-gray-200 dark:bg-white/[0.05] dark:text-gray-400 dark:border-white/[0.08]'"
+            >
+              {{ getFormStatus(form) === 'active' ? 'Active' : 'Inactive' }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+            {{ form.responsesCount || 0 }}
+          </td>
+          <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+            {{ form.createdAt ? (form.createdAt | date:'mediumDate') : 'N/A' }}
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                (click)="goToEdit(form._id!)"
+                class="inline-flex h-[34px] items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:border-brand-300 hover:text-brand-600 dark:border-gray-600 dark:bg-transparent dark:text-gray-300 dark:hover:border-brand-500 dark:hover:text-brand-400"
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                (click)="goToView(form._id!)"
+                class="inline-flex h-[34px] items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600"
+              >
+                View
+              </button>
+              <button
+                type="button"
+                (click)="deleteForm(form._id!, form.title)"
+                class="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-error-200 bg-error-50 text-error-500 transition hover:bg-error-100 dark:border-error-800 dark:bg-error-900/20 dark:text-error-400"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="!isLoading && filteredForms.length > 0" class="px-6 py-4 border-t border-gray-100 dark:border-white/[0.05]">
+    <div class="flex items-center justify-between">
+      <button
+        (click)="goToPage(currentPage - 1)"
+        [disabled]="currentPage === 1"
+        class="inline-flex h-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-transparent dark:text-gray-300 dark:hover:bg-white/[0.05]"
+      >
+        Previous
+      </button>
+
+      <span class="block text-sm font-medium text-gray-700 dark:text-gray-400 sm:hidden">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <ul class="hidden items-center gap-0.5 sm:flex">
+        <li *ngFor="let page of totalPagesArray">
+          <button
+            (click)="goToPage(page)"
+            class="flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition"
+            [ngClass]="currentPage === page
+              ? 'bg-brand-500 text-white'
+              : 'text-gray-700 hover:bg-brand-500/[0.08] hover:text-brand-500 dark:text-gray-400 dark:hover:bg-brand-500 dark:hover:text-white'"
+          >
+            {{ page }}
+          </button>
+        </li>
+      </ul>
+
+      <button
+        (click)="goToPage(currentPage + 1)"
+        [disabled]="currentPage === totalPages"
+        class="inline-flex h-10 items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-transparent dark:text-gray-300 dark:hover:bg-white/[0.05]"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+</div>
