@@ -251,6 +251,40 @@
           Patients from this service will automatically receive this form.
         </p>
       </div>
+
+      <!-- Assign to Patient -->
+      <div class="mt-4">
+        <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          Assign to Patient
+          <span class="text-error-500">*</span>
+        </label>
+        <div class="relative">
+          <select
+            [(ngModel)]="patientId"
+            class="h-11 w-full appearance-none rounded-lg border bg-transparent
+                   px-4 pr-10 text-sm text-gray-800
+                   focus:outline-none focus:ring-3 focus:ring-brand-500/10
+                   dark:text-white/90 transition"
+            [ngClass]="showPatientError()
+              ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+              : 'border-gray-300 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-900'">
+            <option value="">Select a patient</option>
+            <option *ngFor="let patient of patients" [value]="patient._id">
+              {{ patient.firstName }} {{ patient.lastName }}
+            </option>
+          </select>
+          <span class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                 viewBox="0 0 20 20" fill="none">
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor"
+                    stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <p *ngIf="showPatientError()" class="mt-1.5 text-xs text-error-500">
+          Please select a patient.
+        </p>
+      </div>
     </div>
 
     <!-- ── Questions ─────────────────────────────────────── -->

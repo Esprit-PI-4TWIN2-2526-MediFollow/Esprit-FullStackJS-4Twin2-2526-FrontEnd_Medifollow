@@ -25,6 +25,7 @@ export interface SymptomForm {
   title: string;
   description?: string;
   medicalService?: string;
+  patientId?: string;
   questions: SymptomQuestion[];
   status?: 'active' | 'inactive';
   responsesCount?: number;

@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Users } from '../../models/users';
+import { UsersService } from '../../services/user/users.service';
 import {
   SymptomForm,
   SymptomAiQuestion,
@@ -37,7 +39,9 @@ export class BuilderComponent implements OnInit {
   title = '';
   description = '';
   medicalService = '';
+  patientId = '';
   questions: SymptomQuestion[] = [];
+  patients: Users[] = [];
 
   // ── Validation state ─────────────────────────────────────
   submitted = false;
@@ -64,9 +68,12 @@ export class BuilderComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private symptomService: SymptomService,
+    private usersService: UsersService,
   ) {}
 
   ngOnInit(): void {
+    this.loadPatients();
+
     this.formId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.formId;
 
@@ -88,6 +95,10 @@ export class BuilderComponent implements OnInit {
     return this.medicalService.trim() !== '';
   }
 
+  get isPatientValid(): boolean {
+    return this.patientId.trim() !== '';
+  }
+
   isQuestionLabelValid(index: number): boolean {
     return (this.questions[index]?.label.trim().length ?? 0) >= 3;
   }
@@ -107,7 +118,7 @@ export class BuilderComponent implements OnInit {
   }
 
   isFormValid(): boolean {
-    return this.isTitleValid && this.isMedicalServiceValid && this.allQuestionsValid;
+    return this.isTitleValid && this.isMedicalServiceValid && this.isPatientValid && this.allQuestionsValid;
   }
 
   touchQuestion(index: number): void {
@@ -120,6 +131,10 @@ export class BuilderComponent implements OnInit {
 
   showServiceError(): boolean {
     return this.submitted && !this.isMedicalServiceValid;
+  }
+
+  showPatientError(): boolean {
+    return this.submitted && !this.isPatientValid;
   }
 
   showQuestionError(index: number): boolean {
@@ -227,6 +242,7 @@ export class BuilderComponent implements OnInit {
       title:          this.title.trim(),
       description:    this.description.trim(),
       medicalService: this.medicalService,
+      patientId:      this.patientId,
       questions:      this.questions.map((q) => ({
         label:    q.label.trim(),
         type:     q.type,
@@ -295,6 +311,7 @@ export class BuilderComponent implements OnInit {
         this.title = form.title || '';
         this.description = form.description || '';
         this.medicalService = form.medicalService || '';
+        this.patientId = form.patientId || '';
         this.questions = (form.questions || []).map((question, index) => ({
           label: question.label || '',
           type: this.normalizeType(question.type),
@@ -316,6 +333,19 @@ export class BuilderComponent implements OnInit {
         this.errorMessage = 'Unable to load the selected symptoms form.';
         this.isLoading = false;
       }
+    });
+  }
+
+  private loadPatients(): void {
+    this.usersService.getUsers().subscribe({
+      next: (users) => {
+        this.patients = users.filter((user) => user.role === 'patient');
+        console.log(this.patients);
+      },
+      error: (err) => {
+        console.error('Failed to load patients', err);
+        this.patients = [];
+      },
     });
   }
 
