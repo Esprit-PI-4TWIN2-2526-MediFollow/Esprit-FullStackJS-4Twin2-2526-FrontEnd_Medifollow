@@ -15,6 +15,7 @@ import {
   SymptomsAssignedForm,
   SymptomsQuestion,
   SymptomsQuestionType,
+  SymptomsSubmitAnswer,
 } from './symptoms-response.model';
 import { SymptomsResponseService } from './symptoms-response.service';
 
@@ -24,6 +25,7 @@ import { SymptomsResponseService } from './symptoms-response.service';
   styleUrl: './symptoms-renderer.component.css',
 })
 export class SymptomsRendererComponent implements OnInit {
+  currentUser: { _id: string } | null = null;
   form: SymptomsAssignedForm | null = null;
   responseForm: FormGroup;
   patientId = '';
@@ -52,6 +54,14 @@ export class SymptomsRendererComponent implements OnInit {
 
   get currentQuestion(): SymptomsQuestion | null {
     return this.form?.questions?.[this.currentIndex] ?? null;
+  }
+
+  get formData(): SymptomsAssignedForm | null {
+    return this.form;
+  }
+
+  get formGroup(): FormGroup {
+    return this.responseForm;
   }
 
   get totalQuestions(): number {
@@ -111,22 +121,44 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.hasSubmittedToday || !this.form?._id) return;
+    if (this.hasSubmittedToday) return;
 
     const control = this.currentQuestionControl;
     control?.markAsTouched();
 
     if (!this.canGoNext()) return;
 
+    if (!this.currentUser?._id) {
+      this.errorMessage = 'Unable to identify the current patient.';
+      return;
+    }
+
+    if (!this.formData?._id) {
+      this.errorMessage = 'Unable to identify the symptoms form.';
+      return;
+    }
+
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    this.symptomsResponseService.submitResponse({
-      patientId: this.patientId,
-      formId: this.form._id,
-      answers: this.buildAnswersPayload(),
-      date: new Date().toISOString(),
-    }).subscribe({
+    const answers = this.buildAnswersPayload();
+
+    if (answers.length === 0) {
+      this.errorMessage = 'No valid answers to submit.';
+      this.isSubmitting = false;
+      return;
+    }
+
+    const payload = {
+      patientId: this.currentUser._id,
+      formId: this.formData._id,
+      answers,
+      date: new Date(),
+    };
+
+    console.log('SUBMIT DATA:', payload);
+
+    this.symptomsResponseService.submitResponse(payload).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.isSubmitted = true;
@@ -153,9 +185,15 @@ export class SymptomsRendererComponent implements OnInit {
     this.currentQuestionControl?.markAsTouched();
   }
 
-  onMultipleChoiceToggle(optionIndex: number): void {
+  onMultipleChoiceToggle(option: number | string): void {
     const array = this.getCurrentMultipleChoiceArray();
     if (!array) return;
+
+    const optionIndex = typeof option === 'number'
+      ? option
+      : (this.currentQuestion?.options ?? []).indexOf(option);
+
+    if (optionIndex < 0) return;
 
     const control = array.at(optionIndex) as FormControl<boolean>;
     control.setValue(!control.value);
@@ -163,8 +201,14 @@ export class SymptomsRendererComponent implements OnInit {
     array.updateValueAndValidity();
   }
 
-  isOptionChecked(optionIndex: number): boolean {
+  isOptionChecked(option: number | string): boolean {
     const array = this.getCurrentMultipleChoiceArray();
+    const optionIndex = typeof option === 'number'
+      ? option
+      : (this.currentQuestion?.options ?? []).indexOf(option);
+
+    if (optionIndex < 0) return false;
+
     return !!array?.at(optionIndex)?.value;
   }
 
@@ -240,6 +284,7 @@ export class SymptomsRendererComponent implements OnInit {
       this.usersService.getUserByEmail(localUser.email).subscribe({
         next: (user) => {
           this.patientId = user._id || '';
+          this.currentUser = this.patientId ? { _id: this.patientId } : null;
 
           if (!this.patientId) {
             this.errorMessage = 'Unable to identify the current patient.';
@@ -338,26 +383,38 @@ export class SymptomsRendererComponent implements OnInit {
     return this.fb.control(this.getInitialValue(type), validators);
   }
 
-  private buildAnswersPayload(): Record<string, unknown> {
-    const answers: Record<string, unknown> = {};
+  private buildAnswersPayload(): SymptomsSubmitAnswer[] {
+    return (this.form?.questions ?? [])
+      .filter((question): question is SymptomsQuestion & { _id: string } => !!question._id)
+      .map((question) => {
+        const control = this.formGroup.get(question._id);
+        const type = this.normalizeType(question.type);
 
-    for (const question of this.form?.questions ?? []) {
-      if (!question._id) continue;
+        if (!control) {
+          return null;
+        }
 
-      const control = this.responseForm.get(question._id);
-      const type = this.normalizeType(question.type);
+        let value: unknown = control.value;
 
-      if (!control) continue;
+        if (type === 'multiple_choice') {
+          const selections = value as boolean[] | null;
+          value = (question.options ?? []).filter((_, index) => !!selections?.[index]);
+        }
 
-      if (type === 'multiple_choice') {
-        const selected = (question.options ?? []).filter((_, index) => (control.value as boolean[])[index]);
-        answers[question._id] = selected;
-      } else {
-        answers[question._id] = control.value;
-      }
-    }
+        return {
+          questionId: question._id,
+          value,
+        };
+      })
+      .filter((answer): answer is SymptomsSubmitAnswer => {
+        if (!answer) return false;
 
-    return answers;
+        if (Array.isArray(answer.value)) {
+          return answer.value.length > 0;
+        }
+
+        return answer.value !== null && answer.value !== undefined && answer.value !== '';
+      });
   }
 
   private getCurrentMultipleChoiceArray(): FormArray | null {

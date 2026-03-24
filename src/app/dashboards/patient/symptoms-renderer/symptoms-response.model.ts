@@ -44,9 +44,14 @@ export interface SymptomsTodayResponse {
   updatedAt?: string | Date;
 }
 
+export interface SymptomsSubmitAnswer {
+  questionId: string;
+  value: unknown;
+}
+
 export interface SymptomsSubmitPayload {
   patientId: string;
   formId: string;
-  answers: Record<string, unknown>;
-  date: string;
+  answers: SymptomsSubmitAnswer[];
+  date: Date;
 }

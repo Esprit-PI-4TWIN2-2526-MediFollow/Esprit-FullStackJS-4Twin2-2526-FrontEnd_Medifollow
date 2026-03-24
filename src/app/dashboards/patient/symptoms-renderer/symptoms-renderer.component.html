@@ -103,14 +103,14 @@
           {{ errorMessage }}
         </div>
 
-        <div *ngIf="submissionMessage"
+        <div *ngIf="hasSubmittedToday"
              class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3
                     text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20
                     dark:text-amber-400">
-          {{ submissionMessage }}
+          You have already submitted today's symptoms
         </div>
 
-        <form [formGroup]="responseForm"
+        <form [formGroup]="formGroup"
               class="rounded-2xl border border-gray-200 bg-white p-6
                      dark:border-white/[0.05] dark:bg-white/[0.03]">
           <p *ngIf="currentQuestion"
@@ -142,7 +142,7 @@
                   </span>
                   <span class="ml-auto"
                         [ngClass]="isTouched() && getFieldError() ? 'text-error-500' : 'text-gray-400'">
-                    {{ currentQuestionControl?.value?.length || 0 }} chars
+                    {{ formGroup.get(currentQuestion._id!)?.value?.length || 0 }} chars
                   </span>
                 </div>
               </ng-container>
@@ -171,7 +171,7 @@
                   </span>
                   <span *ngIf="isTouched() && !getFieldError()"
                         class="ml-auto font-medium text-brand-500">
-                    {{ currentQuestionControl?.value }}
+                    {{ formGroup.get(currentQuestion._id!)?.value }}
                   </span>
                 </div>
               </ng-container>
@@ -200,17 +200,17 @@
                     type="button"
                     (click)="onSingleChoiceSelect(opt === 'Yes')"
                     class="flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition"
-                    [ngClass]="currentQuestionControl?.value === (opt === 'Yes')
-                      && currentQuestionControl?.value !== null
+                    [ngClass]="formGroup.get(currentQuestion._id!)?.value === (opt === 'Yes')
+                      && formGroup.get(currentQuestion._id!)?.value !== null
                       ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
                       : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
                     <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
-                      [ngClass]="currentQuestionControl?.value === (opt === 'Yes')
-                        && currentQuestionControl?.value !== null
+                      [ngClass]="formGroup.get(currentQuestion._id!)?.value === (opt === 'Yes')
+                        && formGroup.get(currentQuestion._id!)?.value !== null
                         ? 'border-brand-500 bg-brand-500'
                         : 'border-gray-300'">
-                      <span *ngIf="currentQuestionControl?.value === (opt === 'Yes')
-                                   && currentQuestionControl?.value !== null"
+                      <span *ngIf="formGroup.get(currentQuestion._id!)?.value === (opt === 'Yes')
+                                   && formGroup.get(currentQuestion._id!)?.value !== null"
                             class="h-2 w-2 rounded-full bg-white">
                       </span>
                     </span>
@@ -224,18 +224,18 @@
 
               <ng-container *ngSwitchCase="'single_choice'">
                 <div class="flex flex-col gap-3">
-                  <button *ngFor="let opt of currentQuestion.options"
+                  <button *ngFor="let opt of (currentQuestion.options || [])"
                     type="button"
                     (click)="onSingleChoiceSelect(opt)"
                     class="flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition"
-                    [ngClass]="currentQuestionControl?.value === opt
+                    [ngClass]="formGroup.get(currentQuestion._id!)?.value === opt
                       ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
                       : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
                     <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
-                      [ngClass]="currentQuestionControl?.value === opt
+                      [ngClass]="formGroup.get(currentQuestion._id!)?.value === opt
                         ? 'border-brand-500 bg-brand-500'
                         : 'border-gray-300'">
-                      <span *ngIf="currentQuestionControl?.value === opt"
+                      <span *ngIf="formGroup.get(currentQuestion._id!)?.value === opt"
                             class="h-2 w-2 rounded-full bg-white">
                       </span>
                     </span>
@@ -249,7 +249,7 @@
 
               <ng-container *ngSwitchCase="'multiple_choice'">
                 <div class="flex flex-col gap-3">
-                  <button *ngFor="let opt of currentQuestion.options; let i = index"
+                  <button *ngFor="let opt of (currentQuestion.options || []); let i = index"
                     type="button"
                     (click)="onMultipleChoiceToggle(i)"
                     class="flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition"
@@ -274,10 +274,6 @@
                   <p *ngIf="isTouched() && getFieldError()" class="text-error-500">
                     {{ getFieldError() }}
                   </p>
-                  <span *ngIf="!getFieldError() && getSelectedOptionsCount() > 0"
-                        class="ml-auto font-medium text-brand-500">
-                    {{ getSelectedOptionsCount() }} selected
-                  </span>
                 </div>
               </ng-container>
 
@@ -291,7 +287,7 @@
                     ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
                     : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'">
                   <option value="">Select an option</option>
-                  <option *ngFor="let opt of currentQuestion.options" [value]="opt">
+                  <option *ngFor="let opt of (currentQuestion.options || [])" [value]="opt">
                     {{ opt }}
                   </option>
                 </select>
@@ -314,9 +310,9 @@
                 </div>
                 <div class="mt-2 flex justify-between text-xs text-gray-400">
                   <span>Low</span>
-                  <span *ngIf="isScaleSelected(currentQuestionControl?.value)"
+                  <span *ngIf="formGroup.get(currentQuestion._id!)?.value !== null && formGroup.get(currentQuestion._id!)?.value !== undefined"
                         class="font-medium text-brand-500">
-                    Selected: {{ currentQuestionControl?.value }}
+                    Selected: {{ formGroup.get(currentQuestion._id!)?.value }}
                   </span>
                   <span>High</span>
                 </div>
