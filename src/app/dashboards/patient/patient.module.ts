@@ -7,12 +7,14 @@ import { QuestionnaireService } from '../../services/questionnaire.service';
 import { QuestionnaireRendererComponent } from './questionnaire-renderer/questionnaire-renderer.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { SymptomsRendererComponent } from './symptoms-renderer/symptoms-renderer.component';
 
 
 @NgModule({
   declarations: [
     DashboardPatientComponent,
-    QuestionnaireRendererComponent
+    QuestionnaireRendererComponent,
+    SymptomsRendererComponent
   ],
   imports: [
     CommonModule,
