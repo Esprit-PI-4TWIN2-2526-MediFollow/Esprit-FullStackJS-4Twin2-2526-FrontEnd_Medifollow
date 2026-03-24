@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { firstValueFrom } from 'rxjs';
+import { finalize, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Users } from '../../models/users';
 import { UsersService } from '../../services/user/users.service';
@@ -58,6 +58,9 @@ export class AllProfilesComponent implements OnInit {
   isBulkDeleteModalOpen = false;
   isBulkDeleting = false;
   selectedRoleFilter = '';
+  isExportMenuOpen = false;
+  exportingFormat: 'csv' | 'pdf' | null = null;
+  exportError = '';
 
   // ── View modal stub (kept for template compatibility) ─────────
   viewedUser: Users | null = null;
@@ -134,6 +137,19 @@ export class AllProfilesComponent implements OnInit {
     return this.roles
       .filter(r => !r.isOther)
       .map(r => r.label);
+  }
+
+  get canExportUsers(): boolean {
+    const role = this.getCurrentUserRole();
+    return role === 'admin' || role === 'superadmin';
+  }
+
+  get isExportingCsv(): boolean {
+    return this.exportingFormat === 'csv';
+  }
+
+  get isExportingPdf(): boolean {
+    return this.exportingFormat === 'pdf';
   }
 
   constructor(
@@ -219,6 +235,39 @@ export class AllProfilesComponent implements OnInit {
   onSearchInput(event: Event): void {
     this.searchTerm = (event.target as HTMLInputElement).value || '';
     this.currentPage = 1;
+  }
+
+  toggleExportMenu(): void {
+    if (!this.canExportUsers || this.exportingFormat) return;
+    this.isExportMenuOpen = !this.isExportMenuOpen;
+    this.exportError = '';
+  }
+
+  exportUsers(format: 'csv' | 'pdf'): void {
+    if (!this.canExportUsers || this.exportingFormat) return;
+
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      this.exportError = 'Authentication token not found.';
+      this.isExportMenuOpen = false;
+      return;
+    }
+
+    this.exportError = '';
+    this.exportingFormat = format;
+    this.isExportMenuOpen = false;
+
+    this.usersService.exportUsers(format, token)
+      .pipe(finalize(() => { this.exportingFormat = null; }))
+      .subscribe({
+        next: (response) => {
+          const filename = this.getExportFilename(response.headers.get('content-disposition'), format);
+          this.triggerDownload(response.body, filename);
+        },
+        error: (err) => {
+          this.exportError = err?.error?.message || `Failed to export users as ${format.toUpperCase()}.`;
+        },
+      });
   }
 
   goToPage(page: number): void {
@@ -880,6 +929,50 @@ loadRoles(): void {
     const today = new Date();
     this.minDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 120, today.getMonth(), today.getDate()));
     this.maxDateOfBirth = this.formatDateForInput(new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()));
+  }
+
+  private getCurrentUserRole(): string {
+    try {
+      const rawUser = localStorage.getItem('user');
+      if (!rawUser) return '';
+
+      const user = JSON.parse(rawUser);
+      const roleValue = typeof user?.role === 'string'
+        ? user.role
+        : user?.role?.name || user?.role?.label || '';
+
+      return String(roleValue).trim().toLowerCase();
+    } catch {
+      return '';
+    }
+  }
+
+  private getExportFilename(contentDisposition: string | null, format: 'csv' | 'pdf'): string {
+    const utfMatch = contentDisposition?.match(/filename\*=UTF-8''([^;]+)/i);
+    if (utfMatch?.[1]) {
+      return decodeURIComponent(utfMatch[1]);
+    }
+
+    const asciiMatch = contentDisposition?.match(/filename="?([^"]+)"?/i);
+    if (asciiMatch?.[1]) {
+      return asciiMatch[1];
+    }
+
+    return `users-export.${format}`;
+  }
+
+  private triggerDownload(blob: Blob | null, filename: string): void {
+    if (!blob) {
+      this.exportError = 'Export returned an empty file.';
+      return;
+    }
+
+    const blobUrl = window.URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = blobUrl;
+    anchor.download = filename;
+    anchor.click();
+    window.URL.revokeObjectURL(blobUrl);
   }
 
   get uniqueRoles(): string[] {
