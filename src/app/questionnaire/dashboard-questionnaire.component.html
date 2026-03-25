@@ -10,30 +10,28 @@
 
   <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
 
-    <!-- Status filter -->
-    <div class="relative">
-      <select
-        [(ngModel)]="statusFilter"
-        (ngModelChange)="currentPage = 1"
-        class="h-[42px] rounded-lg border border-gray-300 bg-white
-               py-2.5 pl-3 pr-8 text-sm text-gray-800 appearance-none
-               cursor-pointer focus:border-brand-300 focus:outline-none
-               focus:ring-3 focus:ring-brand-500/10
-               dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-        <option value="all">All Status</option>
-        <option value="active">Active</option>
-        <option value="inactive">Inactive</option>
-      </select>
-      <span class="pointer-events-none absolute right-2.5 top-1/2
-                   -translate-y-1/2 text-gray-400">
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-             viewBox="0 0 20 20" fill="none">
-          <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor"
-                stroke-width="1.8" stroke-linecap="round"
-                stroke-linejoin="round"/>
-        </svg>
-      </span>
-    </div>
+   <!-- Status filter -->
+<div class="relative">
+  <select
+    [(ngModel)]="statusFilter"
+    (ngModelChange)="currentPage = 1"
+    class="h-[42px] rounded-lg border border-gray-300 bg-white
+           py-2.5 pl-3 pr-8 text-sm text-gray-800 appearance-none
+           cursor-pointer focus:border-brand-300 focus:outline-none
+           focus:ring-3 focus:ring-brand-500/10
+           dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
+    <option value="all">All Status</option>
+    <option value="active">✅ Active</option>
+    <option value="inactive">⏸️ Inactive</option>
+    <option value="archived">📦 Archived</option>
+  </select>
+  <!-- icône flèche -->
+  <span class="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400">
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 20 20" fill="none">
+      <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </span>
+</div>
 
     <!-- Search -->
     <div class="relative">
@@ -129,123 +127,138 @@
 </p>
   </div>
 
-  <!-- ── Table ────────────────────────────────────────────── -->
-  <div *ngIf="!isLoading && filteredQuestionnaires.length > 0"
-       class="max-w-full overflow-x-auto px-5 sm:px-6">
-    <table class="min-w-full">
+<!-- ── Table ────────────────────────────────────────────── -->
+<div *ngIf="!isLoading && filteredQuestionnaires.length > 0"
+     class="max-w-full overflow-x-auto px-5 sm:px-6">
+  <table class="min-w-full">
 
-      <!-- THEAD -->
-      <thead class="border-y border-gray-100 dark:border-white/[0.05]">
-        <tr>
-          <th class="py-3 text-start text-theme-sm font-normal
-                     text-gray-500 dark:text-gray-400">
-            NAME
-          </th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal
-                     text-gray-500 dark:text-gray-400">
-            QUESTIONS
-          </th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal
-                     text-gray-500 dark:text-gray-400">
-            STATUS
-          </th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal
-                     text-gray-500 dark:text-gray-400">
-            RESPONSES
-          </th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal
-                     text-gray-500 dark:text-gray-400">
-            ACTIONS
-          </th>
-        </tr>
-      </thead>
+    <!-- THEAD -->
+    <thead class="border-y border-gray-100 dark:border-white/[0.05]">
+      <tr>
+        <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">NAME</th>
+        <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">QUESTIONS</th>
+        <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">STATUS</th>
+        <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">RESPONSES</th>
 
-      <!-- TBODY -->
-      <tbody>
-        <tr *ngFor="let q of paginatedQuestionnaires"
-            class="border-b border-gray-100 dark:border-white/[0.05]
-                   hover:bg-gray-50/40 dark:hover:bg-white/[0.015]
-                   transition-colors">
+        <!-- Nouvelle colonne : Date d'archivage -->
+        <th *ngIf="statusFilter === 'archived'"
+            class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">
+          ARCHIVED AT
+        </th>
 
-          <!-- Name + service -->
-          <td class="py-3 pr-4">
-            <div class="flex flex-col gap-0.5">
-              <span class="text-sm font-medium text-gray-800 dark:text-white/90">
-                {{ q.title }}
-              </span>
-              <span class="text-xs text-gray-400 dark:text-gray-500">
-                {{ q.medicalService }}
-              </span>
-            </div>
-          </td>
+        <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">ACTIONS</th>
+      </tr>
+    </thead>
 
-          <!-- Questions count -->
-          <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
-            {{ q.questions.length }}
-            question{{ q.questions.length !== 1 ? 's' : '' }}
-          </td>
+    <!-- TBODY -->
+    <tbody>
+      <tr *ngFor="let q of paginatedQuestionnaires"
+          class="border-b border-gray-100 dark:border-white/[0.05] hover:bg-gray-50/40 dark:hover:bg-white/[0.015] transition-colors">
 
-          <!-- Status badge — cliquable pour toggle -->
-          <td class="px-4 py-3">
-            <span
-              (click)="toggleStatus(q)"
-              title="Click to toggle"
-              class="inline-flex cursor-pointer items-center rounded-full
-                     px-3 py-1 text-xs font-medium transition hover:opacity-80"
-              [ngClass]="q.status === 'active'
-                ? 'bg-success-50 text-success-700 border border-success-200 dark:bg-success-500/10 dark:text-success-400 dark:border-success-800'
-                : 'bg-gray-100 text-gray-500 border border-gray-200 dark:bg-white/[0.05] dark:text-gray-400 dark:border-white/[0.08]'">
-              {{ q.status === 'active' ? 'Active' : 'Inactive' }}
-            </span>
-          </td>
+        <!-- Name + service -->
+        <td class="py-3 pr-4">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-sm font-medium text-gray-800 dark:text-white/90">{{ q.title }}</span>
+            <span class="text-xs text-gray-400 dark:text-gray-500">{{ q.medicalService }}</span>
+          </div>
+        </td>
 
-          <!-- Responses count -->
-          <td class="px-4 py-3 text-sm font-medium text-gray-700
-                     dark:text-gray-300">
-            {{ q.responsesCount }}
-          </td>
+        <!-- Questions -->
+        <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+          {{ q.questions.length }} question{{ q.questions.length !== 1 ? 's' : '' }}
+        </td>
 
-          <!-- Actions -->
-          <td class="px-4 py-3">
-            <div class="flex items-center gap-2">
-              <button (click)="goToEdit(q._id!)"
-                class="inline-flex h-[34px] items-center justify-center
-                       rounded-lg border border-gray-300 bg-white px-4
-                       text-sm font-medium text-gray-700 transition
-                       hover:border-brand-300 hover:text-brand-600
-                       dark:border-gray-600 dark:bg-transparent
-                       dark:text-gray-300 dark:hover:border-brand-500
-                       dark:hover:text-brand-400">
-                Edit
-              </button>
-              <button (click)="goToView(q._id!)"
-                class="inline-flex h-[34px] items-center justify-center
-                       rounded-lg bg-brand-500 px-4 text-sm font-medium
-                       text-white transition hover:bg-brand-600">
-                View
-              </button>
-              <button (click)="handleDelete(q)"
-                class="inline-flex h-[34px] w-[34px] items-center
-                       justify-center rounded-lg border border-error-200
-                       bg-error-50 text-error-500 transition
-                       hover:bg-error-100
-                       dark:border-error-800 dark:bg-error-900/20
-                       dark:text-error-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
-                     viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                     stroke-width="2" stroke-linecap="round"
-                     stroke-linejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"/>
-                  <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-              </button>
-            </div>
-          </td>
+        <!-- Status -->
+        <td class="px-4 py-3">
+          <span class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
+                [ngClass]="{
+                  'bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400': q.status === 'active',
+                  'bg-gray-100 text-gray-500 border border-gray-200 dark:bg-gray-800 dark:text-gray-400': q.status === 'inactive',
+                  'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400': q.status === 'archived'
+                }">
+            <span class="inline-block h-2 w-2 rounded-full"
+                  [ngClass]="{
+                    'bg-emerald-500': q.status === 'active',
+                    'bg-gray-400': q.status === 'inactive',
+                    'bg-amber-500': q.status === 'archived'
+                  }"></span>
+            {{ q.status | titlecase }}
+          </span>
+        </td>
 
-        </tr>
-      </tbody>
-    </table>
-    </div>
+        <!-- Responses -->
+        <td class="px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+          {{ q.responsesCount || 0 }}
+        </td>
+
+        <!-- Archived Date (visible seulement en mode archived) -->
+        <td *ngIf="statusFilter === 'archived'" class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">
+          {{ q.archivedAt | date:'medium' }}
+        </td>
+
+<!-- ACTIONS -->
+<td class="px-4 py-3">
+  <div class="flex items-center gap-2">
+
+    <!-- Edit -->
+    <button (click)="goToEdit(q._id!)"
+      class="inline-flex h-[34px] items-center justify-center rounded-lg border border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 transition hover:border-brand-300 hover:text-brand-600
+             dark:border-gray-600 dark:bg-transparent dark:text-gray-300 dark:hover:border-brand-500 dark:hover:text-brand-400">
+      Edit
+    </button>
+
+    <!-- View -->
+    <button (click)="goToView(q._id!)"
+      class="inline-flex h-[34px] items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600">
+      View
+    </button>
+
+    <!-- Toggle Enable / Disable -->
+    <button
+      (click)="toggleStatus(q)"
+      class="inline-flex h-[34px] items-center justify-center rounded-lg border px-4 text-sm font-medium transition"
+      [ngClass]="q.status === 'active'
+        ? 'border-gray-300 bg-white text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:bg-transparent dark:text-gray-300'
+        : 'border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'">
+      {{ q.status === 'active' ? 'Disable' : 'Enable' }}
+    </button>
+
+    <!-- Archive -->
+    <button *ngIf="q.status !== 'archived'"
+            (click)="archiveQuestionnaire(q)"
+            title="Archive this questionnaire"
+            class="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-amber-200 bg-amber-50 text-amber-600 hover:bg-amber-100 transition
+                   dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+      </svg>
+    </button>
+
+    <!-- Restore -->
+    <button *ngIf="q.status === 'archived'"
+            (click)="restoreQuestionnaire(q)"
+            title="Restore from archive"
+            class="inline-flex h-[34px] items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 px-4 text-xs font-medium text-emerald-700 hover:bg-emerald-100 transition
+                   dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
+      Restore
+    </button>
+
+    <!-- Delete -->
+    <button (click)="handleDelete(q)"
+      class="inline-flex h-[34px] w-[34px] items-center justify-center rounded-lg border border-error-200 bg-error-50 text-error-500 transition hover:bg-error-100
+             dark:border-error-800 dark:bg-error-900/20 dark:text-error-400">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"/>
+        <line x1="6" y1="6" x2="18" y2="18"/>
+      </svg>
+    </button>
+
+  </div>
+</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
     <!-- ── Pagination ──────────────────────────────────── -->
     <div class="px-6 py-4 border-t border-gray-100 dark:border-white/[0.05]">
@@ -301,29 +314,131 @@
 
 </div>
 
-<!-- ── Delete Confirmation Modal ────────────────────────── -->
+<!-- ── Delete Confirmation Modal (Nouveau design) ────────────────────────── -->
 <div *ngIf="questionnaireToDelete"
-     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-  <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl w-80">
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
-      Confirm Deletion
-    </h3>
-    <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-      Are you sure you want to delete
-      <strong>{{ questionnaireToDelete.title }}</strong>?
-      This action cannot be undone.
-    </p>
-    <div class="mt-5 flex justify-end gap-3">
-      <button (click)="cancelDelete()" [disabled]="isDeleting"
-        class="px-4 py-2 rounded-lg border border-gray-300 text-sm
-               text-gray-700 hover:bg-gray-50 disabled:opacity-50
-               dark:border-gray-700 dark:text-gray-300">
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-6 py-5 border-b dark:border-gray-700 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/50 flex items-center justify-center text-2xl">
+        🗑️
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          Confirm Deletion
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">This action cannot be undone</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <p class="text-gray-600 dark:text-gray-300">
+        Are you sure you want to delete
+        <strong class="text-gray-800 dark:text-white">"{{ questionnaireToDelete.title }}"</strong> ?
+      </p>
+      <p class="mt-3 text-sm text-red-600 dark:text-red-400">
+        This action is permanent and cannot be undone.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 px-6 py-5 bg-gray-50 dark:bg-gray-800 border-t dark:border-gray-700">
+      <button (click)="cancelDelete()"
+              class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
         Cancel
       </button>
-      <button (click)="confirmDelete()" [disabled]="isDeleting"
-        class="px-4 py-2 rounded-lg bg-error-500 text-sm font-medium
-               text-white hover:bg-error-600 disabled:opacity-50">
-        {{ isDeleting ? 'Deleting...' : 'Delete' }}
+      <button (click)="confirmDelete()"
+              class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-medium transition flex items-center gap-2">
+        <span>Delete</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Archive Confirmation Modal ────────────────────────── -->
+<div *ngIf="questionnaireToArchive"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-6 py-5 border-b dark:border-gray-700 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-2xl">
+        📦
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          Archive Questionnaire
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">This action can be reversed later</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <p class="text-gray-600 dark:text-gray-300">
+        Are you sure you want to archive
+        <strong class="text-gray-800 dark:text-white">"{{ questionnaireToArchive.title }}"</strong> ?
+      </p>
+      <p class="mt-2 text-sm text-amber-600 dark:text-amber-400">
+        The questionnaire will no longer appear in the active list.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 px-6 py-5 bg-gray-50 dark:bg-gray-800 border-t dark:border-gray-700">
+      <button (click)="cancelArchive()"
+              class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        Cancel
+      </button>
+      <button (click)="confirmArchive()"
+              class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-medium transition flex items-center gap-2">
+        <span>Yes, Archive</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Restore Confirmation Modal ────────────────────────── -->
+<div *ngIf="questionnaireToRestore"
+     class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+  <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md mx-4 overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-6 py-5 border-b dark:border-gray-700 flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center text-2xl">
+        ↩️
+      </div>
+      <div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+          Restore Questionnaire
+        </h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Bring it back to active list</p>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="p-6">
+      <p class="text-gray-600 dark:text-gray-300">
+        Restore
+        <strong class="text-gray-800 dark:text-white">"{{ questionnaireToRestore.title }}"</strong>
+        from archive?
+      </p>
+      <p class="mt-2 text-sm text-emerald-600 dark:text-emerald-400">
+        The questionnaire will become available again.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex justify-end gap-3 px-6 py-5 bg-gray-50 dark:bg-gray-800 border-t dark:border-gray-700">
+      <button (click)="cancelRestore()"
+              class="px-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+        Cancel
+      </button>
+      <button (click)="confirmRestore()"
+              class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition">
+        Yes, Restore
       </button>
     </div>
   </div>

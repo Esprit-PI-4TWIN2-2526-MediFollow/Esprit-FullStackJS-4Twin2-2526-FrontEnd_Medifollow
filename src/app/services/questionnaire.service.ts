@@ -44,6 +44,16 @@ export class QuestionnaireService {
   toggleStatus(id: string): Observable<Questionnaire> {
     return this.http.patch<Questionnaire>(`${this.API}/${id}/toggle-status`, {});
   }
+
+// questionnaire.service.ts
+
+archive(id: string): Observable<Questionnaire> {
+  return this.http.patch<Questionnaire>(`${this.API}/${id}/archive`, {});
+}
+
+restore(id: string): Observable<Questionnaire> {
+  return this.http.patch<Questionnaire>(`${this.API}/${id}/restore`, {});
+}
 //generate with ai
 generateQuestionsWithAI(
   medicalService: string,

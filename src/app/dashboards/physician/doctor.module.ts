@@ -9,11 +9,13 @@ import { QuestionnaireService } from '../../services/questionnaire.service';
 import { UsersService } from '../../services/user/users.service';
 import { PatientResponsesComponent } from './patient-responses/patient-responses.component';
 import { NgChartsModule } from 'ng2-charts';
+import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
 
 @NgModule({
   declarations: [
     DashboardDoctorComponent,
-    PatientResponsesComponent
+    PatientResponsesComponent,
+    ViewQuestionnaireComponent
   ],
   imports: [
     CommonModule,

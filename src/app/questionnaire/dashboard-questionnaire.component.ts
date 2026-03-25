@@ -17,7 +17,9 @@ export class DashboardQuestionnaireComponent implements OnInit {
   // Delete modal
   questionnaireToDelete: Questionnaire | null = null;
   isDeleting = false;
-
+// Variables pour le modal d'archive
+questionnaireToArchive: Questionnaire | null = null;
+questionnaireToRestore: Questionnaire | null = null;
  // ── Pagination ──────────────────────────────────────────
   currentPage = 1;
   itemsPerPage = 6;
@@ -46,7 +48,7 @@ export class DashboardQuestionnaireComponent implements OnInit {
 
 // ── Search + Filter ─────────────────────────────────────
 searchTerm = '';
-statusFilter: 'all' | 'active' | 'inactive' = 'all';
+statusFilter: 'all' | 'active' | 'inactive' | 'archived' = 'all';
 
 get filteredQuestionnaires(): Questionnaire[] {
   return this.questionnaires.filter(q => {
@@ -111,28 +113,85 @@ get totalPages(): number {
   }
 
   handleDelete(questionnaire: Questionnaire): void {
-    this.questionnaireToDelete = questionnaire;
-  }
+  this.questionnaireToDelete = questionnaire;
+}
 
-  cancelDelete(): void {
-    this.questionnaireToDelete = null;
-  }
+confirmDelete(): void {
+  if (!this.questionnaireToDelete) return;
 
-  confirmDelete(): void {
-    if (!this.questionnaireToDelete) return;
-    this.isDeleting = true;
-    this.questionnaireService.delete(this.questionnaireToDelete._id!).subscribe({
-      next: () => {
-        this.questionnaires = this.questionnaires.filter(
-          q => q._id !== this.questionnaireToDelete!._id
-        );
-        this.questionnaireToDelete = null;
-        this.isDeleting = false;
-      },
-      error: () => {
-        this.errorMessage = 'Failed to delete questionnaire.';
-        this.isDeleting = false;
-      }
-    });
-  }
+  this.isDeleting = true;
+  this.questionnaireService.delete(this.questionnaireToDelete._id!).subscribe({
+    next: () => {
+      this.questionnaires = this.questionnaires.filter(
+        q => q._id !== this.questionnaireToDelete!._id
+      );
+      this.questionnaireToDelete = null;
+      this.isDeleting = false;
+    },
+    error: () => {
+      this.errorMessage = 'Failed to delete the questionnaire.';
+      setTimeout(() => this.errorMessage = '', 4000);
+      this.questionnaireToDelete = null;
+      this.isDeleting = false;
+    }
+  });
+}
+
+cancelDelete(): void {
+  this.questionnaireToDelete = null;
+}
+
+
+
+
+// Méthodes pour Archive avec modal
+archiveQuestionnaire(questionnaire: Questionnaire): void {
+  this.questionnaireToArchive = questionnaire;
+}
+
+confirmArchive(): void {
+  if (!this.questionnaireToArchive) return;
+
+  this.questionnaireService.archive(this.questionnaireToArchive._id!).subscribe({
+    next: (updated) => {
+      const index = this.questionnaires.findIndex(q => q._id === updated._id);
+      if (index !== -1) this.questionnaires[index] = updated;
+      this.questionnaireToArchive = null;
+    },
+    error: () => {
+      this.errorMessage = 'Failed to archive the questionnaire.';
+      setTimeout(() => this.errorMessage = '', 4000);
+      this.questionnaireToArchive = null;
+    }
+  });
+}
+
+cancelArchive(): void {
+  this.questionnaireToArchive = null;
+}
+
+// Restore Modal
+restoreQuestionnaire(q: Questionnaire): void {
+  this.questionnaireToRestore = q;
+}
+
+confirmRestore(): void {
+  if (!this.questionnaireToRestore) return;
+  this.questionnaireService.restore(this.questionnaireToRestore._id!).subscribe({
+    next: (updated) => {
+      const index = this.questionnaires.findIndex(q => q._id === updated._id);
+      if (index !== -1) this.questionnaires[index] = updated;
+      this.questionnaireToRestore = null;
+    },
+    error: () => {
+      this.errorMessage = 'Failed to restore questionnaire.';
+      setTimeout(() => this.errorMessage = '', 4000);
+      this.questionnaireToRestore = null;
+    }
+  });
+}
+
+cancelRestore(): void {
+  this.questionnaireToRestore = null;
+}
 }
