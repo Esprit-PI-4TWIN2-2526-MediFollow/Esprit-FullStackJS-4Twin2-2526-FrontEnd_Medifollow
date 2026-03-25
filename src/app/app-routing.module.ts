@@ -75,7 +75,7 @@
 //       { path: 'coordinator', loadChildren: () => import('./dashboards/coordinator/coordinator.module').then(m => m.CoordinatorModule) },
 //       { path: 'nurse', loadChildren: () => import('./dashboards/nurse/nurse.module').then(m => m.NurseModule) },
 //       { path: 'patient', loadChildren: () => import('./dashboards/patient/patient.module').then(m => m.PatientModule) },
-//       { path: 'physician', loadChildren: () => import('./dashboards/physician/physician.module').then(m => m.PhysicianModule) },
+//       { path: 'physician', loadChildren: () => import('./dashboards/physician/physician.module').then(m => m.DoctorModule) },
 //       { path: 'super-admin', loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule) },
 //       //questionnaire
 //       { path: 'questionnaire', loadChildren: () => import('./questionnaire/questionnaire.module').then(m => m.QuestionnaireModule) },
@@ -324,8 +324,8 @@ const routes: Routes = [
         data: { allowedRoles: ['PATIENT'] }
       },
       {
-        path: 'physician',
-        loadChildren: () => import('./dashboards/physician/physician.module').then(m => m.PhysicianModule),
+        path: 'doctor',
+        loadChildren: () => import('./dashboards/physician/doctor.module').then(m => m.DoctorModule),
         canActivate: [RoleGuard],
         data: { allowedRoles: ['DOCTOR'] }
       },

@@ -1,3 +1,6 @@
 npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init
 yahyakaroui☺2003ddddszszs
+
+//pour statistique installez:
+npm install chart.js ng2-charts@5 --legacy-peer-deps
