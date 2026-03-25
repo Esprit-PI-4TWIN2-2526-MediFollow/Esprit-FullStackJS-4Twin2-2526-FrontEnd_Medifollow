@@ -416,7 +416,7 @@ get paginatedQuestionnaires(): Questionnaire[] {
   }
 
   viewQuestionnaire(id: string): void {
-    this.router.navigate(['/questionnaire/view', id]);
+    this.router.navigate(['/doctor/viewQu', id]);
   }
 
 
