@@ -42,7 +42,9 @@ export class SymptomsRendererComponent implements OnInit {
 
   historyDate = '';
   historyLabel = '';
-  responses: SymptomsSubmitAnswer[] = [];
+  responses: SymptomsTodayResponse[] = [];
+  todayResponses: SymptomsTodayResponse[] = [];
+  selectedResponse: SymptomsTodayResponse | null = null;
 
   currentIndex = 0;
 
@@ -66,6 +68,24 @@ export class SymptomsRendererComponent implements OnInit {
 
   get isHistoryMode(): boolean {
     return this.historyDate.trim() !== '';
+  }
+
+  get hasReachedDailyLimit(): boolean {
+    return this.todayResponses.length >= 3;
+  }
+
+  get activeResponses(): SymptomsTodayResponse[] {
+    return this.isHistoryMode ? this.responses : this.todayResponses;
+  }
+
+  get orderedResponses(): SymptomsTodayResponse[] {
+    return [...this.activeResponses].sort((a, b) => {
+      return this.getResponseTimestamp(a) - this.getResponseTimestamp(b);
+    });
+  }
+
+  get selectedResponseAnswers(): SymptomsSubmitAnswer[] {
+    return this.normalizeAnswers(this.selectedResponse?.answers);
   }
 
   get currentQuestion(): SymptomsQuestion | null {
@@ -112,7 +132,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   canGoNext(): boolean {
-    if (this.hasSubmittedToday || this.isHistoryMode) return false;
+    if (this.hasReachedDailyLimit || this.isHistoryMode) return false;
 
     const control = this.currentQuestionControl;
     if (!control) return false;
@@ -141,7 +161,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.hasSubmittedToday || this.isHistoryMode) return;
+    if (this.hasReachedDailyLimit || this.isHistoryMode) return;
 
     const control = this.currentQuestionControl;
     control?.markAsTouched();
@@ -177,6 +197,7 @@ export class SymptomsRendererComponent implements OnInit {
       next: () => {
         this.isSubmitting = false;
         this.isSubmitted = true;
+        this.loadTodayResponses();
       },
       error: (error) => {
         console.error('Failed to submit symptoms response', error);
@@ -300,6 +321,27 @@ export class SymptomsRendererComponent implements OnInit {
     return String(value);
   }
 
+  selectResponse(index: number): void {
+    const response = this.orderedResponses[index];
+    this.selectedResponse = response || null;
+  }
+
+  getAttemptLabel(index: number): string {
+    return `Attempt ${index + 1}`;
+  }
+
+  getResponseTime(response: SymptomsTodayResponse): string {
+    const timestamp = this.getResponseTimestamp(response);
+    if (!timestamp) {
+      return '';
+    }
+
+    return new Date(timestamp).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  }
+
   private loadPatientAndForm(): void {
     this.resetState();
 
@@ -324,12 +366,13 @@ export class SymptomsRendererComponent implements OnInit {
             return;
           }
 
+          this.loadTodayResponses();
+
           forkJoin({
-            todayResponse: this.symptomsResponseService.getTodayResponse(this.patientId),
             form: this.symptomsResponseService.getAssignedForm(this.patientId),
           }).subscribe({
-            next: ({ todayResponse, form }) => {
-              this.hasSubmittedToday = !!todayResponse;
+            next: ({ form }) => {
+              this.hasSubmittedToday = this.todayResponses.length > 0;
               this.form = form ? this.normalizeForm(form) : null;
 
               if (this.isHistoryMode) {
@@ -343,11 +386,6 @@ export class SymptomsRendererComponent implements OnInit {
               }
 
               this.buildForm();
-
-              if (this.hasSubmittedToday) {
-                this.submissionMessage = 'You have already submitted today\'s symptoms';
-                this.responseForm.disable({ emitEvent: false });
-              }
 
               this.isLoading = false;
             },
@@ -371,10 +409,41 @@ export class SymptomsRendererComponent implements OnInit {
     }
   }
 
+  private loadTodayResponses(): void {
+    if (!this.patientId) {
+      this.todayResponses = [];
+      this.selectedResponse = this.isHistoryMode ? this.selectedResponse : null;
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    this.symptomsResponseService.getResponsesByDate(this.patientId, today).subscribe({
+      next: (responses) => {
+        this.todayResponses = responses;
+        this.hasSubmittedToday = responses.length > 0;
+
+        if (!this.isHistoryMode) {
+          this.selectedResponse = this.orderedResponses[0] || null;
+          this.submissionMessage = this.hasReachedDailyLimit
+            ? 'You have reached the maximum of 3 submissions today'
+            : (responses.length > 0 ? 'You can review today\'s submissions below.' : '');
+        }
+      },
+      error: () => {
+        this.todayResponses = [];
+        if (!this.isHistoryMode) {
+          this.selectedResponse = null;
+        }
+      },
+    });
+  }
+
   private loadSymptomsForDate(date: string): void {
     this.isLoading = true;
     this.noData = false;
     this.responses = [];
+    this.selectedResponse = null;
 
     this.symptomsResponseService.getResponsesByDate(this.patientId, date).subscribe({
       next: (data) => {
@@ -382,6 +451,7 @@ export class SymptomsRendererComponent implements OnInit {
           this.noData = true;
         } else {
           this.responses = data;
+          this.selectedResponse = this.orderedResponses[0] || null;
         }
         this.isLoading = false;
       },
@@ -544,7 +614,27 @@ export class SymptomsRendererComponent implements OnInit {
     this.errorMessage = '';
     this.noData = false;
     this.responses = [];
+    this.todayResponses = [];
+    this.selectedResponse = null;
+    this.submissionMessage = '';
     this.currentIndex = 0;
+  }
+
+  private normalizeAnswers(answers: SymptomsTodayResponse['answers'] | undefined): SymptomsSubmitAnswer[] {
+    if (Array.isArray(answers)) {
+      return answers.filter((answer): answer is SymptomsSubmitAnswer => {
+        return !!answer && typeof answer.questionId === 'string';
+      });
+    }
+
+    if (!answers || typeof answers !== 'object') {
+      return [];
+    }
+
+    return Object.entries(answers).map(([questionId, value]) => ({
+      questionId,
+      value,
+    }));
   }
 
   private formatHistoryDate(date: string): string {
@@ -557,5 +647,21 @@ export class SymptomsRendererComponent implements OnInit {
       day: 'numeric',
       year: 'numeric',
     });
+  }
+
+  private getResponseTimestamp(response: SymptomsTodayResponse): number {
+    const rawDate =
+      response.createdAt ??
+      response.updatedAt ??
+      response.submittedAt ??
+      response.responseDate ??
+      response.date;
+
+    if (!rawDate) {
+      return 0;
+    }
+
+    const parsedDate = new Date(rawDate);
+    return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
   }
 }

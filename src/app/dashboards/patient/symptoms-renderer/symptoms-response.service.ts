@@ -4,7 +4,6 @@ import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 import {
   SymptomsAssignedForm,
-  SymptomsSubmitAnswer,
   SymptomsSubmitPayload,
   SymptomsTodayResponse,
 } from './symptoms-response.model';
@@ -48,34 +47,14 @@ export class SymptomsResponseService {
     );
   }
 
-  getResponsesByDate(patientId: string, date: string): Observable<SymptomsSubmitAnswer[]> {
+  getResponsesByDate(patientId: string, date: string): Observable<SymptomsTodayResponse[]> {
     return this.getPatientResponses(patientId).pipe(
-      map((responses) => {
-        const matchedResponse = responses.find((response) => this.extractResponseDateKey(response) === date);
-        return matchedResponse ? this.normalizeAnswers(matchedResponse.answers) : [];
-      })
+      map((responses) => responses.filter((response) => this.extractResponseDateKey(response) === date))
     );
   }
 
   submitResponse(payload: SymptomsSubmitPayload): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/response`, payload);
-  }
-
-  private normalizeAnswers(answers: SymptomsTodayResponse['answers']): SymptomsSubmitAnswer[] {
-    if (Array.isArray(answers)) {
-      return answers.filter((answer): answer is SymptomsSubmitAnswer => {
-        return !!answer && typeof answer.questionId === 'string';
-      });
-    }
-
-    if (!answers || typeof answers !== 'object') {
-      return [];
-    }
-
-    return Object.entries(answers).map(([questionId, value]) => ({
-      questionId,
-      value,
-    }));
   }
 
   private extractResponseDateKey(response: SymptomsTodayResponse): string | null {
