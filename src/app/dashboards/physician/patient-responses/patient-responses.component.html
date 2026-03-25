@@ -117,6 +117,64 @@
     </div>
   </div>
 
+
+<!-- ==================== AI SUMMARY SECTION ==================== -->
+  <div *ngIf="!isLoadingResponses && responses.length > 0" class="mb-8">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-lg font-semibold text-gray-800 dark:text-white">AI Medical Summary</h3>
+
+      <button
+        (click)="generateAISummary()"
+        [disabled]="isGeneratingSummary"
+        class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-6 py-2.5 text-sm font-medium text-white hover:from-violet-700 hover:to-indigo-700 disabled:opacity-70 transition">
+
+        <span *ngIf="isGeneratingSummary" class="animate-spin">⟳</span>
+        <span *ngIf="!isGeneratingSummary">✦ Generate AI Summary</span>
+        <span *ngIf="isGeneratingSummary">Generating...</span>
+      </button>
+    </div>
+
+<!-- Display AI Summary -->
+    <div *ngIf="aiSummary"
+         class="rounded-2xl border border-violet-200 bg-violet-50 p-6 dark:border-violet-800 dark:bg-violet-950/30">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="text-2xl">✦</div>
+        <h4 class="font-semibold text-violet-700 dark:text-violet-300">Intelligent Medical Summary</h4>
+      </div>
+      <p class="text-gray-700 dark:text-gray-200 leading-relaxed whitespace-pre-line">
+        {{ aiSummary }}
+      </p>
+    </div>
+
+    <!-- Placeholder when no summary yet -->
+    <div *ngIf="!aiSummary"
+         class="rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center dark:border-gray-700 dark:bg-gray-900">
+      <p class="text-gray-400 dark:text-gray-500">
+        Click "Generate AI Summary" to get an intelligent medical overview of all this patient's responses.
+      </p>
+    </div>
+  </div>
+  <!-- ==================== END AI SUMMARY ==================== -->
+<!-- <button -->
+  <!-- (click)="generateAISummary()" -->
+  <!-- [disabled]="isGeneratingSummary" -->
+  <!-- class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:from-violet-700 hover:to-indigo-700 transition disabled:opacity-70"> -->
+<!--  -->
+  <!-- <span *ngIf="isGeneratingSummary" class="animate-spin">⟳</span> -->
+  <!-- <span *ngIf="!isGeneratingSummary">✦ AI Summary</span> -->
+  <!-- <span *ngIf="isGeneratingSummary">Generating...</span> -->
+<!-- </button> -->
+<!--  -->
+<!-- <div *ngIf="aiSummary" class="mt-6 p-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700"> -->
+  <!-- <div class="flex items-center gap-2 mb-3"> -->
+    <!-- <span class="text-violet-600 text-xl">✦</span> -->
+    <!-- <h3 class="font-semibold text-gray-900 dark:text-white">AI Medical Summary</h3> -->
+  <!-- </div> -->
+  <!-- <p class="text-gray-700 dark:text-gray-300 leading-relaxed"> -->
+    <!-- {{ aiSummary }} -->
+  <!-- </p> -->
+<!-- </div> -->
+
   <!-- ── Loading ───────────────────────────────────────────── -->
   <div *ngIf="isLoadingResponses"
        class="flex flex-col items-center justify-center gap-3 py-16
