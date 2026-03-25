@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, of, throwError } from 'rxjs';
+import { Observable, catchError, map, of, throwError } from 'rxjs';
 
 import {
   SymptomsAssignedForm,
@@ -36,7 +36,41 @@ export class SymptomsResponseService {
     );
   }
 
+  getPatientResponses(patientId: string): Observable<SymptomsTodayResponse[]> {
+    return this.http.get<SymptomsTodayResponse[]>(`${this.apiUrl}/response/${patientId}`).pipe(
+      catchError((error) => {
+        if (error.status === 404) {
+          return of([]);
+        }
+        return throwError(() => error);
+      })
+    );
+  }
+
+  getResponsesByDate(patientId: string, date: string): Observable<SymptomsTodayResponse[]> {
+    return this.getPatientResponses(patientId).pipe(
+      map((responses) => responses.filter((response) => this.extractResponseDateKey(response) === date))
+    );
+  }
+
   submitResponse(payload: SymptomsSubmitPayload): Observable<unknown> {
     return this.http.post(`${this.apiUrl}/response`, payload);
+  }
+
+  private extractResponseDateKey(response: SymptomsTodayResponse): string | null {
+    const rawDate = response.submittedAt ?? response.responseDate ?? response.date ?? response.createdAt;
+    if (!rawDate) {
+      return null;
+    }
+
+    const parsedDate = new Date(rawDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return null;
+    }
+
+    const year = parsedDate.getFullYear();
+    const month = `${parsedDate.getMonth() + 1}`.padStart(2, '0');
+    const day = `${parsedDate.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

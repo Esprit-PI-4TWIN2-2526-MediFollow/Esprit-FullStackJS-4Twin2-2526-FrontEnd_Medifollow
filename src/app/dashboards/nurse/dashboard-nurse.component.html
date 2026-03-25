@@ -1,1 +1,71 @@
-<p>dashboard-nurse works!</p>
+<div class="min-h-screen bg-gray-50 p-4 dark:bg-gray-950 sm:p-6">
+  <div class="mx-auto max-w-5xl space-y-6">
+    <div class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
+      <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div class="max-w-2xl">
+          <p class="text-sm font-medium uppercase tracking-[0.18em] text-brand-500 dark:text-brand-300">
+            Nurse workspace
+          </p>
+          <h1 class="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">
+            Symptoms validation queue
+          </h1>
+          <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            Review patient responses from your department, validate normal submissions, and escalate abnormal vitals without leaving the nurse dashboard.
+          </p>
+        </div>
+
+        <div class="rounded-3xl border border-brand-100 bg-brand-50 p-5 dark:border-brand-900/40 dark:bg-brand-900/20">
+          <p class="text-xs font-medium uppercase tracking-[0.16em] text-brand-500 dark:text-brand-300">
+            Pending responses
+          </p>
+          <p class="mt-3 text-4xl font-semibold text-brand-700 dark:text-brand-200">
+            {{ isLoading ? '...' : pendingCount }}
+          </p>
+          <button
+            type="button"
+            (click)="openValidationDashboard()"
+            class="mt-4 inline-flex h-11 items-center justify-center rounded-2xl bg-brand-500 px-5 text-sm font-medium text-white transition hover:bg-brand-600">
+            Valider réponses
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      (click)="openValidationDashboard()"
+      class="w-full rounded-3xl border border-gray-200 bg-white p-6 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-brand-200 dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:border-brand-900/60">
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div class="flex items-start gap-4">
+          <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-300">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 6 9 17l-5-5"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Valider réponses</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Open the nurse validation list with pending and validated symptoms submissions.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <span class="inline-flex items-center rounded-full bg-rose-50 px-3 py-1 text-sm font-medium text-rose-700 dark:bg-rose-900/20 dark:text-rose-300">
+            {{ pendingCount }} pending
+          </span>
+          <span class="inline-flex items-center gap-2 text-sm font-medium text-brand-500 dark:text-brand-300">
+            Open queue
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
+          </span>
+        </div>
+      </div>
+    </button>
+  </div>
+</div>

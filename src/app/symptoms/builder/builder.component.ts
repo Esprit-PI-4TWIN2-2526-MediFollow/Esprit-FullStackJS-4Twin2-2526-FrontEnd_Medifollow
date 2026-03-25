@@ -39,7 +39,10 @@ export class BuilderComponent implements OnInit {
   title = '';
   description = '';
   medicalService = '';
-  patientId = '';
+  selectedPatients: string[] = [];
+  searchTerm = '';
+  showPatientModal = false;
+  patientsWithForm: string[] = [];
   questions: SymptomQuestion[] = [];
   patients: Users[] = [];
 
@@ -64,6 +67,64 @@ export class BuilderComponent implements OnInit {
     { value: 'boolean',         label: 'Yes / No' },
   ];
 
+  // ── Default static questions added on form creation ──────
+  private readonly defaultQuestions: Omit<SymptomQuestion, 'order'>[] = [
+    {
+      label:    'What is your pain level?',
+      type:     'scale',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your body temperature (°C)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'Have you changed your dressing?',
+      type:     'boolean',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your oxygen level (SpO2 %)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your blood sugar level (mg/dL)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your heart rate (bpm)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your blood pressure (e.g. 120/80)?',
+      type:     'text',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'Is your urine output normal?',
+      type:     'boolean',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your level of consciousness?',
+      type:     'scale',
+      options:  [],
+      required: true,
+    },
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -72,17 +133,17 @@ export class BuilderComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadPatients();
-
     this.formId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.formId;
+    this.loadPatients();
+    this.loadPatientsWithForms();
 
     if (this.isEditMode) {
       this.loadForm();
       return;
     }
 
-    this.addQuestion();
+    this.addDefaultQuestions();
   }
 
   // ── Validation helpers ───────────────────────────────────
@@ -96,7 +157,7 @@ export class BuilderComponent implements OnInit {
   }
 
   get isPatientValid(): boolean {
-    return this.patientId.trim() !== '';
+    return this.selectedPatients.length > 0;
   }
 
   isQuestionLabelValid(index: number): boolean {
@@ -143,6 +204,10 @@ export class BuilderComponent implements OnInit {
   }
 
   // ── Question management ──────────────────────────────────
+
+  addDefaultQuestions(): void {
+    this.questions = this.defaultQuestions.map((q, i) => ({ ...q, order: i }));
+  }
 
   addQuestion(): void {
     this.questions = [
@@ -197,6 +262,90 @@ export class BuilderComponent implements OnInit {
     this.questions[questionIndex] = { ...q, options: newOptions };
   }
 
+  // ── Patient selection ────────────────────────────────────
+
+  loadPatientsWithForms(): void {
+    this.symptomService.getForms().subscribe({
+      next: (forms) => {
+        this.patientsWithForm = Array.from(new Set(forms
+          .filter((form) => form._id !== this.formId)
+          .flatMap((form) => {
+            const maybeForm = form as SymptomForm & { patientIds?: string[] };
+            if (Array.isArray(maybeForm.patientIds) && maybeForm.patientIds.length > 0) {
+              return maybeForm.patientIds;
+            }
+
+            return form.patientId ? [form.patientId] : [];
+          })
+          .filter((patientId): patientId is string => typeof patientId === 'string' && patientId.trim() !== '')));
+      },
+      error: (err) => {
+        console.error('Failed to load patients with forms', err);
+        this.patientsWithForm = [];
+      },
+    });
+  }
+
+  openPatientModal(): void {
+    this.showPatientModal = true;
+  }
+
+  closePatientModal(): void {
+    this.showPatientModal = false;
+    this.searchTerm = '';
+  }
+
+  togglePatient(id: string): void {
+    if (!id || this.isPatientDisabled(id)) return;
+
+    if (this.selectedPatients.includes(id)) {
+      this.selectedPatients = this.selectedPatients.filter((patientId) => patientId !== id);
+      return;
+    }
+
+    this.selectedPatients = [...this.selectedPatients, id];
+  }
+
+  clearSelectedPatients(): void {
+    this.selectedPatients = [];
+  }
+
+  isPatientDisabled(id: string): boolean {
+    return this.patientsWithForm.includes(id) && !this.selectedPatients.includes(id);
+  }
+
+  get filteredPatients(): Users[] {
+    const term = this.searchTerm.trim().toLowerCase();
+    if (!term) return this.patients;
+
+    return this.patients.filter((patient) => {
+      const fullName = `${patient.firstName || ''} ${patient.lastName || ''}`.trim().toLowerCase();
+      const email = String(patient.email || '').toLowerCase();
+      return fullName.includes(term) || email.includes(term);
+    });
+  }
+
+  get selectedPatientNames(): string {
+    if (this.selectedPatients.length === 0) {
+      return 'No patients selected';
+    }
+
+    const selected = this.patients.filter((patient) => this.selectedPatients.includes(patient._id || ''));
+    const names = selected
+      .map((patient) => `${patient.firstName || ''} ${patient.lastName || ''}`.trim())
+      .filter(Boolean);
+
+    if (names.length === 0) {
+      return `${this.selectedPatients.length} patient${this.selectedPatients.length > 1 ? 's' : ''} selected`;
+    }
+
+    if (names.length <= 2) {
+      return names.join(', ');
+    }
+
+    return `${names.slice(0, 2).join(', ')} +${names.length - 2} more`;
+  }
+
   // ── AI Generation ────────────────────────────────────────
 
   generateWithAI(): void {
@@ -238,11 +387,11 @@ export class BuilderComponent implements OnInit {
     this.isSubmitting = true;
     this.errorMessage = '';
 
-    const payload: Partial<SymptomForm> = {
+    const payload: Partial<SymptomForm> & { patientIds: string[] } = {
       title:          this.title.trim(),
       description:    this.description.trim(),
       medicalService: this.medicalService,
-      patientId:      this.patientId,
+      patientIds:     this.selectedPatients,
       questions:      this.questions.map((q) => ({
         label:    q.label.trim(),
         type:     q.type,
@@ -261,6 +410,7 @@ export class BuilderComponent implements OnInit {
     request$.subscribe({
       next: () => {
         this.isSubmitting = false;
+        this.closePatientModal();
         this.router.navigate(['/symptoms']);
       },
       error: (err) => {
@@ -311,7 +461,10 @@ export class BuilderComponent implements OnInit {
         this.title = form.title || '';
         this.description = form.description || '';
         this.medicalService = form.medicalService || '';
-        this.patientId = form.patientId || '';
+        const maybeForm = form as SymptomForm & { patientIds?: string[] };
+        this.selectedPatients = Array.isArray(maybeForm.patientIds)
+          ? maybeForm.patientIds.filter((patientId) => typeof patientId === 'string' && patientId.trim() !== '')
+          : (form.patientId ? [form.patientId] : []);
         this.questions = (form.questions || []).map((question, index) => ({
           label: question.label || '',
           type: this.normalizeType(question.type),
@@ -340,7 +493,6 @@ export class BuilderComponent implements OnInit {
     this.usersService.getUsers().subscribe({
       next: (users) => {
         this.patients = users.filter((user) => user.role === 'patient');
-        console.log(this.patients);
       },
       error: (err) => {
         console.error('Failed to load patients', err);

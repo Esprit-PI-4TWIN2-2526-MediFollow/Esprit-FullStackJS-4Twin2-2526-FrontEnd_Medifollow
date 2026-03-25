@@ -38,8 +38,10 @@ export interface SymptomsTodayResponse {
   _id?: string;
   patientId?: string;
   formId?: string;
-  answers?: Record<string, unknown>;
+  answers?: Record<string, unknown> | SymptomsSubmitAnswer[];
   date?: string | Date;
+  submittedAt?: string | Date;
+  responseDate?: string | Date;
   createdAt?: string | Date;
   updatedAt?: string | Date;
 }

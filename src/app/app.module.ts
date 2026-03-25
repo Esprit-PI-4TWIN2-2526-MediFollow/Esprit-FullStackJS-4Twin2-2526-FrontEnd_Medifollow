@@ -109,11 +109,12 @@ import { ResetPasswordComponent } from './shared/components/auth/reset-password/
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
 import { FirstLoginChangePasswordComponent } from './shared/components/auth/first-login-change-password/first-login-change-password.component';
 
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { RoleManageComponent } from './roles/role-manage/role-manage.component';
 import { MicButtonComponent } from './users/mic-button/mic-button.component';
 import { ManageServiceComponent } from './manage-service/manage-service.component';
 import { UnauthorizedComponent } from './pages/other-page/unauthorized/unauthorized.component';
+import { authInterceptor } from './services/auth/auth.interceptor';
 
 
 
@@ -237,7 +238,7 @@ import { UnauthorizedComponent } from './pages/other-page/unauthorized/unauthori
 
   ],
   providers: [
-    provideHttpClient()
+    provideHttpClient(withInterceptors([authInterceptor]))
   ],
   bootstrap: [AppComponent]
 })
