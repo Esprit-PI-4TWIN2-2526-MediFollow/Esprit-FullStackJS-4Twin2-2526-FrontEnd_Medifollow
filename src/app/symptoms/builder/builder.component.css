@@ -1,0 +1,31 @@
+.patient-modal-backdrop {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(8px);
+  animation: fade-in 180ms ease-out;
+}
+
+.patient-modal-backdrop > div {
+  animation: modal-pop 220ms ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-pop {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
