@@ -53,18 +53,23 @@
   </div>
 
   <div class="mt-5 grid grid-cols-10 gap-1">
-    <div
+    <button
       *ngFor="let day of symptomDays"
-      class="h-5 w-5 rounded-[4px]"
+      type="button"
+      (click)="day.status !== 'empty' ? goToSymptomsHistory(day.date) : null"
+      class="h-5 w-5 appearance-none rounded-[4px] border-0 p-0"
       [ngClass]="{
         'bg-green-500': day.status === 'submitted',
         'bg-red-400': day.status === 'missed',
         'bg-green-700 ring-2 ring-green-300 ring-offset-1': day.status === 'today' || day.status === 'today-submitted',
         'bg-gray-100': day.status === 'empty'
       }"
+      [disabled]="day.status === 'empty'"
+      [class.cursor-pointer]="day.status !== 'empty'"
+      [class.cursor-default]="day.status === 'empty'"
       [attr.title]="day.tooltip"
       [attr.aria-label]="day.tooltip"
-    ></div>
+    ></button>
   </div>
 
   <div class="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">

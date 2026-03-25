@@ -125,6 +125,11 @@ export class DashboardPatientComponent implements OnInit {
     this.router.navigate(['/patient/symptoms']);
   }
 
+  goToSymptomsHistory(date: Date): void {
+    if (!date) return;
+    this.router.navigate(['/patient/symptoms-history', this.toDateKey(date)]);
+  }
+
   private initializeSymptomsStreak(createdAt: string | Date, responses: SymptomResponse[]): void {
     this.symptomDays = this.generateSymptomDays(createdAt, responses);
     this.streak = this.calculateStreak(this.symptomDays);

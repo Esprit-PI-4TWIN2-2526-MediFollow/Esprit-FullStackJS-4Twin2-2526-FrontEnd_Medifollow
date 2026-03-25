@@ -5,9 +5,10 @@ import {
   FormBuilder,
   FormControl,
   FormGroup,
+  ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 import { UsersService } from '../../../services/user/users.service';
@@ -16,6 +17,7 @@ import {
   SymptomsQuestion,
   SymptomsQuestionType,
   SymptomsSubmitAnswer,
+  SymptomsTodayResponse,
 } from './symptoms-response.model';
 import { SymptomsResponseService } from './symptoms-response.service';
 
@@ -36,11 +38,17 @@ export class SymptomsRendererComponent implements OnInit {
   hasSubmittedToday = false;
   errorMessage = '';
   submissionMessage = '';
+  noData = false;
+
+  historyDate = '';
+  historyLabel = '';
+  responses: SymptomsSubmitAnswer[] = [];
 
   currentIndex = 0;
 
   constructor(
     private fb: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
     private usersService: UsersService,
     private symptomsResponseService: SymptomsResponseService
@@ -49,7 +57,15 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadPatientAndForm();
+    this.route.paramMap.subscribe((params) => {
+      this.historyDate = params.get('date') || '';
+      this.historyLabel = this.historyDate ? this.formatHistoryDate(this.historyDate) : '';
+      this.loadPatientAndForm();
+    });
+  }
+
+  get isHistoryMode(): boolean {
+    return this.historyDate.trim() !== '';
   }
 
   get currentQuestion(): SymptomsQuestion | null {
@@ -96,7 +112,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   canGoNext(): boolean {
-    if (this.hasSubmittedToday) return false;
+    if (this.hasSubmittedToday || this.isHistoryMode) return false;
 
     const control = this.currentQuestionControl;
     if (!control) return false;
@@ -117,11 +133,15 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/patient/dashboard']);
+    this.router.navigate([this.isHistoryMode ? '/patient/dashboard' : '/patient/dashboard']);
+  }
+
+  goToDay(date: string): void {
+    this.router.navigate(['/patient/symptoms-history', date]);
   }
 
   submit(): void {
-    if (this.hasSubmittedToday) return;
+    if (this.hasSubmittedToday || this.isHistoryMode) return;
 
     const control = this.currentQuestionControl;
     control?.markAsTouched();
@@ -142,23 +162,18 @@ export class SymptomsRendererComponent implements OnInit {
     this.errorMessage = '';
 
     const answers = this.buildAnswersPayload();
-
     if (answers.length === 0) {
       this.errorMessage = 'No valid answers to submit.';
       this.isSubmitting = false;
       return;
     }
 
-    const payload = {
+    this.symptomsResponseService.submitResponse({
       patientId: this.currentUser._id,
       formId: this.formData._id,
       answers,
       date: new Date(),
-    };
-
-    console.log('SUBMIT DATA:', payload);
-
-    this.symptomsResponseService.submitResponse(payload).subscribe({
+    }).subscribe({
       next: () => {
         this.isSubmitting = false;
         this.isSubmitted = true;
@@ -210,11 +225,6 @@ export class SymptomsRendererComponent implements OnInit {
     if (optionIndex < 0) return false;
 
     return !!array?.at(optionIndex)?.value;
-  }
-
-  getSelectedOptionsCount(): number {
-    const array = this.getCurrentMultipleChoiceArray();
-    return array ? (array.value as boolean[]).filter(Boolean).length : 0;
   }
 
   isTouched(): boolean {
@@ -269,9 +279,31 @@ export class SymptomsRendererComponent implements OnInit {
     return '';
   }
 
-  private loadPatientAndForm(): void {
-    const userStr = localStorage.getItem('user');
+  getQuestionLabel(questionId: string): string {
+    const question = this.form?.questions?.find((item) => item._id === questionId);
+    return question?.label || questionId;
+  }
 
+  formatAnswerValue(value: unknown): string {
+    if (Array.isArray(value)) {
+      return value.length > 0 ? value.join(', ') : 'No answer provided';
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+
+    if (value === null || value === undefined || value === '') {
+      return 'No answer provided';
+    }
+
+    return String(value);
+  }
+
+  private loadPatientAndForm(): void {
+    this.resetState();
+
+    const userStr = localStorage.getItem('user');
     if (!userStr) {
       this.errorMessage = 'Unable to identify the current patient.';
       this.isLoading = false;
@@ -298,14 +330,18 @@ export class SymptomsRendererComponent implements OnInit {
           }).subscribe({
             next: ({ todayResponse, form }) => {
               this.hasSubmittedToday = !!todayResponse;
+              this.form = form ? this.normalizeForm(form) : null;
 
-              if (!form) {
-                this.form = null;
+              if (this.isHistoryMode) {
+                this.loadSymptomsForDate(this.historyDate);
+                return;
+              }
+
+              if (!this.form) {
                 this.isLoading = false;
                 return;
               }
 
-              this.form = this.normalizeForm(form);
               this.buildForm();
 
               if (this.hasSubmittedToday) {
@@ -335,6 +371,27 @@ export class SymptomsRendererComponent implements OnInit {
     }
   }
 
+  private loadSymptomsForDate(date: string): void {
+    this.isLoading = true;
+    this.noData = false;
+    this.responses = [];
+
+    this.symptomsResponseService.getResponsesByDate(this.patientId, date).subscribe({
+      next: (data) => {
+        if (!data || data.length === 0) {
+          this.noData = true;
+        } else {
+          this.responses = data;
+        }
+        this.isLoading = false;
+      },
+      error: () => {
+        this.noData = true;
+        this.isLoading = false;
+      },
+    });
+  }
+
   private buildForm(): void {
     const group: Record<string, AbstractControl> = {};
 
@@ -348,7 +405,7 @@ export class SymptomsRendererComponent implements OnInit {
 
   private createControl(question: SymptomsQuestion): AbstractControl {
     const type = this.normalizeType(question.type);
-    const validators = [];
+    const validators: ValidatorFn[] = [];
 
     if (question.required) {
       if (type === 'multiple_choice') {
@@ -480,5 +537,25 @@ export class SymptomsRendererComponent implements OnInit {
     selectedDate.setHours(0, 0, 0, 0);
 
     return selectedDate > today ? { futureDate: true } : null;
+  }
+
+  private resetState(): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.noData = false;
+    this.responses = [];
+    this.currentIndex = 0;
+  }
+
+  private formatHistoryDate(date: string): string {
+    const [year, month, day] = date.split('-').map(Number);
+    const parsedDate = new Date(year, (month || 1) - 1, day || 1);
+
+    return parsedDate.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
   }
 }

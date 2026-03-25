@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-gray-50 dark:bg-gray-950 p-4 sm:p-6">
+<div class="min-h-screen bg-gray-50 p-4 dark:bg-gray-950 sm:p-6">
   <div class="mx-auto max-w-2xl">
 
     <div *ngIf="isLoading"
@@ -48,9 +48,10 @@
           Back to dashboard
         </button>
 
-        <div class="flex items-center gap-3" *ngIf="form">
+        <div class="flex items-center gap-3" *ngIf="form || isHistoryMode">
           <div class="flex h-10 w-10 shrink-0 items-center justify-center
-                      rounded-xl bg-brand-50 text-brand-500 dark:bg-brand-900/30 dark:text-brand-400">
+                      rounded-xl bg-brand-50 text-brand-500
+                      dark:bg-brand-900/30 dark:text-brand-400">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                  viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -63,22 +64,57 @@
           </div>
           <div>
             <h1 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-              {{ form.title }}
+              {{ isHistoryMode ? ('Symptoms for ' + historyLabel) : form?.title }}
             </h1>
-            <p *ngIf="form.description" class="text-sm text-gray-500 dark:text-gray-400">
-              {{ form.description }}
+            <p *ngIf="isHistoryMode"
+               class="text-sm text-gray-500 dark:text-gray-400">
+              Review the answers you submitted for this specific day.
+            </p>
+            <p *ngIf="!isHistoryMode && form?.description"
+               class="text-sm text-gray-500 dark:text-gray-400">
+              {{ form?.description }}
             </p>
           </div>
         </div>
       </div>
 
-      <div *ngIf="!form && !errorMessage"
+      <div *ngIf="isHistoryMode">
+        <div *ngIf="noData"
+             class="rounded-2xl border border-gray-200 bg-white p-8 text-center
+                    dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <p class="text-base font-semibold text-gray-800 dark:text-white/90">
+            You did not submit your symptoms for this day
+          </p>
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            Select another day from your dashboard history to review a previous submission.
+          </p>
+        </div>
+
+        <div *ngIf="!noData"
+             class="rounded-2xl border border-gray-200 bg-white p-6
+                    dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <div class="space-y-4">
+            <div *ngFor="let answer of responses"
+                 class="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4
+                        dark:border-white/[0.06] dark:bg-white/[0.02]">
+              <p class="text-sm font-semibold text-gray-800 dark:text-white/90">
+                {{ getQuestionLabel(answer.questionId) }}
+              </p>
+              <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                {{ formatAnswerValue(answer.value) }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!isHistoryMode && !form && !errorMessage"
            class="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-500
                   dark:border-white/[0.05] dark:bg-white/[0.03] dark:text-gray-400">
         No symptoms form is assigned to you today.
       </div>
 
-      <div *ngIf="form">
+      <div *ngIf="!isHistoryMode && form">
         <div class="mb-4 rounded-2xl border border-gray-200 bg-white p-4
                     dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div class="mb-2 flex items-center justify-between text-sm">
@@ -164,15 +200,6 @@
                   <span *ngIf="isTouched() && getFieldError()" class="text-error-500">
                     {{ getFieldError() }}
                   </span>
-                  <span *ngIf="!getFieldError() && currentQuestion.validation?.min !== undefined"
-                        class="text-gray-400">
-                    Accepted range:
-                    {{ currentQuestion.validation?.min }} → {{ currentQuestion.validation?.max }}
-                  </span>
-                  <span *ngIf="isTouched() && !getFieldError()"
-                        class="ml-auto font-medium text-brand-500">
-                    {{ formGroup.get(currentQuestion._id!)?.value }}
-                  </span>
                 </div>
               </ng-container>
 
@@ -189,9 +216,6 @@
                 <p *ngIf="isTouched() && getFieldError()" class="mt-1.5 text-xs text-error-500">
                   {{ getFieldError() }}
                 </p>
-                <p *ngIf="!getFieldError()" class="mt-1.5 text-xs text-gray-400">
-                  Date cannot be in the future.
-                </p>
               </ng-container>
 
               <ng-container *ngSwitchCase="'boolean'">
@@ -204,16 +228,6 @@
                       && formGroup.get(currentQuestion._id!)?.value !== null
                       ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
                       : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-                    <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
-                      [ngClass]="formGroup.get(currentQuestion._id!)?.value === (opt === 'Yes')
-                        && formGroup.get(currentQuestion._id!)?.value !== null
-                        ? 'border-brand-500 bg-brand-500'
-                        : 'border-gray-300'">
-                      <span *ngIf="formGroup.get(currentQuestion._id!)?.value === (opt === 'Yes')
-                                   && formGroup.get(currentQuestion._id!)?.value !== null"
-                            class="h-2 w-2 rounded-full bg-white">
-                      </span>
-                    </span>
                     {{ opt }}
                   </button>
                 </div>
@@ -231,14 +245,6 @@
                     [ngClass]="formGroup.get(currentQuestion._id!)?.value === opt
                       ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
                       : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-                    <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2"
-                      [ngClass]="formGroup.get(currentQuestion._id!)?.value === opt
-                        ? 'border-brand-500 bg-brand-500'
-                        : 'border-gray-300'">
-                      <span *ngIf="formGroup.get(currentQuestion._id!)?.value === opt"
-                            class="h-2 w-2 rounded-full bg-white">
-                      </span>
-                    </span>
                     {{ opt }}
                   </button>
                 </div>
@@ -256,25 +262,12 @@
                     [ngClass]="isOptionChecked(i)
                       ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
                       : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-                    <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-lg border-2"
-                      [ngClass]="isOptionChecked(i)
-                        ? 'border-brand-500 bg-brand-500'
-                        : 'border-gray-300'">
-                      <svg *ngIf="isOptionChecked(i)"
-                           xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                           viewBox="0 0 24 24" fill="none" stroke="white"
-                           stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="20 6 9 17 4 12"/>
-                      </svg>
-                    </span>
                     {{ opt }}
                   </button>
                 </div>
-                <div class="mt-2 flex items-center justify-between text-xs">
-                  <p *ngIf="isTouched() && getFieldError()" class="text-error-500">
-                    {{ getFieldError() }}
-                  </p>
-                </div>
+                <p *ngIf="isTouched() && getFieldError()" class="mt-2 text-xs text-error-500">
+                  {{ getFieldError() }}
+                </p>
               </ng-container>
 
               <ng-container *ngSwitchCase="'select'">
@@ -307,14 +300,6 @@
                       : 'border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:bg-transparent dark:text-gray-400'">
                     {{ n }}
                   </button>
-                </div>
-                <div class="mt-2 flex justify-between text-xs text-gray-400">
-                  <span>Low</span>
-                  <span *ngIf="formGroup.get(currentQuestion._id!)?.value !== null && formGroup.get(currentQuestion._id!)?.value !== undefined"
-                        class="font-medium text-brand-500">
-                    Selected: {{ formGroup.get(currentQuestion._id!)?.value }}
-                  </span>
-                  <span>High</span>
                 </div>
                 <p *ngIf="isTouched() && getFieldError()" class="mt-1.5 text-xs text-error-500">
                   {{ getFieldError() }}
