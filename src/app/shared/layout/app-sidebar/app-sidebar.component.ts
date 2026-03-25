@@ -66,13 +66,15 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
       roles: ['SUPERADMIN', 'ADMIN'],
     },
     {
-  icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none">
     <path d="M8 3.75H16C17.7949 3.75 19.25 5.20507 19.25 7V17C19.25 18.7949 17.7949 20.25 16 20.25H8C6.20507 20.25 4.75 18.7949 4.75 17V7C4.75 5.20507 6.20507 3.75 8 3.75Z" stroke="currentColor" stroke-width="1.5"/>
     <path d="M8 8H16M8 12H16M8 16H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
   </svg>`,
-  name: "Manage Symptomes",
-  path: "/symptoms"
-},
+      name: "Manage Symptomes",
+      path: "/symptoms",
+      roles: ['SUPERADMIN', 'ADMIN'],
+
+    },
 
   ];
 
