@@ -156,6 +156,6 @@ export class PatientResponsesComponent implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/physician/dashboard']);
+    this.router.navigate(['/doctor/dashboard']);
   }
 }

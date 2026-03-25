@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { PhysicianRoutingModule } from './physician-routing.module';
-import { DashboardPhysicianComponent } from './dashboard-physician.component';
+import { DoctorRoutingModule } from './doctor-routing.module';
+import { DashboardDoctorComponent } from './dashboard-doctor.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { QuestionnaireService } from '../../services/questionnaire.service';
@@ -12,14 +12,14 @@ import { NgChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
-    DashboardPhysicianComponent,
+    DashboardDoctorComponent,
     PatientResponsesComponent
   ],
   imports: [
     CommonModule,
     FormsModule,
     HttpClientModule,
-    PhysicianRoutingModule,
+    DoctorRoutingModule,
     NgChartsModule,
   ],
   providers: [
@@ -27,4 +27,4 @@ import { NgChartsModule } from 'ng2-charts';
     UsersService
   ]
 })
-export class PhysicianModule { }
+export class DoctorModule { }

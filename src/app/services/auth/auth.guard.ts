@@ -77,7 +77,7 @@ export class AuthGuard implements CanActivate {
     COORDINATOR: '/coordinator/dashboard',
     NURSE: '/nurse/dashboard',
     PATIENT: '/patient/dashboard',
-    DOCTOR: '/physician/dashboard',
+    DOCTOR: '/doctor/dashboard',
   };
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
@@ -90,7 +90,7 @@ export class AuthGuard implements CanActivate {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const role = this.extractRole(user).toUpperCase();
-    const targetPath = state.url.split('?')[0]; 
+    const targetPath = state.url.split('?')[0];
 
     if (targetPath === '/' || targetPath === '') {
       const home = this.ROLE_HOME[role] ?? '/dashboard';

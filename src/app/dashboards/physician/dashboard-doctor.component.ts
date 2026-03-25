@@ -9,10 +9,10 @@ import { QuestionnaireService } from '../../services/questionnaire.service';
 
 @Component({
   selector: 'app-dashboard-physician',
-  templateUrl: './dashboard-physician.component.html',
-  styleUrl: './dashboard-physician.component.css'
+  templateUrl: './dashboard-doctor.component.html',
+  styleUrl: './dashboard-doctor.component.css'
 })
-export class DashboardPhysicianComponent implements OnInit {
+export class DashboardDoctorComponent implements OnInit {
 
   currentDoctor: Users | null = null;
   patients: Users[] = [];
@@ -412,12 +412,13 @@ get paginatedQuestionnaires(): Questionnaire[] {
   // ── Navigation ──────────────────────────────────────────
 
   viewPatientResponses(patientId: string): void {
-    this.router.navigate(['/physician/patient', patientId, 'responses']);
+    this.router.navigate(['/doctor/patient', patientId, 'responses']);
   }
 
   viewQuestionnaire(id: string): void {
     this.router.navigate(['/questionnaire/view', id]);
   }
+
 
   // ── Helpers ─────────────────────────────────────────────
 

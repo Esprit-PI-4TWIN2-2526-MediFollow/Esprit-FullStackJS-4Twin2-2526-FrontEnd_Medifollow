@@ -6,9 +6,9 @@ export class RoleGuard implements CanActivate {
   constructor(private router: Router) { }
 
   // Exceptions : rôles dont le nom de route diffère du nom du rôle
-  private readonly ROUTE_EXCEPTIONS: Record<string, string> = {
-    DOCTOR: '/physician/dashboard',
-  };
+  /*private readonly ROUTE_EXCEPTIONS: Record<string, string> = {
+    DOCTOR: '/physician',
+  };*/
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -43,12 +43,12 @@ export class RoleGuard implements CanActivate {
   private getHomeRoute(roleName: string): string {
     if (!roleName) return '/signin';
 
-    const normalized = roleName.toUpperCase();
+    //const normalized = roleName.toUpperCase();
 
     // Vérifier les exceptions d'abord
-    if (this.ROUTE_EXCEPTIONS[normalized]) {
+    /*if (this.ROUTE_EXCEPTIONS[normalized]) {
       return this.ROUTE_EXCEPTIONS[normalized];
-    }
+    }*/
 
     // // Admins → dashboard partagé
     // if (['SUPERADMIN', 'ADMIN'].includes(normalized)) {
