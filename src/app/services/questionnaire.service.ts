@@ -122,4 +122,16 @@ generateQuestionsWithAI(
       `${this.API}/patient/${patientId}/responses`
     );
   }
+
+//summary with ai
+generatePatientSummary(patientName: string, medicalService: string, responses: any[]) {
+  return this.http.post<{ summary: string }>(
+    'http://localhost:3000/ai/generate-summary',   // ← URL correcte
+    {
+      patientName,
+      medicalService,
+      responses
+    }
+  );
+}
 }

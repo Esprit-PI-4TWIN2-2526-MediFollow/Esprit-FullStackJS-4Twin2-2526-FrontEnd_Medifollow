@@ -41,6 +41,7 @@ currentPageQuestionnaire=1;
   // Responses count per patient
   responsesCountMap: Record<string, number> = {};
 
+
   // ── Charts ───────────────────────────────────────────────
 
   genderChartData: ChartData<'doughnut'> = {
@@ -435,4 +436,6 @@ get paginatedQuestionnaires(): Questionnaire[] {
   getWelcomeName(): string {
     return this.currentDoctor?.firstName?.trim() || 'Doctor';
   }
+
+
 }

@@ -24,7 +24,9 @@ export class PatientResponsesComponent implements OnInit {
 
   // Réponse sélectionnée pour le détail
   selectedResponse: QuestionnaireResponsePopulated | null = null;
-
+// AI Summary
+  isGeneratingSummary = false;
+  aiSummary: string | null = null;
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -91,7 +93,48 @@ export class PatientResponsesComponent implements OnInit {
       });
     });
   }
+// ── AI Summary ──────────────────────────────────────────
+generateAISummary(): void {
+    if (this.isGeneratingSummary || !this.patient || this.responses.length === 0) return;
 
+    this.isGeneratingSummary = true;
+    this.aiSummary = null;
+
+    const patientName = `${this.patient.firstName || ''} ${this.patient.lastName || ''}`.trim() || 'Patient';
+    const medicalService = this.responses[0]?.questionnaireId
+      ? (typeof this.responses[0].questionnaireId === 'object'
+          ? this.responses[0].questionnaireId.medicalService
+          : this.questionnairesMap[this.responses[0].questionnaireId as string]?.medicalService || 'General')
+      : 'General';
+
+    // Préparer toutes les réponses du patient pour l'IA
+    const allResponsesForAI = this.responses.map(response => ({
+      questionnaireTitle: this.getQuestionnaireTitle(response),
+      medicalService: this.getQuestionnaireMedicalService(response),
+      createdAt: response.createdAt,
+      answers: response.answers.map(ans => ({
+        question: this.getQuestionLabel(response, ans.questionId),
+        value: ans.value,
+        formattedValue: this.formatValue(ans.value)
+      }))
+    }));
+
+    this.questionnaireService.generatePatientSummary(
+      patientName,
+      medicalService,
+      allResponsesForAI
+    ).subscribe({
+      next: (res) => {
+        this.aiSummary = res.summary;
+        this.isGeneratingSummary = false;
+      },
+      error: (err) => {
+        console.error(err);
+        this.aiSummary = "Impossible de générer le résumé pour le moment. Veuillez réessayer.";
+        this.isGeneratingSummary = false;
+      }
+    });
+  }
   // ── Helpers ─────────────────────────────────────────────
 
   getQuestionnaireId(response: QuestionnaireResponsePopulated): string {
