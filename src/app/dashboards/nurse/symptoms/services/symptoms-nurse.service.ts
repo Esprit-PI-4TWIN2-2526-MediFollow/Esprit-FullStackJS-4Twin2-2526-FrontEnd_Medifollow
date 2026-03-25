@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, throwError } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, throwError, forkJoin } from 'rxjs';
+import { Users } from '../../../../models/users';
+import { UsersService } from '../../../../services/user/users.service';
 
 export interface NurseVitalSnapshot {
   bloodPressure?: string | number | null;
@@ -14,6 +16,7 @@ export interface NurseSymptomsResponse {
   patientId?: string;
   patientName?: string;
   patientDepartment?: string;
+  patientEmail?: string;
   submittedAt?: string | Date | null;
   createdAt?: string | Date | null;
   updatedAt?: string | Date | null;
@@ -43,19 +46,30 @@ interface NurseIdentity {
 export class SymptomsNurseService {
   private readonly apiUrl = 'http://localhost:3000/symptoms';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private usersService: UsersService
+  ) {}
 
   getResponsesForNurse(): Observable<NurseSymptomsResponse[]> {
     const department = this.getCurrentNurseDepartment();
 
-    return this.fetchAllResponses().pipe(
-      map((responses) => {
+    return forkJoin({
+      responses: this.fetchAllResponses(),
+      users: this.fetchAllUsers()
+    }).pipe(
+      map(({ responses, users }) => {
+        const patientsIndex = this.buildPatientsIndex(users);
+        const enrichedResponses = responses.map((response) => this.enrichResponse(response, patientsIndex));
+
         if (!department) {
-          return responses;
+          return enrichedResponses;
         }
 
-        return responses.filter((response) => {
-          const responseDepartment = this.normalizeDepartment(response.patientDepartment);
+        return enrichedResponses.filter((response) => {
+          const responseDepartment = this.normalizeDepartment(
+            response.patientDepartment
+          );
           return !!responseDepartment && responseDepartment === department;
         });
       }),
@@ -129,6 +143,42 @@ export class SymptomsNurseService {
         return throwError(() => error);
       })
     );
+  }
+
+  private fetchAllUsers(): Observable<Users[]> {
+    return this.usersService.getUsers().pipe(
+      catchError((error) => {
+        console.error('Failed to load users for nurse symptoms mapping', error);
+        return of([]);
+      })
+    );
+  }
+
+  private buildPatientsIndex(users: Users[]): Record<string, Users> {
+    return users.reduce<Record<string, Users>>((accumulator, user) => {
+      if (user?._id) {
+        accumulator[user._id] = user;
+      }
+
+      return accumulator;
+    }, {});
+  }
+
+  private enrichResponse(
+    response: NurseSymptomsResponse,
+    patientsIndex: Record<string, Users>
+  ): NurseSymptomsResponse {
+    const patient = response.patientId ? patientsIndex[response.patientId] : undefined;
+    const patientName = patient
+      ? `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+      : '';
+
+    return {
+      ...response,
+      patientName: response.patientName || patientName || 'Unknown patient',
+      patientDepartment: response.patientDepartment || patient?.assignedDepartment || '',
+      patientEmail: response.patientEmail || patient?.email || ''
+    };
   }
 
   private getCurrentNurse(): NurseIdentity | null {
