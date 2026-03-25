@@ -4,6 +4,7 @@ import { SidebarService } from '../../services/sidebar.service';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { combineLatest, Subscription } from 'rxjs';
 import { AuthService } from '../../../services/auth/auth.service';
+import { SymptomsNurseService } from '../../../dashboards/nurse/symptoms/services/symptoms-nurse.service';
 
 type NavItem = {
   name: string;
@@ -11,6 +12,7 @@ type NavItem = {
   path?: string;
   new?: boolean;
   roles?: string[];
+  badgeCount?: number;
   subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
   action?: () => void;
 };
@@ -27,7 +29,7 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     ADMIN: '/admin',
     AUDITOR: '/auditor',
     COORDINATOR: '/coordinator',
-    NURSE: '/nurse',
+    NURSE: '/nurse/dashboard',
     PATIENT: '/patient',
     DOCTOR: '/physician',
 
@@ -89,6 +91,13 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     //   ],
     // },
     {
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 4.75H16C18.3472 4.75 19.25 5.65279 19.25 8V16C19.25 18.3472 18.3472 19.25 16 19.25H8C5.65279 19.25 4.75 18.3472 4.75 16V8C4.75 5.65279 5.65279 4.75 8 4.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8.75 9.25H15.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.75 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.75 14.75H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M15.5 12.5L16.75 13.75L19 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      name: 'Symptoms Queue',
+      path: '/nurse/symptoms',
+      roles: ['NURSE'],
+      badgeCount: 0,
+    },
+    {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75C9.1005 2.75 6.75 5.1005 6.75 8C6.75 10.8995 9.1005 13.25 12 13.25C14.8995 13.25 17.25 10.8995 17.25 8C17.25 5.1005 14.8995 2.75 12 2.75ZM8.25 8C8.25 5.92893 9.92893 4.25 12 4.25C14.0711 4.25 15.75 5.92893 15.75 8C15.75 10.0711 14.0711 11.75 12 11.75C9.92893 11.75 8.25 10.0711 8.25 8ZM5.25 15.5C4.00736 15.5 3 16.5074 3 17.75V19.5C3 20.7426 4.00736 21.75 5.25 21.75H18.75C19.9926 21.75 21 20.7426 21 19.5V17.75C21 16.5074 19.9926 15.5 18.75 15.5H5.25ZM4.5 17.75C4.5 17.3358 4.83579 17 5.25 17H18.75C19.1642 17 19.5 17.3358 19.5 17.75V19.5C19.5 19.9142 19.1642 20.25 18.75 20.25H5.25C4.83579 20.25 4.5 19.9142 4.5 19.5V17.75Z" fill="currentColor"/></svg>`,
       name: 'Sign Out',
       path: '/signin',
@@ -113,7 +122,8 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     public sidebarService: SidebarService,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private authService: AuthService
+    private authService: AuthService,
+    private symptomsNurseService: SymptomsNurseService
   ) {
     this.isExpanded$ = this.sidebarService.isExpanded$;
     this.isMobileOpen$ = this.sidebarService.isMobileOpen$;
@@ -159,7 +169,26 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
 
     this.navItems = [dashboardItem, ...this.BASE_NAV_ITEMS.filter(canSee)];
     this.othersItems = this.ALL_OTHERS_ITEMS.filter(canSee);
+    if (role === 'NURSE') {
+      this.loadNursePendingCount();
+    }
     this.cdr.detectChanges();
+  }
+
+  private loadNursePendingCount(): void {
+    this.subscription.add(
+      this.symptomsNurseService.getPendingCount().subscribe({
+        next: (count) => {
+          this.navItems = this.navItems.map((item) =>
+            item.path === '/nurse/symptoms' ? { ...item, badgeCount: count } : item
+          );
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.cdr.detectChanges();
+        }
+      })
+    );
   }
 
   signOut() {
