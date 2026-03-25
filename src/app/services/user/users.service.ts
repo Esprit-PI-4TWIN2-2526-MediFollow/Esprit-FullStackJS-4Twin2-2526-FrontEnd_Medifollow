@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 import { Users } from '../../models/users';
 
 
@@ -78,6 +79,18 @@ export class UsersService {
   //delete user
   deleteUser(id: string) {
     return this.http.delete(`${this.apiUrl}/delete/${id}`);
+  }
+
+  exportUsers(format: 'csv' | 'pdf', token: string): Observable<HttpResponse<Blob>> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+
+    return this.http.get(`${this.apiUrl}/users/export/${format}`, {
+      headers,
+      observe: 'response',
+      responseType: 'blob',
+    });
   }
 
 }

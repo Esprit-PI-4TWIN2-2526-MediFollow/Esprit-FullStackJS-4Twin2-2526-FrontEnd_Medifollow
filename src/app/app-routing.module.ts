@@ -270,7 +270,6 @@ const routes: Routes = [
     title: 'MediFollow - Accès refusé'
   },
 
-
   {
     path: '',
     component: AppLayoutComponent,
@@ -295,7 +294,11 @@ const routes: Routes = [
         component: SignUpComponent,
         title: 'MediFollow - Inscription'
       },
+      {
+        path: 'symptoms', loadChildren: () => import('./symptoms/symptoms.module').then(m => m.SymptomsModule),
+        data: { allowedRoles: ['PATIENT'] }
 
+      },
       {
         path: 'auditor',
         loadChildren: () => import('./dashboards/auditor/auditor.module').then(m => m.AuditorModule),
