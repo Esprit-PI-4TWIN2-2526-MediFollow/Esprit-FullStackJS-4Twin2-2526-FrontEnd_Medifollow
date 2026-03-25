@@ -64,6 +64,64 @@ export class BuilderComponent implements OnInit {
     { value: 'boolean',         label: 'Yes / No' },
   ];
 
+  // ── Default static questions added on form creation ──────
+  private readonly defaultQuestions: Omit<SymptomQuestion, 'order'>[] = [
+    {
+      label:    'What is your pain level?',
+      type:     'scale',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your body temperature (°C)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'Have you changed your dressing?',
+      type:     'boolean',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your oxygen level (SpO2 %)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your blood sugar level (mg/dL)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your heart rate (bpm)?',
+      type:     'number',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your blood pressure (e.g. 120/80)?',
+      type:     'text',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'Is your urine output normal?',
+      type:     'boolean',
+      options:  [],
+      required: true,
+    },
+    {
+      label:    'What is your level of consciousness?',
+      type:     'scale',
+      options:  [],
+      required: true,
+    },
+  ];
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -82,7 +140,7 @@ export class BuilderComponent implements OnInit {
       return;
     }
 
-    this.addQuestion();
+    this.addDefaultQuestions();
   }
 
   // ── Validation helpers ───────────────────────────────────
@@ -143,6 +201,10 @@ export class BuilderComponent implements OnInit {
   }
 
   // ── Question management ──────────────────────────────────
+
+  addDefaultQuestions(): void {
+    this.questions = this.defaultQuestions.map((q, i) => ({ ...q, order: i }));
+  }
 
   addQuestion(): void {
     this.questions = [
