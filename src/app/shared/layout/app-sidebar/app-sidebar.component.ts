@@ -23,8 +23,8 @@ type NavItem = {
 export class AppSidebarComponent implements OnInit, OnDestroy {
 
   private readonly DASHBOARD_PATHS: Record<string, string> = {
-    SUPERADMIN: '/dashboard',
-    ADMIN: '/dashboard',
+    SUPERADMIN: '/super-admin/dashboard',
+    ADMIN: '/admin/dashboard',
     AUDITOR: '/auditor/dashboard',
     COORDINATOR: '/coordinator/dashboard',
     NURSE: '/nurse/dashboard',

@@ -34,8 +34,10 @@ export class AuthService {
     );
   }
 
-  persistAuthSession(accessToken: string, user: Users): void {
-    localStorage.setItem('accessToken', accessToken);
+  persistAuthSession(token: string, user: any): void {
+    localStorage.removeItem('accessToken');  // ← vide d'abord
+    localStorage.removeItem('user');         // ← vide d'abord
+    localStorage.setItem('accessToken', token);
     localStorage.setItem('user', JSON.stringify(user));
   }
 

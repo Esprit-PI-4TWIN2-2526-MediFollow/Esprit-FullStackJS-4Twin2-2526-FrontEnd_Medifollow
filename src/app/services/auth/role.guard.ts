@@ -3,15 +3,17 @@ import { CanActivate, Router, ActivatedRouteSnapshot } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class RoleGuard implements CanActivate {
-  constructor(private router: Router) {}
+  constructor(private router: Router) { }
+
+  // Exceptions : rôles dont le nom de route diffère du nom du rôle
+  private readonly ROUTE_EXCEPTIONS: Record<string, string> = {
+    DOCTOR: '/physician/dashboard',
+  };
 
   canActivate(route: ActivatedRouteSnapshot): boolean {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-
-    // ── Compatibilité : role peut être une string OU un objet {_id, name}
     const roleName: string = this.extractRoleName(user);
 
-    // ── Redirection initiale sur ''
     if (route.data['redirectToRole']) {
       this.router.navigate([this.getHomeRoute(roleName)]);
       return false;
@@ -19,36 +21,42 @@ export class RoleGuard implements CanActivate {
 
     const allowedRoles: string[] | undefined = route.data['allowedRoles'];
 
-    // Pas de restriction → accessible à tous
     if (!allowedRoles || allowedRoles.length === 0) return true;
 
-    // Comparaison insensible à la casse
     const hasAccess = allowedRoles
       .map(r => r.toUpperCase())
       .includes(roleName.toUpperCase());
 
-    if (!hasAccess) this.router.navigate(['/unauthorized']);
+    // if (!hasAccess) this.router.navigate(['/unauthorized']);
+    if (!hasAccess) this.router.navigate([this.getHomeRoute(roleName)]);
+
     return hasAccess;
   }
 
   private extractRoleName(user: any): string {
     if (!user?.role) return '';
-
-    // Cas 1 : role est une string → "SUPERADMIN"
     if (typeof user.role === 'string') return user.role;
-
-    // Cas 2 : role est un objet → { _id: '...', name: 'SUPERADMIN' }
     if (typeof user.role === 'object') return user.role.name ?? '';
-
     return '';
   }
 
   private getHomeRoute(roleName: string): string {
     if (!roleName) return '/signin';
 
-    const adminRoles = ['SUPERADMIN', 'ADMIN'];
-    if (adminRoles.includes(roleName.toUpperCase())) return '/dashboard';
+    const normalized = roleName.toUpperCase();
 
-    return `/${roleName.toLowerCase()}`;
+    // Vérifier les exceptions d'abord
+    if (this.ROUTE_EXCEPTIONS[normalized]) {
+      return this.ROUTE_EXCEPTIONS[normalized];
+    }
+
+    // // Admins → dashboard partagé
+    // if (['SUPERADMIN', 'ADMIN'].includes(normalized)) {
+    //   return '/dashboard';
+    // }
+
+    // Convention générale : /<roleName_lowercase>/dashboard
+    // Ex: NURSE → /nurse/dashboard, AUDITOR → /auditor/dashboard
+    return `/${roleName.toLowerCase()}/dashboard`;
   }
 }
