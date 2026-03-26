@@ -416,6 +416,10 @@ get paginatedQuestionnaires(): Questionnaire[] {
     this.router.navigate(['/doctor/patient', patientId, 'responses']);
   }
 
+  viewPatientSymptoms(patientId: string): void {
+    this.router.navigate(['/doctor/patient', patientId, 'symptoms']);
+  }
+
   viewQuestionnaire(id: string): void {
     this.router.navigate(['/doctor/viewQu', id]);
   }

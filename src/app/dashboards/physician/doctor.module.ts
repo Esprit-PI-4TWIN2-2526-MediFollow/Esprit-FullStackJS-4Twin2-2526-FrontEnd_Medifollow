@@ -10,12 +10,14 @@ import { UsersService } from '../../services/user/users.service';
 import { PatientResponsesComponent } from './patient-responses/patient-responses.component';
 import { NgChartsModule } from 'ng2-charts';
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
+import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
 
 @NgModule({
   declarations: [
     DashboardDoctorComponent,
     PatientResponsesComponent,
-    ViewQuestionnaireComponent
+    ViewQuestionnaireComponent,
+    DoctorViewSymptomsComponent
   ],
   imports: [
     CommonModule,
