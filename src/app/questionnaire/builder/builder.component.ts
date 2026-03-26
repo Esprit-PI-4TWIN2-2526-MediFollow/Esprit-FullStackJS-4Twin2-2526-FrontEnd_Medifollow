@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Questionnaire } from '../../models/questionnaire';
 import { Question, QuestionType } from '../../models/question';
 import { QuestionnaireService } from '../../services/questionnaire.service';
+import { ServiceManagementService } from '../../services/service/service-management.service';
 
 @Component({
   selector: 'app-builder',
@@ -32,11 +33,13 @@ generateCount = 7;//nb max of questions to generate
   submitted = false; // true après le premier clic sur Save
   touchedQuestions: Set<number> = new Set(); // index des questions touchées
   // Liste des services médicaux
-  medicalServices = [
-    'Cardiology', 'Neurology', 'Pediatrics', 'Oncology',
-    'General Medicine', 'Orthopedics', 'Dermatology',
-    'Psychiatry', 'Radiology', 'Surgery'
-  ];
+  // medicalServices = [
+  //   'Cardiology', 'Neurology', 'Pediatrics', 'Oncology',
+  //   'General Medicine', 'Orthopedics', 'Dermatology',
+  //   'Psychiatry', 'Radiology', 'Surgery'
+  // ];
+
+medicalServices: string[] = [];
 
   // Types de questions disponibles
   questionTypes: { value: QuestionType; label: string }[] = [
@@ -52,7 +55,8 @@ generateCount = 7;//nb max of questions to generate
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private questionnaireService: QuestionnaireService
+    private questionnaireService: QuestionnaireService,
+private serviceManagementService:ServiceManagementService
   ) {}
 
   ngOnInit(): void {
@@ -61,7 +65,9 @@ generateCount = 7;//nb max of questions to generate
 
     if (this.isEditMode) {
       this.loadQuestionnaire();
+
     }
+this.loadDepartments();
   }
 
   // ── Chargement en mode edit ─────────────────────────────
@@ -74,6 +80,7 @@ generateCount = 7;//nb max of questions to generate
         this.description    = q.description || '';
         this.medicalService = q.medicalService;
         this.questions      = q.questions.sort((a, b) => a.order - b.order);
+        this.loadDepartments();
         this.isLoading      = false;
       },
       error: () => {
@@ -82,7 +89,17 @@ generateCount = 7;//nb max of questions to generate
       }
     });
   }
-
+//loadservices
+loadDepartments(): void {
+  this.serviceManagementService.getAll().subscribe({
+    next: (services) => {
+      this.medicalServices = services
+        .filter(s => s.statut === 'ACTIF')  // uniquement les services actifs
+        .map(s => s.nom);
+    },
+    error: (err) => console.error('Error loading departments:', err)
+  });
+}
 
 // ── Validation helpers ──────────────────────────────────
 
