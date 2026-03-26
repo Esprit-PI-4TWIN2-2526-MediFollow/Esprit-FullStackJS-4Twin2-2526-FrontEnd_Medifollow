@@ -8,6 +8,8 @@ import { UsersService } from '../../services/user/users.service';
 import { RoleService } from '../../services/role/role.service';
 import { Role } from '../../models/roles';
 import { SpeechRecognitionService } from '../../services/speech-recognition.service';
+import { ComplianceService } from '../../models/dashbored.interfaces';
+import { ServiceManagementService } from '../../services/service/service-management.service';
 
 type RoleKey = string;
 type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
@@ -106,7 +108,8 @@ export class AllProfilesComponent implements OnInit {
 
 
 
-  departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'General Medicine', 'Orthopedics', 'Dermatology', 'Psychiatry', 'Radiology', 'Surgery'];
+  //departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'General Medicine', 'Orthopedics', 'Dermatology', 'Psychiatry', 'Radiology', 'Surgery'];
+departments: string[] = [];
   doctors: string[] = [];
   auditScopes = ['Logs', 'Data', 'Full Access'];
   sexeOptions = ['Male', 'Female'];
@@ -157,13 +160,15 @@ export class AllProfilesComponent implements OnInit {
     private fb: FormBuilder,
     private readonly http: HttpClient,
     private roleService: RoleService,
-  public speech: SpeechRecognitionService ){ }
+  public speech: SpeechRecognitionService,
+private serviceManagementService:ServiceManagementService ){ }
 
   ngOnInit(): void {
     this.loadUsers();
     this.initSignupForm();
     this.setDateRange();
     this.loadRoles();
+this.loadDepartments();
   }
   // Ajoutez cette méthode dans la classe AllProfilesComponent
   getUserInitials(user: Users): string {
@@ -184,6 +189,7 @@ export class AllProfilesComponent implements OnInit {
         this.users = res;
         this.doctors = this.extractDoctorNames(res);
         console.log('Doctors extracted:', this.doctors);
+
         this.sanitizeSelectedUsers();
       },
       error: (err) => console.error(err),
@@ -197,11 +203,25 @@ export class AllProfilesComponent implements OnInit {
       .filter((name) => !!name);
   }
 
+
+
   private getUserFullName(user: Users): string {
     const firstName = String((user as any)?.firstName ?? (user as any)?.firstname ?? '').trim();
     const lastName = String((user as any)?.lastName ?? (user as any)?.lastname ?? '').trim();
     return `${firstName} ${lastName}`.trim();
   }
+
+//loadservices
+loadDepartments(): void {
+  this.serviceManagementService.getAll().subscribe({
+    next: (services) => {
+      this.departments = services
+        .filter(s => s.statut === 'ACTIF')  // uniquement les services actifs
+        .map(s => s.nom);
+    },
+    error: (err) => console.error('Error loading departments:', err)
+  });
+}
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.filteredUsers.length / this.itemsPerPage));
