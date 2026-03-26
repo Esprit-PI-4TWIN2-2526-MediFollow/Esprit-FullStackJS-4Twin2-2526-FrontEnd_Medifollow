@@ -82,8 +82,34 @@ export class CoordinatorDashboardService {
       source.charts ?? source.chart ?? {}
     );
 
-    return {
-      completedQuestionnaires: this.readNumber(
+    const questionnaireActivity = this.readActivity(
+      source.questionnaireActivity
+        ?? activity.questionnaireActivity
+        ?? charts.questionnaireActivity
+        ?? source.questionnaireChart
+        ?? charts.questionnaires
+        ?? charts.questionnaire
+    );
+
+    const symptomActivity = this.readActivity(
+      source.symptomActivity
+        ?? activity.symptomActivity
+        ?? charts.symptomActivity
+        ?? source.symptomChart
+        ?? charts.symptoms
+        ?? charts.symptom
+    );
+
+    const generalActivity = this.readActivity(
+      source.generalActivity
+        ?? activity.generalActivity
+        ?? charts.generalActivity
+        ?? source.generalChart
+        ?? charts.general
+        ?? charts.activity
+    );
+
+    const completedQuestionnairesFromStats = this.readNumber(
         source,
         counts,
         'completedQuestionnaires',
@@ -91,7 +117,16 @@ export class CoordinatorDashboardService {
         'questionnairesCompleted',
         'questionnaires_completed',
         'completedQuestionnaireCount'
-      ),
+      );
+
+    // Some backends provide correct questionnaire completion only in the chart series.
+    // If stats are stuck at 0 but the chart has data, use the chart total for the card.
+    const completedQuestionnaires = completedQuestionnairesFromStats > 0
+      ? completedQuestionnairesFromStats
+      : this.sumActivity(questionnaireActivity);
+
+    return {
+      completedQuestionnaires,
       submittedSymptoms: this.readNumber(
         source,
         counts,
@@ -130,30 +165,9 @@ export class CoordinatorDashboardService {
         'validations_pending',
         'pendingValidationCount'
       ),
-      questionnaireActivity: this.readActivity(
-        source.questionnaireActivity
-          ?? activity.questionnaireActivity
-          ?? charts.questionnaireActivity
-          ?? source.questionnaireChart
-          ?? charts.questionnaires
-          ?? charts.questionnaire
-      ),
-      symptomActivity: this.readActivity(
-        source.symptomActivity
-          ?? activity.symptomActivity
-          ?? charts.symptomActivity
-          ?? source.symptomChart
-          ?? charts.symptoms
-          ?? charts.symptom
-      ),
-      generalActivity: this.readActivity(
-        source.generalActivity
-          ?? activity.generalActivity
-          ?? charts.generalActivity
-          ?? source.generalChart
-          ?? charts.general
-          ?? charts.activity
-      )
+      questionnaireActivity,
+      symptomActivity,
+      generalActivity
     };
   }
 
@@ -216,6 +230,11 @@ export class CoordinatorDashboardService {
     }
 
     return { label, value: 0 };
+  }
+
+  private sumActivity(points: CoordinatorActivityPoint[]): number {
+    const total = points.reduce((accumulator, point) => accumulator + this.toNumber(point?.value), 0);
+    return total > 0 ? total : 0;
   }
 
   private readNumber(primary: any, secondary: any, ...keys: string[]): number {
