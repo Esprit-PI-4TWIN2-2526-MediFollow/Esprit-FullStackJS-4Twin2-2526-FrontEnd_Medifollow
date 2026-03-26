@@ -8,6 +8,7 @@ import {
   SymptomQuestionType,
   SymptomService,
 } from '../services/symptom.service';
+import { ServiceManagementService } from '../../services/service/service-management.service';
 
 // Internal model (mirrors Questionnaires' Question shape)
 interface SymptomQuestion {
@@ -51,11 +52,12 @@ export class BuilderComponent implements OnInit {
   touchedQuestions: Set<number> = new Set();
 
   // ── Static data ──────────────────────────────────────────
-  medicalServices = [
-    'Cardiology', 'Neurology', 'Pediatrics', 'Oncology',
-    'General Medicine', 'Orthopedics', 'Dermatology',
-    'Psychiatry', 'Radiology', 'Surgery',
-  ];
+  // medicalServices = [
+  //   'Cardiology', 'Neurology', 'Pediatrics', 'Oncology',
+  //   'General Medicine', 'Orthopedics', 'Dermatology',
+  //   'Psychiatry', 'Radiology', 'Surgery',
+  // ];
+medicalServices: string[] = [];
 
   readonly inputTypes: { value: SymptomQuestionType; label: string }[] = [
     { value: 'text',            label: 'Text Response' },
@@ -130,6 +132,7 @@ export class BuilderComponent implements OnInit {
     private router: Router,
     private symptomService: SymptomService,
     private usersService: UsersService,
+private serviceManagementService:ServiceManagementService
   ) {}
 
   ngOnInit(): void {
@@ -137,6 +140,7 @@ export class BuilderComponent implements OnInit {
     this.isEditMode = !!this.formId;
     this.loadPatients();
     this.loadPatientsWithForms();
+this.loadDepartments();
 
     if (this.isEditMode) {
       this.loadForm();
@@ -145,6 +149,18 @@ export class BuilderComponent implements OnInit {
 
     this.addDefaultQuestions();
   }
+
+//loadservices
+loadDepartments(): void {
+  this.serviceManagementService.getAll().subscribe({
+    next: (services) => {
+      this.medicalServices = services
+        .filter(s => s.statut === 'ACTIF')  // uniquement les services actifs
+        .map(s => s.nom);
+    },
+    error: (err) => console.error('Error loading departments:', err)
+  });
+}
 
   // ── Validation helpers ───────────────────────────────────
 
