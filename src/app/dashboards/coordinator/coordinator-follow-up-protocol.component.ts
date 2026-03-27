@@ -5,6 +5,8 @@ import {
   CoordinatorProtocolPatient,
   CoordinatorProtocolStatus
 } from '../../services/coordinator-follow-up.service';
+import { QuestionnaireService } from '../../services/questionnaire.service';
+import { from, mergeMap, of, toArray } from 'rxjs';
 
 @Component({
   selector: 'app-coordinator-follow-up-protocol',
@@ -15,10 +17,12 @@ export class CoordinatorFollowUpProtocolComponent implements OnInit {
   patients: CoordinatorProtocolPatient[] = [];
   searchTerm = '';
   isLoading = true;
+  isLoadingQuestionnaireStatus = false;
   errorMessage = '';
 
   constructor(
     private coordinatorFollowUpService: CoordinatorFollowUpService,
+    private questionnaireService: QuestionnaireService,
     private router: Router
   ) {}
 
@@ -47,6 +51,11 @@ export class CoordinatorFollowUpProtocolComponent implements OnInit {
     this.router.navigate(['/coordinator/follow-up/protocol', patient.patientId]);
   }
 
+  getStatus(patient: CoordinatorProtocolPatient, key: CoordinatorProtocolStatus['key']): CoordinatorProtocolStatus {
+    return patient.statuses.find((status) => status.key === key)
+      ?? { key, label: key, done: false };
+  }
+
   getStatusClasses(status: CoordinatorProtocolStatus): string {
     return status.done
       ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-300'
@@ -61,10 +70,65 @@ export class CoordinatorFollowUpProtocolComponent implements OnInit {
       next: (patients) => {
         this.patients = patients;
         this.isLoading = false;
+        this.hydrateQuestionnaireStatuses();
       },
       error: () => {
         this.errorMessage = 'Unable to load the follow-up protocol.';
         this.isLoading = false;
+      }
+    });
+  }
+
+  private hydrateQuestionnaireStatuses(): void {
+    if (this.patients.length === 0) {
+      return;
+    }
+
+    // The follow-up endpoint can be stale. Compute questionnaire submissions from the real responses API.
+    this.isLoadingQuestionnaireStatus = true;
+
+    from(this.patients).pipe(
+      mergeMap((patient) => {
+        if (!patient.patientId) {
+          return of({ patientId: '', count: 0 });
+        }
+
+        return this.questionnaireService.getPatientResponses(patient.patientId).pipe(
+          mergeMap((responses) => of({ patientId: patient.patientId, count: Array.isArray(responses) ? responses.length : 0 })),
+        );
+      }, 6),
+      toArray()
+    ).subscribe({
+      next: (results) => {
+        const counts = results.reduce<Record<string, number>>((accumulator, item) => {
+          if (item.patientId) {
+            accumulator[item.patientId] = item.count;
+          }
+          return accumulator;
+        }, {});
+
+        this.patients = this.patients.map((patient) => {
+          const submissionsCount = counts[patient.patientId] ?? null;
+          const statuses = patient.statuses.map((status) => {
+            if (status.key !== 'questionnaireCompleted') {
+              return status;
+            }
+
+            if (submissionsCount === null) {
+              return status;
+            }
+
+            // Mark done if at least one submission exists. This keeps the list consistent with actual data.
+            return { ...status, done: submissionsCount > 0 };
+          });
+
+          return { ...patient, statuses };
+        });
+
+        this.isLoadingQuestionnaireStatus = false;
+      },
+      error: () => {
+        this.isLoadingQuestionnaireStatus = false;
       }
     });
   }

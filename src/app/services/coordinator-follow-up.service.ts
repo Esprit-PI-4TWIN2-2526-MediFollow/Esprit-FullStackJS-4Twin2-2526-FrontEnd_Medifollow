@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
 
+declare const ngDevMode: boolean | undefined;
+
 export interface CoordinatorProtocolStatus {
   key: 'questionnaireCompleted' | 'symptomsSubmitted' | 'vitalSignsSubmitted' | 'coordinatorValidation';
   label: string;
@@ -24,6 +26,7 @@ export interface CoordinatorProtocolDetails {
   patientDepartment: string;
   statuses: CoordinatorProtocolStatus[];
   submittedAt: string | null;
+  questionnaireExpectedCount: number | null;
   questionnaireResponses: Array<{ title: string; submittedAt: string | null; status: string; answersCount: number }>;
   symptoms: Array<{ label: string; value: string }>;
   vitalSigns: Array<{ label: string; value: string }>;
@@ -44,13 +47,24 @@ export class CoordinatorFollowUpService {
 
   getProtocol(): Observable<CoordinatorProtocolPatient[]> {
     return this.getWithFallback([...this.protocolUrls]).pipe(
-      map((payload) => this.extractArray(payload).map((row) => this.mapProtocolPatient(row)))
+      map((payload) => {
+        const rows = this.extractArray(payload);
+        if (typeof ngDevMode !== 'undefined' && ngDevMode && rows.length > 0) {
+          console.log('[CoordinatorFollowUp] raw first row', rows[0]);
+        }
+        return rows.map((row) => this.mapProtocolPatient(row));
+      })
     );
   }
 
   getProtocolDetails(patientId: string): Observable<CoordinatorProtocolDetails> {
     return this.getDetailsWithFallback([...this.protocolUrls], patientId).pipe(
-      map((payload) => this.mapProtocolDetails(payload, patientId))
+      map((payload) => {
+        if (typeof ngDevMode !== 'undefined' && ngDevMode) {
+          console.log('[CoordinatorFollowUp] raw details payload', payload);
+        }
+        return this.mapProtocolDetails(payload, patientId);
+      })
     );
   }
 
@@ -95,7 +109,14 @@ export class CoordinatorFollowUpService {
       patientId,
       patientName,
       patientEmail: String(row?.patientEmail ?? patient?.email ?? ''),
-      patientDepartment: String(row?.patientDepartment ?? patient?.assignedDepartment ?? patient?.department ?? ''),
+      patientDepartment: String(
+        row?.patientDepartment
+        ?? row?.assignedDepartment
+        ?? row?.department
+        ?? patient?.assignedDepartment
+        ?? patient?.department
+        ?? ''
+      ),
       statuses: this.buildStatuses(row),
       updatedAt: this.readDate(row?.updatedAt ?? row?.submittedAt ?? row?.createdAt)
     };
@@ -106,11 +127,14 @@ export class CoordinatorFollowUpService {
     const patient = source.patient ?? source.patientId ?? {};
     const symptoms = Array.isArray(source.symptoms) ? source.symptoms : [];
     const vitals = this.unwrapObject(source.vitalSigns ?? source.vitals);
-    const questionnaireResponses = Array.isArray(source.questionnaireResponses)
-      ? source.questionnaireResponses
-      : Array.isArray(source.questionnaires)
-        ? source.questionnaires
-        : [];
+    let questionnaireResponses = this.extractQuestionnaireResponses(source);
+    if (questionnaireResponses.length === 0) {
+      questionnaireResponses = this.buildQuestionnaireProgressFallback(source);
+    }
+    const questionnaireMeta = source.questionnaire ?? source.questionnaires ?? null;
+    const questionnaireExpectedCount = questionnaireMeta && typeof questionnaireMeta === 'object'
+      ? this.coerceNumber((questionnaireMeta as any).expectedCount ?? (questionnaireMeta as any).expected)
+      : null;
 
     const symptomRows = symptoms.map((item: any) => ({
       label: String(item?.label ?? item?.question ?? item?.name ?? 'Symptom'),
@@ -140,11 +164,19 @@ export class CoordinatorFollowUpService {
       patientId: String(source?.patientId ?? patient?._id ?? patient?.id ?? fallbackPatientId),
       patientName: this.readPatientName(source, patient),
       patientEmail: String(source?.patientEmail ?? patient?.email ?? ''),
-      patientDepartment: String(source?.patientDepartment ?? patient?.assignedDepartment ?? patient?.department ?? ''),
+      patientDepartment: String(
+        source?.patientDepartment
+        ?? source?.assignedDepartment
+        ?? source?.department
+        ?? patient?.assignedDepartment
+        ?? patient?.department
+        ?? ''
+      ),
       statuses: this.buildStatuses(source),
       submittedAt: this.readDate(source?.submittedAt ?? source?.updatedAt ?? source?.createdAt),
+      questionnaireExpectedCount: questionnaireExpectedCount ?? null,
       questionnaireResponses: questionnaireResponses.map((item: any) => ({
-        title: String(item?.title ?? item?.questionnaireTitle ?? item?.name ?? 'Questionnaire'),
+        title: String(item?.title ?? item?.questionnaireTitle ?? item?.name ?? item?.questionnaireName ?? 'Questionnaire'),
         submittedAt: this.readDate(item?.submittedAt ?? item?.createdAt ?? item?.updatedAt),
         status: String(item?.status ?? (item?.completed ? 'Completed' : 'Pending')),
         answersCount: this.toNumber(item?.answersCount ?? item?.answers?.length)
@@ -157,11 +189,57 @@ export class CoordinatorFollowUpService {
   }
 
   private buildStatuses(source: any): CoordinatorProtocolStatus[] {
+    const statusContainer = this.unwrapObject(
+      source?.status ?? source?.statuses ?? source?.protocolStatus ?? source?.followUpStatus ?? {}
+    );
+    const merged = { ...statusContainer, ...source };
+
+    const questionnaireSection = source?.questionnaire ?? source?.questionnaires ?? null;
+    const symptomsSection = source?.symptoms ?? source?.symptom ?? null;
+    const vitalsSection = source?.vitalSigns ?? source?.vitals ?? source?.vital_signs ?? null;
+    const coordinatorValidationSection = source?.coordinatorValidation ?? source?.validation ?? null;
+
     return [
-      { key: 'questionnaireCompleted', label: 'Questionnaire completed', done: this.readBoolean(source, 'questionnaireCompleted', 'isQuestionnaireCompleted') },
-      { key: 'symptomsSubmitted', label: 'Symptoms submitted', done: this.readBoolean(source, 'symptomsSubmitted', 'isSymptomsSubmitted') },
-      { key: 'vitalSignsSubmitted', label: 'Vital signs submitted', done: this.readBoolean(source, 'vitalSignsSubmitted', 'isVitalSignsSubmitted') },
-      { key: 'coordinatorValidation', label: 'Coordinator validation', done: this.readBoolean(source, 'coordinatorValidation', 'isCoordinatorValidation', 'validated') }
+      {
+        key: 'questionnaireCompleted',
+        label: 'Questionnaire completed',
+        done: this.resolveQuestionnaireAllDone(questionnaireSection) ?? this.resolveDone(merged, {
+          booleanKeys: ['questionnaireCompleted', 'isQuestionnaireCompleted', 'questionnairesCompleted', 'isQuestionnairesCompleted'],
+          countKeys: ['completedQuestionnaires', 'completedQuestionnairesCount', 'questionnairesCompletedCount', 'questionnaireResponsesCount'],
+          arrayKeys: ['questionnaireResponses', 'questionnaires', 'responses'],
+          statusKeys: ['questionnaireStatus', 'questionnairesStatus']
+        })
+      },
+      {
+        key: 'symptomsSubmitted',
+        label: 'Symptoms submitted',
+        done: this.resolveSectionDone(symptomsSection) ?? this.resolveDone(merged, {
+          booleanKeys: ['symptomsSubmitted', 'isSymptomsSubmitted', 'hasSymptoms'],
+          countKeys: ['submittedSymptoms', 'submittedSymptomsCount', 'symptomsCount', 'symptomResponsesCount'],
+          arrayKeys: ['symptoms', 'symptomResponses', 'symptomsResponses', 'answers'],
+          statusKeys: ['symptomsStatus']
+        })
+      },
+      {
+        key: 'vitalSignsSubmitted',
+        label: 'Vital signs submitted',
+        done: this.resolveSectionDone(vitalsSection) ?? this.resolveDone(merged, {
+          booleanKeys: ['vitalSignsSubmitted', 'isVitalSignsSubmitted', 'vitalsSubmitted', 'isVitalsSubmitted', 'hasVitals'],
+          countKeys: ['submittedVitalSigns', 'submittedVitalSignsCount', 'vitalSignsCount', 'vitalsCount'],
+          arrayKeys: ['vitalSigns', 'vitals', 'vitalSignsSubmissions', 'vitalsSubmissions'],
+          statusKeys: ['vitalSignsStatus', 'vitalsStatus']
+        })
+      },
+      {
+        key: 'coordinatorValidation',
+        label: 'Coordinator validation',
+        done: this.resolveSectionDone(coordinatorValidationSection) ?? this.resolveDone(merged, {
+          booleanKeys: ['coordinatorValidation', 'isCoordinatorValidation', 'validated', 'isValidated'],
+          countKeys: ['validatedSymptoms', 'validatedSymptomsCount'],
+          arrayKeys: [],
+          statusKeys: ['validationStatus', 'coordinatorValidationStatus']
+        })
+      }
     ];
   }
 
@@ -187,6 +265,67 @@ export class CoordinatorFollowUpService {
     return [];
   }
 
+  private extractQuestionnaireResponses(source: any): any[] {
+    if (!source || typeof source !== 'object') {
+      return [];
+    }
+
+    const direct = source.questionnaireResponses
+      ?? source.questionnaires
+      ?? source.questionnaireSubmissions
+      ?? source.submissions;
+
+    if (Array.isArray(direct)) {
+      return direct;
+    }
+
+    const questionnaire = source.questionnaire ?? source.questionnaires ?? null;
+    if (questionnaire && typeof questionnaire === 'object') {
+      const nested = (questionnaire as any).responses
+        ?? (questionnaire as any).submissions
+        ?? (questionnaire as any).items
+        ?? (questionnaire as any).history
+        ?? (questionnaire as any).list;
+
+      if (Array.isArray(nested)) {
+        return nested;
+      }
+    }
+
+    return [];
+  }
+
+  private buildQuestionnaireProgressFallback(source: any): any[] {
+    if (!source || typeof source !== 'object') {
+      return [];
+    }
+
+    const questionnaire = source.questionnaire ?? source.questionnaires ?? null;
+    if (!questionnaire || typeof questionnaire !== 'object') {
+      return [];
+    }
+
+    const statusText = String((questionnaire as any).status ?? '').trim();
+    const completedCount = this.coerceNumber((questionnaire as any).completedCount ?? (questionnaire as any).submittedCount) ?? 0;
+    const expectedCount = this.coerceNumber((questionnaire as any).expectedCount ?? (questionnaire as any).expected) ?? 0;
+    const latestSubmissionAt = (questionnaire as any).latestSubmissionAt ?? null;
+
+    const progressLabel = expectedCount > 0
+      ? `${completedCount}/${expectedCount} submitted`
+      : `${completedCount} submitted`;
+
+    const statusLabel = statusText ? `${statusText} (${progressLabel})` : progressLabel;
+
+    return [
+      {
+        title: 'Questionnaires',
+        submittedAt: latestSubmissionAt,
+        status: statusLabel,
+        answersCount: completedCount
+      }
+    ];
+  }
+
   private unwrapObject(payload: unknown): any {
     if (!payload || typeof payload !== 'object') {
       return {};
@@ -204,15 +343,178 @@ export class CoordinatorFollowUpService {
     return String(value || 'Unknown patient');
   }
 
-  private readBoolean(source: any, ...keys: string[]): boolean {
-    for (const key of keys) {
-      const value = source?.[key];
-      if (value !== undefined && value !== null) {
-        return !!value;
+  private resolveDone(
+    source: any,
+    spec: {
+      booleanKeys: string[];
+      countKeys: string[];
+      arrayKeys: string[];
+      statusKeys: string[];
+    }
+  ): boolean {
+    const readValue = (key: string): unknown => source?.[key];
+
+    for (const key of spec.booleanKeys) {
+      const value = readValue(key);
+      const resolved = this.coerceBoolean(value);
+      if (resolved !== null) {
+        return resolved;
+      }
+    }
+
+    for (const key of spec.countKeys) {
+      const value = readValue(key);
+      const numeric = this.coerceNumber(value);
+      if (numeric !== null) {
+        return numeric > 0;
+      }
+    }
+
+    for (const key of spec.arrayKeys) {
+      const value = readValue(key);
+      if (Array.isArray(value)) {
+        return value.length > 0;
+      }
+    }
+
+    for (const key of spec.statusKeys) {
+      const value = readValue(key);
+      const normalized = String(value || '').trim().toLowerCase();
+      if (!normalized) {
+        continue;
+      }
+
+      if (['done', 'completed', 'complete', 'submitted', 'validated', 'ok', 'true', 'yes'].includes(normalized)) {
+        return true;
+      }
+
+      if (['pending', 'missing', 'no', 'false'].includes(normalized)) {
+        return false;
       }
     }
 
     return false;
+  }
+
+  private resolveSectionDone(section: unknown): boolean | null {
+    if (!section || typeof section !== 'object') {
+      return null;
+    }
+
+    const source = section as any;
+
+    // Preferred: explicit boolean flag.
+    const completedBool = this.coerceBoolean(source.completed);
+    if (completedBool !== null) {
+      return completedBool;
+    }
+
+    // Next: string status.
+    const statusText = String(source.status || '').trim().toLowerCase();
+    if (statusText) {
+      if (['done', 'completed', 'complete', 'submitted', 'validated', 'ok', 'true', 'yes'].includes(statusText)) {
+        return true;
+      }
+      if (['pending', 'missing', 'no', 'false'].includes(statusText)) {
+        return false;
+      }
+    }
+
+    // Next: counts. Many APIs provide expectedCount/completedCount.
+    const completedCount = this.coerceNumber(source.completedCount ?? source.count ?? source.total);
+    const expectedCount = this.coerceNumber(source.expectedCount ?? source.expected);
+
+    if (completedCount !== null && expectedCount !== null) {
+      if (expectedCount <= 0) {
+        return completedCount > 0;
+      }
+      return completedCount >= expectedCount;
+    }
+
+    if (completedCount !== null) {
+      return completedCount > 0;
+    }
+
+    return null;
+  }
+
+  private resolveQuestionnaireAllDone(section: unknown): boolean | null {
+    if (!section || typeof section !== 'object') {
+      return null;
+    }
+
+    const source = section as any;
+
+    const completedBool = this.coerceBoolean(source.completed);
+    if (completedBool !== null) {
+      return completedBool;
+    }
+
+    const statusText = String(source.status || '').trim().toLowerCase();
+    if (statusText) {
+      if (['done', 'completed', 'complete', 'validated', 'ok', 'true', 'yes'].includes(statusText)) {
+        return true;
+      }
+      if (['pending', 'missing', 'no', 'false'].includes(statusText)) {
+        // keep evaluating counts below
+      }
+    }
+
+    const completedCount = this.coerceNumber(source.completedCount ?? source.submittedCount ?? source.count ?? source.total);
+    const expectedCount = this.coerceNumber(source.expectedCount ?? source.expected);
+
+    if (expectedCount !== null) {
+      if (expectedCount <= 0) {
+        return true;
+      }
+
+      if (completedCount !== null) {
+        return completedCount >= expectedCount;
+      }
+
+      return false;
+    }
+
+    if (completedCount !== null) {
+      return completedCount > 0;
+    }
+
+    return null;
+  }
+
+  private coerceBoolean(value: unknown): boolean | null {
+    if (value === null || value === undefined) {
+      return null;
+    }
+
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    if (typeof value === 'number') {
+      return value > 0;
+    }
+
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (['true', 'yes', 'done', 'completed', 'submitted', 'validated', 'ok'].includes(normalized)) {
+        return true;
+      }
+      if (['false', 'no', 'pending'].includes(normalized)) {
+        return false;
+      }
+    }
+
+    return null;
+  }
+
+  private coerceNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') {
+      return null;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
   }
 
   private readDate(value: unknown): string | null {

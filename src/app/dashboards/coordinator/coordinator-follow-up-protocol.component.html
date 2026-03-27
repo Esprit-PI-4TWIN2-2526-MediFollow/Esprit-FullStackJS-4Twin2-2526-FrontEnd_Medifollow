@@ -56,26 +56,26 @@
             <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{{ patient.patientDepartment || 'Unassigned' }}</td>
             <td class="px-4 py-4">
               <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
-                    [ngClass]="getStatusClasses(patient.statuses[0])">
-                {{ patient.statuses[0].done ? 'Completed' : 'Pending' }}
+                    [ngClass]="getStatusClasses(getStatus(patient, 'questionnaireCompleted'))">
+                {{ getStatus(patient, 'questionnaireCompleted').done ? 'Completed' : 'Pending' }}
               </span>
             </td>
             <td class="px-4 py-4">
               <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
-                    [ngClass]="getStatusClasses(patient.statuses[1])">
-                {{ patient.statuses[1].done ? 'Submitted' : 'Pending' }}
+                    [ngClass]="getStatusClasses(getStatus(patient, 'symptomsSubmitted'))">
+                {{ getStatus(patient, 'symptomsSubmitted').done ? 'Submitted' : 'Pending' }}
               </span>
             </td>
             <td class="px-4 py-4">
               <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
-                    [ngClass]="getStatusClasses(patient.statuses[2])">
-                {{ patient.statuses[2].done ? 'Submitted' : 'Pending' }}
+                    [ngClass]="getStatusClasses(getStatus(patient, 'vitalSignsSubmitted'))">
+                {{ getStatus(patient, 'vitalSignsSubmitted').done ? 'Submitted' : 'Pending' }}
               </span>
             </td>
             <td class="px-4 py-4">
               <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
-                    [ngClass]="getStatusClasses(patient.statuses[3])">
-                {{ patient.statuses[3].done ? 'Validated' : 'Pending' }}
+                    [ngClass]="getStatusClasses(getStatus(patient, 'coordinatorValidation'))">
+                {{ getStatus(patient, 'coordinatorValidation').done ? 'Validated' : 'Pending' }}
               </span>
             </td>
             <td class="px-6 py-4">
