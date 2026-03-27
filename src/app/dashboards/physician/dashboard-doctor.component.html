@@ -517,21 +517,39 @@
 
             <!-- Actions -->
             <td class="px-4 py-3">
-              <button (click)="viewPatientResponses(patient._id)"
-                class="inline-flex h-[34px] items-center justify-center
-                       gap-2 rounded-lg bg-brand-500 px-4 text-sm
-                       font-medium text-white transition
-                       hover:bg-brand-600">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14"
-                     height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11
-                           8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-                View Responses
-              </button>
+              <div class="flex flex-wrap gap-2">
+                <button (click)="viewPatientResponses(patient._id)"
+                  class="inline-flex h-[34px] items-center justify-center
+                         gap-2 rounded-lg bg-brand-500 px-4 text-sm
+                         font-medium text-white transition
+                         hover:bg-brand-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14"
+                       height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11
+                             8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                  View Responses
+                </button>
+
+                <button (click)="viewPatientSymptoms(patient._id)"
+                  class="inline-flex h-[34px] items-center justify-center
+                         gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 text-sm
+                         font-medium text-sky-700 transition hover:bg-sky-100
+                         dark:border-sky-900/60 dark:bg-sky-900/20 dark:text-sky-300">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14"
+                       height="14" viewBox="0 0 24 24" fill="none"
+                       stroke="currentColor" stroke-width="2"
+                       stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 12h6"/>
+                    <path d="M12 9v6"/>
+                    <path d="M4 7a2 2 0 0 1 2-2h3l1-2h4l1 2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/>
+                  </svg>
+                  View Symptoms
+                </button>
+              </div>
             </td>
 
           </tr>
