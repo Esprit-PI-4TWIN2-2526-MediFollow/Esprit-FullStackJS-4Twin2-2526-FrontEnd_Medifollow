@@ -6,6 +6,8 @@ import { UsersService } from '../../services/user/users.service';
 import { QuestionnaireResponsePopulated } from '../../models/questionnaire-response';
 import { Questionnaire } from '../../models/questionnaire';
 import { QuestionnaireService } from '../../services/questionnaire.service';
+import { Alert } from '../../models/alert';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-dashboard-physician',
@@ -41,7 +43,9 @@ currentPageQuestionnaire=1;
   // Responses count per patient
   responsesCountMap: Record<string, number> = {};
 
-
+// ── Propriétés ──────────────────────────────────────────────
+alerts: Alert[] = [];
+isLoadingAlerts = false;
   // ── Charts ───────────────────────────────────────────────
 
   genderChartData: ChartData<'doughnut'> = {
@@ -121,7 +125,8 @@ currentPageQuestionnaire=1;
   constructor(
     private usersService: UsersService,
     private questionnaireService: QuestionnaireService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -137,8 +142,10 @@ currentPageQuestionnaire=1;
       const localUser = JSON.parse(userStr);
       this.usersService.getUserByEmail(localUser.email).subscribe({
         next: (doctor) => {
+console.log('👨‍⚕️ Doctor _id:', doctor._id);  // ← vérifier cet ID
           this.currentDoctor = doctor;
           this.loadPatients(doctor.firstName + ' ' + doctor.lastName);
+        this.loadAlerts(doctor._id);//passer l'id de docteur pour charger les alertes
           const service = doctor.assignedDepartment || doctor.specialization || '';
           if (service) this.loadQuestionnaires(service);
         },
@@ -413,7 +420,7 @@ get paginatedQuestionnaires(): Questionnaire[] {
   // ── Navigation ──────────────────────────────────────────
 
   viewPatientResponses(patientId: string): void {
-    this.router.navigate(['/doctor/patient', patientId, 'responses']);
+    this.router.navigate(['/doctor/patient', patientId, 'symptoms']);
   }
 
   viewPatientSymptoms(patientId: string): void {
@@ -424,6 +431,56 @@ get paginatedQuestionnaires(): Questionnaire[] {
     this.router.navigate(['/doctor/viewQu', id]);
   }
 
+// ── Alerts ─────────────────────────────────────────────
+// ── Méthodes ────────────────────────────────────────────────
+loadAlerts(doctorId: string): void {
+  this.isLoadingAlerts = true;
+  this.alertService.getUnreadAlertsForDoctor(doctorId).subscribe({
+    next: (alerts) => {
+      this.alerts = alerts;
+      this.isLoadingAlerts = false;
+    },
+    error: () => { this.isLoadingAlerts = false; }
+  });
+}
+
+markAlertAsRead(alertId: string): void {
+  this.alertService.markAsRead(alertId).subscribe({
+    next: () => {
+      this.alerts = this.alerts.filter(a => a._id !== alertId);
+    }
+  });
+}
+
+getSeverityClass(severity: string): string {
+  const map: Record<string, string> = {
+    critical: 'border-error-200 bg-error-50 dark:border-error-800 dark:bg-error-900/20',
+    high:     'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20',
+    medium:   'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20',
+    low:      'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20',
+  };
+  return map[severity] || map['low'];
+}
+
+getSeverityTextClass(severity: string): string {
+  const map: Record<string, string> = {
+    critical: 'text-error-600 dark:text-error-400',
+    high:     'text-orange-600 dark:text-orange-400',
+    medium:   'text-amber-600 dark:text-amber-400',
+    low:      'text-blue-600 dark:text-blue-400',
+  };
+  return map[severity] || map['low'];
+}
+
+getSeverityDotClass(severity: string): string {
+  const map: Record<string, string> = {
+    critical: 'bg-error-500',
+    high:     'bg-orange-500',
+    medium:   'bg-amber-500',
+    low:      'bg-blue-500',
+  };
+  return map[severity] || 'bg-blue-500';
+}
 
   // ── Helpers ─────────────────────────────────────────────
 
