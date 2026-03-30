@@ -11,6 +11,7 @@ import { PatientResponsesComponent } from './patient-responses/patient-responses
 import { NgChartsModule } from 'ng2-charts';
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
 import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
+import { AlertService } from '../../services/alert.service';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
   ],
   providers: [
     QuestionnaireService,
-    UsersService
+    UsersService,
+    AlertService
   ]
 })
 export class DoctorModule { }
