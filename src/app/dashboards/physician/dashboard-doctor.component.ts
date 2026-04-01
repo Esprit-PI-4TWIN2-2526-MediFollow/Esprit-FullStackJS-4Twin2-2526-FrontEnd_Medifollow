@@ -420,8 +420,13 @@ get paginatedQuestionnaires(): Questionnaire[] {
   // ── Navigation ──────────────────────────────────────────
 
   viewPatientResponses(patientId: string): void {
+    this.router.navigate(['/doctor/patient', patientId, 'responses']);
+  }
+
+  viewPatientResponsesAlert(patientId: string): void {
     this.router.navigate(['/doctor/patient', patientId, 'symptoms']);
   }
+
 
   viewPatientSymptoms(patientId: string): void {
     this.router.navigate(['/doctor/patient', patientId, 'symptoms']);
