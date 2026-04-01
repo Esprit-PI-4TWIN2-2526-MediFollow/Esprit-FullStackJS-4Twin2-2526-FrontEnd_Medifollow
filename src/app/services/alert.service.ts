@@ -19,6 +19,10 @@ export class AlertService {
     return this.http.get<Alert[]>(`${this.apiUrl}/patient/${patientId}`);
   }
 
+getAlertById(alertId: string): Observable<Alert> {
+    return this.http.get<Alert>(`${this.apiUrl}/${alertId}`);
+  }
+
   markAsRead(alertId: string): Observable<Alert> {
     return this.http.patch<Alert>(`${this.apiUrl}/${alertId}/read`, {});
   }
