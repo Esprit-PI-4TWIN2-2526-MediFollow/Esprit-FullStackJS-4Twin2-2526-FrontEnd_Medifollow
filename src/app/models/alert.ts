@@ -4,6 +4,9 @@ export interface Alert {
     _id: string;
     firstName: string;
     lastName: string;
+email?: string;
+    avatarUrl?: string;
+    phoneNumber?: string;
   };
   response: any;
   severity: 'low' | 'medium' | 'high' | 'critical';

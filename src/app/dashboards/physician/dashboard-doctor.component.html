@@ -60,6 +60,11 @@
     {{ inactiveCount }}
   </p>
 </div>
+
+<div class="rounded-xl bg-white/20 px-4 py-2.5 backdrop-blur-sm">
+  <p class="text-xs text-white/70">Critical Alerts</p>
+  <p class="text-xl font-semibold text-white">{{ criticalAlerts }}</p>
+</div>
     </div>
 
   </div>
@@ -390,7 +395,100 @@
 
 </div>
 
+<!-- ── Alerts Statistics ───────────────────────────────── -->
+<div class="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
 
+  <!-- Total Alerts -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        Total Alerts
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-gray-800 dark:text-white/90">
+      {{ totalAlerts }}
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      This month
+    </p>
+  </div>
+
+  <!-- Critical Alerts -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        Critical Alerts
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-error-50 text-error-600 dark:bg-error-900/30 dark:text-error-400">
+        <span class="text-lg font-bold">!</span>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-error-600">
+      {{ criticalAlerts }}
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      Require immediate attention
+    </p>
+  </div>
+
+  <!-- Unread Alerts -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        Unread Alerts
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+             viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M12 8v4l3 3"/>
+        </svg>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-amber-600">
+      {{ unreadAlertsCount }}
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      Need review
+    </p>
+  </div>
+
+  <!-- High Alerts -->
+  <div class="rounded-2xl border border-gray-200 bg-white p-5
+              dark:border-white/[0.05] dark:bg-white/[0.03]">
+    <div class="flex items-center justify-between mb-3">
+      <p class="text-xs font-medium text-gray-500 dark:text-gray-400">
+        High Priority
+      </p>
+      <div class="flex h-9 w-9 items-center justify-center rounded-xl
+                  bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400">
+        <span class="text-lg">⚠️</span>
+      </div>
+    </div>
+    <p class="text-2xl font-semibold text-orange-600">
+      {{ highAlerts }}
+    </p>
+    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+      High severity
+    </p>
+  </div>
+
+</div>
 
   <!-- ── Table card ───────────────────────────────────────── -->
   <div class="rounded-2xl border border-gray-200 bg-white pt-4
@@ -631,42 +729,63 @@
               </span>
             </td>
 
-            <!-- Actions -->
-            <td class="px-4 py-3">
-              <div class="flex flex-wrap gap-2">
-                <button (click)="viewPatientResponses(patient._id)"
-                  class="inline-flex h-[34px] items-center justify-center
-                         gap-2 rounded-lg bg-brand-500 px-4 text-sm
-                         font-medium text-white transition
-                         hover:bg-brand-600">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14"
-                       height="14" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11
-                             8-11-8-11-8z"/>
-                    <circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  View Responses
-                </button>
 
-                <button (click)="viewPatientSymptoms(patient._id)"
-                  class="inline-flex h-[34px] items-center justify-center
-                         gap-2 rounded-lg border border-sky-200 bg-sky-50 px-4 text-sm
-                         font-medium text-sky-700 transition hover:bg-sky-100
-                         dark:border-sky-900/60 dark:bg-sky-900/20 dark:text-sky-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14"
-                       height="14" viewBox="0 0 24 24" fill="none"
-                       stroke="currentColor" stroke-width="2"
-                       stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 12h6"/>
-                    <path d="M12 9v6"/>
-                    <path d="M4 7a2 2 0 0 1 2-2h3l1-2h4l1 2h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/>
-                  </svg>
-                  View Symptoms
-                </button>
-              </div>
-            </td>
+<!-- Actions -->
+<td class="px-4 py-3">
+  <div class="flex items-center gap-2">
+
+    <!-- Responses -->
+    <button (click)="viewPatientResponses(patient._id)"
+      class="inline-flex h-[34px] items-center justify-center gap-1.5
+             rounded-lg bg-brand-500 px-3 text-sm font-medium text-white
+             transition hover:bg-brand-600">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      Responses
+    </button>
+
+    <!-- Symptoms -->
+    <button (click)="viewPatientSymptoms(patient._id)"
+      class="inline-flex h-[34px] items-center justify-center gap-1.5
+             rounded-lg border border-sky-200 bg-sky-50 px-3 text-sm
+             font-medium text-sky-700 transition hover:bg-sky-100
+             dark:border-sky-900/60 dark:bg-sky-900/20 dark:text-sky-300">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 12h6"/>
+        <path d="M12 9v6"/>
+        <path d="M4 7a2 2 0 0 1 2-2h3l1-2h4l1 2h3a2 2 0 0 1 2 2v10
+                 a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/>
+      </svg>
+      Symptoms
+    </button>
+
+    <!-- Alert -->
+    <button (click)="viewPatientAlerts(patient._id)"
+      class="inline-flex h-[34px] items-center justify-center gap-1.5
+             rounded-lg border px-3 text-sm font-medium transition"
+      [ngClass]="getLatestAlert(patient._id)?.severity === 'critical'
+        ? 'border-red-300 bg-red-100 text-red-700 hover:bg-red-200'
+        : 'border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100'">
+      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13"
+           viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0
+                 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      Alert
+    </button>
+
+  </div>
+</td>
+
 
           </tr>
         </tbody>

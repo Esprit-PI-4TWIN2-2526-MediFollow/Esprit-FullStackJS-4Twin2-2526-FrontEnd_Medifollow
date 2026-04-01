@@ -438,14 +438,21 @@ get paginatedQuestionnaires(): Questionnaire[] {
 
 // ── Alerts ─────────────────────────────────────────────
 // ── Méthodes ────────────────────────────────────────────────
+
+
 loadAlerts(doctorId: string): void {
   this.isLoadingAlerts = true;
   this.alertService.getUnreadAlertsForDoctor(doctorId).subscribe({
     next: (alerts) => {
-      this.alerts = alerts;
+      this.alerts = alerts || [];
       this.isLoadingAlerts = false;
+      console.log('Alerts loaded:', this.alerts.length, this.alerts); // ← Pour debug
     },
-    error: () => { this.isLoadingAlerts = false; }
+    error: (err) => {
+      console.error('Error loading alerts:', err);
+      this.alerts = [];
+      this.isLoadingAlerts = false;
+    }
   });
 }
 
@@ -486,7 +493,102 @@ getSeverityDotClass(severity: string): string {
   };
   return map[severity] || 'bg-blue-500';
 }
+// ── Alert Management ─────────────────────────────────────
+getPatientAlerts(patientId: string): Alert[] {
+  // Pour l'instant on filtre depuis les alerts déjà chargés
+  // (on peut améliorer plus tard en faisant un appel API par patient si besoin)
+  return this.alerts.filter(alert =>
+    alert.patient?._id === patientId || alert.patient._id === patientId
+  );
+}
 
+// Nouvelle version - affiche le bouton même si l'alerte est déjà lue
+// hasAlerts(patientId: string): boolean {
+//   return this.alerts.some(alert =>
+//     (alert.patient?._id === patientId || alert.patient._id === patientId)
+//   );
+// }
+
+// Vérifie si le patient a AU MOINS UNE alerte (lue ou non lue)
+hasAlerts(patientId: string): boolean {
+  if (!patientId || !this.alerts || this.alerts.length === 0) return false;
+
+  return this.alerts.some(alert => {
+    const alertPatientId = typeof alert.patient === 'object'
+      ? alert.patient._id
+      : alert.patient;
+
+    return alertPatientId === patientId;
+  });
+}
+
+// getLatestAlert(patientId: string): Alert | null {
+//   const patientAlerts = this.alerts.filter(alert =>
+//     alert.patient?._id === patientId || alert.patient._id === patientId
+//   );
+
+//   if (patientAlerts.length === 0) return null;
+
+//   // Trie par date décroissante et retourne la plus récente
+//   return [...patientAlerts].sort((a, b) =>
+//     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+//   )[0];
+// }
+
+// Retourne la dernière alerte du patient
+getLatestAlert(patientId: string): Alert | null {
+  if (!patientId || !this.alerts || this.alerts.length === 0) return null;
+
+  const patientAlerts = this.alerts.filter(alert => {
+    const alertPatientId = typeof alert.patient === 'object'
+      ? alert.patient._id
+      : alert.patient;
+    return alertPatientId === patientId;
+  });
+
+  if (patientAlerts.length === 0) return null;
+
+  // Retourne l'alerte la plus récente
+  return [...patientAlerts].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )[0];
+}
+
+getAlertsForPatient(patientId: string): Alert[] {
+  if (!patientId || !this.alerts || this.alerts.length === 0) return [];
+  return this.alerts.filter(alert => {
+    const alertPatientId = typeof alert.patient === 'object'
+      ? alert.patient._id
+      : alert.patient;
+    return alertPatientId === patientId;
+  });
+}
+
+viewPatientAlerts(patientId: string): void {
+  this.router.navigate(['/doctor/alert/patient', patientId]);
+}
+
+// kept for backwards compatibility (route alert/:id)
+viewAlert(alertId: string): void {
+  this.router.navigate(['/doctor/alert', alertId]);
+}
+// ── Alert Statistics ─────────────────────────────────────
+get totalAlerts(): number {
+  return this.alerts.length;
+}
+
+get criticalAlerts(): number {
+  return this.alerts.filter(a => a.severity?.toLowerCase() === 'critical').length;
+}
+
+get highAlerts(): number {
+  return this.alerts.filter(a => a.severity?.toLowerCase() === 'high').length;
+}
+
+get unreadAlertsCount(): number {
+  return this.alerts.length;   // si tu charges seulement les unread
+  // Si tu charges tous les alerts plus tard, utilise : this.alerts.filter(a => !a.isRead).length;
+}
   // ── Helpers ─────────────────────────────────────────────
 
   getUserInitials(user: Users): string {

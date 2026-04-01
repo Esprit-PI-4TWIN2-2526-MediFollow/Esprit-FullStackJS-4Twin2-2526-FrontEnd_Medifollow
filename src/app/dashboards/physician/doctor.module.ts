@@ -12,13 +12,15 @@ import { NgChartsModule } from 'ng2-charts';
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
 import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
 import { AlertService } from '../../services/alert.service';
+import { ViewAlertComponent } from './view-alert/view-alert.component';
 
 @NgModule({
   declarations: [
     DashboardDoctorComponent,
     PatientResponsesComponent,
     ViewQuestionnaireComponent,
-    DoctorViewSymptomsComponent
+    DoctorViewSymptomsComponent,
+    ViewAlertComponent
   ],
   imports: [
     CommonModule,
