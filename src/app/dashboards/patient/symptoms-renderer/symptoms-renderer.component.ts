@@ -122,6 +122,16 @@ export class SymptomsRendererComponent implements OnInit {
     return question?._id ? this.responseForm.get(question._id) : null;
   }
 
+  get currentQuestionFormControl(): FormControl {
+    const control = this.currentQuestionControl;
+
+    if (!(control instanceof FormControl)) {
+      throw new Error('The current question is not bound to a FormControl.');
+    }
+
+    return control;
+  }
+
   get scaleValues(): number[] {
     const question = this.currentQuestion;
     if (!question) return [];

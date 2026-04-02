@@ -238,7 +238,7 @@
             <ng-container [ngSwitch]="currentQuestion.type">
               <ng-container *ngSwitchCase="'text'">
                 <textarea
-                  [formControlName]="currentQuestion._id!"
+                  [formControl]="currentQuestionFormControl"
                   rows="4"
                   placeholder="Your answer..."
                   class="w-full rounded-xl border px-4 py-3 text-sm text-gray-700
@@ -264,7 +264,7 @@
 
               <ng-container *ngSwitchCase="'number'">
                 <input
-                  [formControlName]="currentQuestion._id!"
+                  [formControl]="currentQuestionFormControl"
                   type="number"
                   [min]="currentQuestion.validation?.min ?? null"
                   [max]="currentQuestion.validation?.max ?? null"
@@ -284,7 +284,7 @@
 
               <ng-container *ngSwitchCase="'date'">
                 <input
-                  [formControlName]="currentQuestion._id!"
+                  [formControl]="currentQuestionFormControl"
                   type="date"
                   class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
                          focus:outline-none focus:ring-3 focus:ring-brand-500/10
@@ -351,7 +351,7 @@
 
               <ng-container *ngSwitchCase="'select'">
                 <select
-                  [formControlName]="currentQuestion._id!"
+                  [formControl]="currentQuestionFormControl"
                   class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
                          focus:outline-none focus:ring-3 focus:ring-brand-500/10
                          dark:text-gray-200 transition"
