@@ -3,7 +3,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../../services/auth/auth.service';
 import { FaceRecognitionService } from '../../../../services/face-recognition.service';
-import { FirstLoginRequiredResponse, SignInResponse } from '../../../../models/auth';
+import {
+  FirstLoginRequiredResponse,
+  SignInResponse,
+  SignInSuccessResponse,
+  TwoFactorRequiredResponse,
+} from '../../../../models/auth';
 
 @Component({
   selector: 'app-signin-form',
@@ -14,13 +19,17 @@ export class SigninFormComponent implements OnInit {
   isChecked = false;
   isLoading = false;
   isFaceIdLoading = false;
+  isTwoFactorLoading = false;
   showFaceIdButton = true;
   showCamera = false;
   videoStream: MediaStream | null = null;
   errorMessage = '';
   infoMessage = '';
+  isTwoFactorStep = false;
+  twoFactorToken = '';
 
   loginForm: FormGroup;
+  twoFactorForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
@@ -43,6 +52,10 @@ export class SigninFormComponent implements OnInit {
           Validators.required,
         ]
       ]
+    });
+
+    this.twoFactorForm = this.fb.group({
+      code: ['', [Validators.required, Validators.pattern(/^\d{6}$/)]],
     });
   }
 
@@ -82,6 +95,14 @@ export class SigninFormComponent implements OnInit {
           return;
         }
 
+        if (this.isTwoFactorRequiredResponse(res)) {
+          this.isTwoFactorStep = true;
+          this.twoFactorToken = res.twoFactorToken;
+          this.twoFactorForm.reset();
+          this.infoMessage = 'Enter the 6-digit code from your authenticator app.';
+          return;
+        }
+
         if (res.accessToken && res.user) {
           this.authService.persistAuthSession(res.accessToken, res.user);
           this.router.navigate([this.authService.getPostLoginRoute(res.user)]);
@@ -100,10 +121,61 @@ export class SigninFormComponent implements OnInit {
     });
   }
 
+  onVerifyTwoFactor() {
+    this.errorMessage = '';
+
+    if (this.twoFactorForm.invalid || this.isTwoFactorLoading) {
+      this.twoFactorForm.markAllAsTouched();
+      return;
+    }
+
+    if (!this.twoFactorToken) {
+      this.errorMessage = 'Two-factor session is invalid. Please sign in again.';
+      this.backToCredentials();
+      return;
+    }
+
+    this.isTwoFactorLoading = true;
+    const code = String(this.twoFactorForm.value.code || '').trim();
+
+    this.authService
+      .verifyTwoFactor({ twoFactorToken: this.twoFactorToken, code })
+      .subscribe({
+        next: (res: SignInSuccessResponse) => {
+          if (res.accessToken && res.user) {
+            this.authService.persistAuthSession(res.accessToken, res.user);
+            this.router.navigate([this.authService.getPostLoginRoute(res.user)]);
+            return;
+          }
+          this.errorMessage = 'Invalid 2FA verification response.';
+        },
+        error: (err) => {
+          this.errorMessage = err?.error?.message || 'Invalid code. Please try again.';
+          this.isTwoFactorLoading = false;
+        },
+        complete: () => {
+          this.isTwoFactorLoading = false;
+        },
+      });
+  }
+
+  backToCredentials(): void {
+    this.isTwoFactorStep = false;
+    this.twoFactorToken = '';
+    this.twoFactorForm.reset();
+  }
+
   private isFirstLoginResponse(res: SignInResponse): res is FirstLoginRequiredResponse {
     return (
       (res as FirstLoginRequiredResponse).requiresPasswordChange === true &&
       !!(res as FirstLoginRequiredResponse).onboardingToken
+    );
+  }
+
+  private isTwoFactorRequiredResponse(res: SignInResponse): res is TwoFactorRequiredResponse {
+    return (
+      (res as TwoFactorRequiredResponse).requiresTwoFactor === true &&
+      !!(res as TwoFactorRequiredResponse).twoFactorToken
     );
   }
 

@@ -100,6 +100,7 @@ import { UserDropdownComponent } from './shared/components/header/user-dropdown/
 import { UserInfoCardComponent } from './shared/components/user-profile/user-info-card/user-info-card.component';
 import { UserMetaCardComponent } from './shared/components/user-profile/user-meta-card/user-meta-card.component';
 import { SecuritySettingsCardComponent } from './shared/components/user-profile/security-settings-card/security-settings-card.component';
+import { TwoFactorAuthCardComponent } from './shared/components/user-profile/two-factor-auth-card/two-factor-auth-card.component';
 import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
@@ -216,6 +217,7 @@ import { authInterceptor } from './services/auth/auth.interceptor';
     UserInfoCardComponent,
     UserMetaCardComponent,
     SecuritySettingsCardComponent,
+    TwoFactorAuthCardComponent,
     VideosComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,

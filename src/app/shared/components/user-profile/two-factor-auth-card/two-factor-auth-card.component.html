@@ -1,0 +1,160 @@
+<div class="p-5 border border-gray-200 rounded-2xl dark:border-gray-800 lg:p-6">
+  <div class="flex items-start justify-between gap-4">
+    <div>
+      <h4 class="mb-1 text-lg font-semibold text-gray-800 dark:text-white/90">
+        Two-Factor Authentication
+      </h4>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Add an extra layer of security to your account with an authenticator app.
+      </p>
+    </div>
+
+    <span
+      *ngIf="!isLoadingStatus"
+      class="px-2 py-1 text-xs font-medium rounded-full"
+      [ngClass]="twoFactorEnabled
+        ? 'text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400'
+        : 'text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300'"
+    >
+      {{ twoFactorEnabled ? 'Enabled' : 'Disabled' }}
+    </span>
+  </div>
+
+  <div *ngIf="isLoadingStatus" class="mt-4 text-sm text-gray-500 dark:text-gray-400">
+    Loading 2FA status...
+  </div>
+
+  <p *ngIf="successMessage" class="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-300">
+    {{ successMessage }}
+  </p>
+  <p *ngIf="errorMessage" class="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+    {{ errorMessage }}
+  </p>
+
+  <!-- Disabled: start setup -->
+  <div *ngIf="!isLoadingStatus && !twoFactorEnabled" class="mt-5">
+    <button
+      *ngIf="!setupData"
+      type="button"
+      (click)="startSetup()"
+      [disabled]="isSettingUp"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-brand-500 rounded-lg hover:bg-brand-600 disabled:opacity-50"
+    >
+      <span *ngIf="!isSettingUp">Enable 2FA</span>
+      <span *ngIf="isSettingUp" class="inline-flex items-center gap-2">
+        <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        Starting...
+      </span>
+    </button>
+
+    <div *ngIf="setupData" class="mt-4 space-y-4">
+      <div class="grid gap-4 lg:grid-cols-2">
+        <div class="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+          <p class="text-sm font-medium text-gray-800 dark:text-white/90">Scan QR code</p>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            Use Google Authenticator, Authy, Microsoft Authenticator, etc.
+          </p>
+          <div class="mt-3 flex justify-center">
+            <img
+              [src]="setupData.qrCodeDataUrl"
+              alt="2FA QR Code"
+              class="w-44 h-44 rounded bg-white p-2 border border-gray-200"
+            />
+          </div>
+        </div>
+
+        <div class="p-4 border border-gray-200 rounded-lg dark:border-gray-700">
+          <p class="text-sm font-medium text-gray-800 dark:text-white/90">Manual setup key</p>
+          <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+            If you can’t scan the QR, enter this secret in your authenticator app.
+          </p>
+          <div class="mt-3 rounded bg-gray-50 px-3 py-2 text-sm font-mono text-gray-800 dark:bg-gray-800 dark:text-gray-200 break-all">
+            {{ setupData.secretBase32 }}
+          </div>
+        </div>
+      </div>
+
+      <form [formGroup]="enableForm" (ngSubmit)="enable2fa()" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <div class="flex-1">
+          <label class="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+            6-digit code
+          </label>
+          <input
+            type="text"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            placeholder="123456"
+            formControlName="code"
+            class="w-full border rounded p-2"
+            [ngClass]="{
+              'border-red-500': enableForm.get('code')?.touched && enableForm.get('code')?.invalid
+            }"
+          />
+          <p *ngIf="enableForm.get('code')?.touched && enableForm.get('code')?.invalid" class="mt-1 text-sm text-red-500">
+            Enter a valid 6-digit code.
+          </p>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            type="submit"
+            [disabled]="enableForm.invalid || isEnabling"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-50"
+          >
+            <span *ngIf="!isEnabling">Confirm & Enable</span>
+            <span *ngIf="isEnabling" class="inline-flex items-center gap-2">
+              <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              Enabling...
+            </span>
+          </button>
+
+          <button
+            type="button"
+            (click)="cancelSetup()"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Enabled: disable -->
+  <div *ngIf="!isLoadingStatus && twoFactorEnabled" class="mt-5">
+    <form [formGroup]="disableForm" (ngSubmit)="disable2fa()" class="flex flex-col gap-3 sm:flex-row sm:items-end">
+      <div class="flex-1">
+        <label class="block mb-1 text-sm text-gray-700 dark:text-gray-300">
+          6-digit code
+        </label>
+        <input
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          placeholder="123456"
+          formControlName="code"
+          class="w-full border rounded p-2"
+          [ngClass]="{
+            'border-red-500': disableForm.get('code')?.touched && disableForm.get('code')?.invalid
+          }"
+        />
+        <p *ngIf="disableForm.get('code')?.touched && disableForm.get('code')?.invalid" class="mt-1 text-sm text-red-500">
+          Enter a valid 6-digit code.
+        </p>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="disableForm.invalid || isDisabling"
+        class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 disabled:opacity-50"
+      >
+        <span *ngIf="!isDisabling">Disable 2FA</span>
+        <span *ngIf="isDisabling" class="inline-flex items-center gap-2">
+          <span class="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          Disabling...
+        </span>
+      </button>
+    </form>
+  </div>
+</div>
+

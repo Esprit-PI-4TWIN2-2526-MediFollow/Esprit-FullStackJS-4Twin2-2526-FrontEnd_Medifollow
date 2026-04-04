@@ -28,7 +28,7 @@
       {{ errorMessage }}
     </p>
 
-    <form [formGroup]="loginForm" (ngSubmit)="onSignIn()" class="space-y-6">
+    <form *ngIf="!isTwoFactorStep" [formGroup]="loginForm" (ngSubmit)="onSignIn()" class="space-y-6">
 
       <!-- EMAIL -->
       <div>
@@ -142,6 +142,45 @@
             Cancel
           </button>
         </div>
+      </div>
+    </form>
+
+    <form *ngIf="isTwoFactorStep" [formGroup]="twoFactorForm" (ngSubmit)="onVerifyTwoFactor()" class="space-y-6">
+      <div>
+        <label class="block mb-1">2FA code <span class="text-error-500">*</span></label>
+        <input
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          placeholder="123456"
+          formControlName="code"
+          [ngClass]="{
+            'border-red-500': twoFactorForm.get('code')?.touched && twoFactorForm.get('code')?.invalid
+          }"
+          class="w-full border rounded p-2"
+        />
+        <div *ngIf="twoFactorForm.get('code')?.touched && twoFactorForm.get('code')?.invalid"
+             class="text-sm text-red-500 mt-1">
+          <p>Enter a valid 6-digit code.</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button
+          type="submit"
+          [disabled]="twoFactorForm.invalid || isTwoFactorLoading"
+          class="flex-1 bg-brand-500 text-white rounded p-2 hover:bg-brand-600 disabled:opacity-50"
+        >
+          {{ isTwoFactorLoading ? 'Verifying...' : 'Verify' }}
+        </button>
+
+        <button
+          type="button"
+          (click)="backToCredentials()"
+          class="px-4 py-2 rounded border border-gray-300 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+        >
+          Back
+        </button>
       </div>
     </form>
 
