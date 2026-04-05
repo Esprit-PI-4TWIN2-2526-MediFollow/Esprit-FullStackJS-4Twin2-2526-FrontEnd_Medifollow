@@ -47,6 +47,14 @@ export class SymptomsRendererComponent implements OnInit {
   selectedResponse: SymptomsTodayResponse | null = null;
 
   currentIndex = 0;
+  currentStep = 0;
+
+  readonly steps = [
+    { key: 'vital_parameters', label: 'Vital' },
+    { key: 'subjective_symptoms', label: 'Symptoms' },
+    { key: 'patient_context', label: 'Context' },
+    { key: 'clinical_data', label: 'Clinical' },
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -92,6 +100,10 @@ export class SymptomsRendererComponent implements OnInit {
     return this.form?.questions?.[this.currentIndex] ?? null;
   }
 
+  get questions(): SymptomsQuestion[] {
+    return this.form?.questions ?? [];
+  }
+
   get formData(): SymptomsAssignedForm | null {
     return this.form;
   }
@@ -101,20 +113,39 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   get totalQuestions(): number {
-    return this.form?.questions?.length ?? 0;
+    return this.questions.length;
+  }
+
+  get currentStepCategory(): string {
+    return this.steps[this.currentStep].key;
+  }
+
+  get currentQuestions(): SymptomsQuestion[] {
+    return this.questions.filter((question) => this.getQuestionCategory(question) === this.currentStepCategory);
+  }
+
+  get answeredQuestions(): number {
+    return this.questions.filter((question) => this.isQuestionAnswered(question)).length;
   }
 
   get progressPercent(): number {
     if (!this.totalQuestions) return 0;
-    return Math.round(((this.currentIndex + 1) / this.totalQuestions) * 100);
+    return Math.round((this.answeredQuestions / this.totalQuestions) * 100);
   }
 
-  get isLastQuestion(): boolean {
-    return this.currentIndex === this.totalQuestions - 1;
+  get stepProgress(): { answered: number; total: number } {
+    const stepQuestions = this.currentQuestions;
+    const answered = stepQuestions.filter((question) => this.isQuestionAnswered(question)).length;
+
+    return {
+      answered,
+      total: stepQuestions.length,
+    };
   }
 
-  get isFirstQuestion(): boolean {
-    return this.currentIndex === 0;
+  get stepProgressPercent(): number {
+    if (!this.stepProgress.total) return 0;
+    return Math.round((this.stepProgress.answered / this.stepProgress.total) * 100);
   }
 
   get currentQuestionControl(): AbstractControl | null {
@@ -143,23 +174,31 @@ export class SymptomsRendererComponent implements OnInit {
 
   canGoNext(): boolean {
     if (this.hasReachedDailyLimit || this.isHistoryMode) return false;
-
-    const control = this.currentQuestionControl;
-    if (!control) return false;
-
-    return control.valid;
+    const questions = this.currentQuestions;
+    if (questions.length === 0) return true;
+    return questions.every((question) => this.getControl(question)?.valid);
   }
 
   next(): void {
-    const control = this.currentQuestionControl;
-    control?.markAsTouched();
-
+    this.markCurrentStepTouched();
     if (!this.canGoNext()) return;
-    if (!this.isLastQuestion) this.currentIndex++;
+    this.nextStep();
   }
 
   previous(): void {
-    if (!this.isFirstQuestion) this.currentIndex--;
+    this.prevStep();
+  }
+
+  nextStep(): void {
+    if (this.currentStep < this.steps.length - 1) {
+      this.currentStep++;
+    }
+  }
+
+  prevStep(): void {
+    if (this.currentStep > 0) {
+      this.currentStep--;
+    }
   }
 
   goBack(): void {
@@ -173,10 +212,11 @@ export class SymptomsRendererComponent implements OnInit {
   submit(): void {
     if (this.hasReachedDailyLimit || this.isHistoryMode) return;
 
-    const control = this.currentQuestionControl;
-    control?.markAsTouched();
+    this.markAllTouched();
 
-    if (!this.canGoNext()) return;
+    if (this.responseForm.invalid) {
+      return;
+    }
 
     if (!this.currentUser?._id) {
       this.errorMessage = 'Unable to identify the current patient.';
@@ -350,6 +390,121 @@ export class SymptomsRendererComponent implements OnInit {
       hour: 'numeric',
       minute: '2-digit',
     });
+  }
+
+  getControl(question: SymptomsQuestion): AbstractControl | null {
+    return question._id ? this.formGroup.get(question._id) : null;
+  }
+
+  getFormControl(question: SymptomsQuestion): FormControl {
+    const control = this.getControl(question);
+    if (!(control instanceof FormControl)) {
+      throw new Error(`Question ${question._id || question.label} is not bound to a FormControl.`);
+    }
+    return control;
+  }
+
+  getMultipleChoiceArray(question: SymptomsQuestion): FormArray | null {
+    const control = this.getControl(question);
+    return control instanceof FormArray ? control : null;
+  }
+
+  getScaleValues(question: SymptomsQuestion): number[] {
+    const min = question.validation?.min ?? 1;
+    const max = question.validation?.max ?? 10;
+    return Array.from({ length: max - min + 1 }, (_, index) => min + index);
+  }
+
+  onScaleSelectFor(question: SymptomsQuestion, value: number): void {
+    this.getControl(question)?.setValue(value);
+    this.getControl(question)?.markAsTouched();
+  }
+
+  isScaleSelectedFor(question: SymptomsQuestion, value: number): boolean {
+    return this.getControl(question)?.value === value;
+  }
+
+  onSingleChoiceSelectFor(question: SymptomsQuestion, value: string | boolean): void {
+    this.getControl(question)?.setValue(value);
+    this.getControl(question)?.markAsTouched();
+  }
+
+  onMultipleChoiceToggleFor(question: SymptomsQuestion, option: number | string): void {
+    const array = this.getMultipleChoiceArray(question);
+    if (!array) return;
+
+    const optionIndex = typeof option === 'number'
+      ? option
+      : (question.options ?? []).indexOf(option);
+
+    if (optionIndex < 0) return;
+
+    const control = array.at(optionIndex) as FormControl<boolean>;
+    control.setValue(!control.value);
+    array.markAsTouched();
+    array.updateValueAndValidity();
+  }
+
+  isOptionCheckedFor(question: SymptomsQuestion, option: number | string): boolean {
+    const array = this.getMultipleChoiceArray(question);
+    const optionIndex = typeof option === 'number'
+      ? option
+      : (question.options ?? []).indexOf(option);
+
+    if (optionIndex < 0) return false;
+
+    return !!array?.at(optionIndex)?.value;
+  }
+
+  isTouchedFor(question: SymptomsQuestion): boolean {
+    const control = this.getControl(question);
+    return !!control && (control.touched || control.dirty);
+  }
+
+  getFieldErrorFor(question: SymptomsQuestion): string {
+    const control = this.getControl(question);
+
+    if (!control || !control.errors || !this.isTouchedFor(question)) {
+      return '';
+    }
+
+    if (control.errors['required']) {
+      switch (this.normalizeType(question.type)) {
+        case 'single_choice':
+        case 'select':
+          return 'Please select an option.';
+        case 'multiple_choice':
+          return 'Please select at least one option.';
+        case 'date':
+          return 'Please select a date.';
+        case 'boolean':
+          return 'Please select Yes or No.';
+        case 'scale':
+          return 'Please select a value.';
+        case 'number':
+          return 'Please enter a valid number.';
+        default:
+          return 'This field cannot be empty.';
+      }
+    }
+
+    if (control.errors['minlength']) {
+      return 'Please enter at least 3 characters.';
+    }
+
+    if (control.errors['min']) {
+      return `Value must be at least ${question.validation?.min}.`;
+    }
+
+    if (control.errors['max']) {
+      return `Value must be at most ${question.validation?.max}.`;
+    }
+
+    if (control.errors['futureDate']) {
+      return 'Date cannot be in the future.';
+    }
+
+    return '';
   }
 
   private loadPatientAndForm(): void {
@@ -558,6 +713,38 @@ export class SymptomsRendererComponent implements OnInit {
     return this.currentQuestionControl instanceof FormArray ? this.currentQuestionControl : null;
   }
 
+  private getQuestionCategory(question: SymptomsQuestion): string {
+    return (question as SymptomsQuestion & { category?: string }).category || 'vital_parameters';
+  }
+
+  private isQuestionAnswered(question: SymptomsQuestion): boolean {
+    const control = this.getControl(question);
+    if (!control) return false;
+
+    const type = this.normalizeType(question.type);
+    const value = control.value;
+
+    if (type === 'multiple_choice') {
+      return Array.isArray(value) && value.some(Boolean);
+    }
+
+    return value !== null && value !== undefined && value !== '';
+  }
+
+  private markCurrentStepTouched(): void {
+    for (const question of this.currentQuestions) {
+      this.getControl(question)?.markAsTouched();
+      this.getControl(question)?.updateValueAndValidity();
+    }
+  }
+
+  private markAllTouched(): void {
+    for (const question of this.questions) {
+      this.getControl(question)?.markAsTouched();
+      this.getControl(question)?.updateValueAndValidity();
+    }
+  }
+
   private normalizeForm(form: SymptomsAssignedForm): SymptomsAssignedForm {
     return {
       ...form,
@@ -628,6 +815,7 @@ export class SymptomsRendererComponent implements OnInit {
     this.selectedResponse = null;
     this.submissionMessage = '';
     this.currentIndex = 0;
+    this.currentStep = 0;
   }
 
   private normalizeAnswers(answers: SymptomsTodayResponse['answers'] | undefined): SymptomsSubmitAnswer[] {
