@@ -343,14 +343,40 @@
                 </ng-container>
 
                 <ng-container *ngSwitchCase="'boolean'">
-                  <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-brand-300 dark:border-gray-700 dark:bg-transparent dark:text-gray-300">
-                    <input
-                      type="checkbox"
-                      class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
-                      [checked]="getFormControl(question).value === true"
-                      (change)="onSingleChoiceSelectFor(question, $any($event.target).checked)" />
-                    <span>Yes / No</span>
-                  </label>
+                  <div class="flex gap-3">
+                    <button
+                      type="button"
+                      (click)="onBooleanSelect(question, true)"
+                      class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors"
+                      [ngClass]="{
+                        'border-green-500 bg-green-50 text-green-700 dark:border-green-400 dark:bg-green-900/20 dark:text-green-400': getAnswer(question) === true,
+                        'border-gray-200 bg-white text-gray-700 hover:border-green-300 hover:bg-green-50/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300': getAnswer(question) !== true
+                      }"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="2.5"
+                           stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                      Yes
+                    </button>
+                    <button
+                      type="button"
+                      (click)="onBooleanSelect(question, false)"
+                      class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors"
+                      [ngClass]="{
+                        'border-red-500 bg-red-50 text-red-700 dark:border-red-400 dark:bg-red-900/20 dark:text-red-400': getAnswer(question) === false,
+                        'border-gray-200 bg-white text-gray-700 hover:border-red-300 hover:bg-red-50/50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300': getAnswer(question) !== false
+                      }"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+                           fill="none" stroke="currentColor" stroke-width="2.5"
+                           stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                      </svg>
+                      No
+                    </button>
+                  </div>
                   <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-2 text-xs text-error-500">
                     {{ getFieldErrorFor(question) }}
                   </p>
@@ -411,20 +437,21 @@
                 </ng-container>
 
                 <ng-container *ngSwitchCase="'scale'">
-                  <div class="rounded-xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-800">
-                    <div class="mb-3 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                      <span>Low</span>
-                      <span class="rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-600 dark:bg-brand-900/20 dark:text-brand-300">
-                        {{ getFormControl(question).value || (question.validation?.min ?? 1) }}/{{ question.validation?.max ?? 10 }}
-                      </span>
-                      <span>High</span>
-                    </div>
-                    <input
-                      [formControl]="getFormControl(question)"
-                      type="range"
-                      [min]="question.validation?.min ?? 1"
-                      [max]="question.validation?.max ?? 10"
-                      class="medical-range w-full" />
+                  <div class="flex flex-wrap items-center gap-1">
+                    <span class="text-xs text-gray-400">Lowest</span>
+                    <button
+                      *ngFor="let val of [1,2,3,4,5,6,7,8,9,10]"
+                      type="button"
+                      (click)="onScaleSelect(question, val)"
+                      class="flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-medium transition-colors"
+                      [ngClass]="{
+                        'border-brand-500 bg-brand-500 text-white': getAnswer(question) === val,
+                        'border-gray-200 bg-white text-gray-700 hover:border-brand-300 hover:bg-brand-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300': getAnswer(question) !== val
+                      }"
+                    >
+                      {{ val }}
+                    </button>
+                    <span class="text-xs text-gray-400">Highest</span>
                   </div>
                   <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-1.5 text-xs text-error-500">
                     {{ getFieldErrorFor(question) }}
