@@ -20,6 +20,11 @@ export class UserAddressCardComponent implements OnInit {
   avatarFileName = '';
   avatarPreviewUrl = '';
 
+// ── Propriétés à ajouter ────────────────────────────────
+minDateOfBirth = '';
+maxDateOfBirth = '';
+dateOfBirthError = '';
+
   editForm = {
     address: '',
     sexe: '',
@@ -35,6 +40,8 @@ export class UserAddressCardComponent implements OnInit {
 
   ngOnInit() {
     this.loadCurrentUser();
+this.setDateRange();
+  this.loadCurrentUser();
   }
 
   loadCurrentUser() {
@@ -67,6 +74,57 @@ export class UserAddressCardComponent implements OnInit {
       this.isLoading = false;
     }
   }
+
+setDateRange(): void {
+  const today = new Date();
+
+  // Min : 120 ans en arrière
+  const min = new Date(
+    today.getFullYear() - 120,
+    today.getMonth(),
+    today.getDate()
+  );
+  this.minDateOfBirth = this.formatDateForInput(min);
+
+  // Max : il y a 18 ans (né avant 2008 si on est en 2026)
+  const max = new Date(
+    today.getFullYear() - 18,
+    today.getMonth(),
+    today.getDate()
+  );
+  this.maxDateOfBirth = this.formatDateForInput(max);
+}
+
+onDateOfBirthChange(value: string): void {
+  this.updateEditField('dateOfBirth', value);
+  this.dateOfBirthError = '';
+
+  if (!value) {
+    this.dateOfBirthError = 'Date of birth is required.';
+    return;
+  }
+
+  const selected = new Date(value);
+  const today    = new Date();
+
+  if (isNaN(selected.getTime())) {
+    this.dateOfBirthError = 'Please enter a valid date.';
+    return;
+  }
+
+  const minDate = new Date(today.getFullYear() - 120, today.getMonth(), today.getDate());
+  const maxDate = new Date(today.getFullYear() - 18,  today.getMonth(), today.getDate());
+
+  if (selected > maxDate) {
+    this.dateOfBirthError = 'Patient must be at least 18 years old.';
+    return;
+  }
+
+  if (selected < minDate) {
+    this.dateOfBirthError = 'Please enter a valid date of birth.';
+    return;
+  }
+}
 
   openModal() {
     this.fillEditForm();
