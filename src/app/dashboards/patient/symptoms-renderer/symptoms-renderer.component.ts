@@ -192,12 +192,14 @@ export class SymptomsRendererComponent implements OnInit {
   nextStep(): void {
     if (this.currentStep < this.steps.length - 1) {
       this.currentStep++;
+      this.scrollToTop();
     }
   }
 
   prevStep(): void {
     if (this.currentStep > 0) {
       this.currentStep--;
+      this.scrollToTop();
     }
   }
 
@@ -371,6 +373,148 @@ export class SymptomsRendererComponent implements OnInit {
     return String(value);
   }
 
+  getSubmissionGroups(answers: SymptomsSubmitAnswer[]): {
+    key: string;
+    label: string;
+    items: { answer: SymptomsSubmitAnswer; question: SymptomsQuestion | null }[];
+  }[] {
+    const grouped = new Map<string, { answer: SymptomsSubmitAnswer; question: SymptomsQuestion | null }[]>();
+
+    for (const answer of answers) {
+      const question = this.getQuestionById(answer.questionId);
+      const key = question ? this.getQuestionCategory(question) : 'vital_parameters';
+      const items = grouped.get(key) ?? [];
+      items.push({ answer, question });
+      grouped.set(key, items);
+    }
+
+    return this.steps
+      .map((step) => ({
+        key: step.key,
+        label: this.getCategoryLabel(step.key),
+        items: grouped.get(step.key) ?? [],
+      }))
+      .filter((group) => group.items.length > 0);
+  }
+
+  getQuestionById(questionId: string): SymptomsQuestion | null {
+    return this.questions.find((question) => question._id === questionId) ?? null;
+  }
+
+  getCategoryLabel(category: string): string {
+    switch (category) {
+      case 'vital_parameters':
+        return 'Vital Parameters';
+      case 'subjective_symptoms':
+        return 'Subjective Symptoms';
+      case 'patient_context':
+        return 'Patient Context';
+      case 'clinical_data':
+        return 'Clinical Data';
+      default:
+        return 'Clinical Summary';
+    }
+  }
+
+  getGlobalStatus(answers: SymptomsSubmitAnswer[]): string {
+    for (const answer of answers) {
+      const question = this.getQuestionById(answer.questionId);
+      const statusClass = this.getStatusColor(question, answer.value);
+      if (statusClass.includes('red')) return 'Requires attention';
+      if (statusClass.includes('amber')) return 'Monitor';
+    }
+
+    return 'Stable';
+  }
+
+  getGlobalStatusClass(answers: SymptomsSubmitAnswer[]): string {
+    const status = this.getGlobalStatus(answers);
+    if (status === 'Requires attention') return 'text-red-600 dark:text-red-400';
+    if (status === 'Monitor') return 'text-amber-600 dark:text-amber-400';
+    return 'text-green-600 dark:text-green-400';
+  }
+
+  getStatusColor(question: SymptomsQuestion | null, value: unknown): string {
+    if (!question) return 'text-gray-700 dark:text-gray-200';
+
+    const label = question.label.toLowerCase();
+    const numericValue = typeof value === 'number' ? value : Number(value);
+
+    if (label.includes('pain') && !Number.isNaN(numericValue)) {
+      if (numericValue >= 7) return 'text-red-500';
+      if (numericValue >= 4) return 'text-amber-500';
+      return 'text-green-500';
+    }
+
+    if (label.includes('temperature') && !Number.isNaN(numericValue)) {
+      if (numericValue >= 38 || numericValue < 35.5) return 'text-red-500';
+      if (numericValue >= 37.5) return 'text-amber-500';
+      return 'text-green-500';
+    }
+
+    if (label.includes('heart rate') && !Number.isNaN(numericValue)) {
+      if (numericValue > 120 || numericValue < 50) return 'text-red-500';
+      if (numericValue > 100) return 'text-amber-500';
+      return 'text-green-500';
+    }
+
+    if ((label.includes('spo2') || label.includes('oxygen')) && !Number.isNaN(numericValue)) {
+      if (numericValue < 92) return 'text-red-500';
+      if (numericValue < 95) return 'text-amber-500';
+      return 'text-green-500';
+    }
+
+    if (label.includes('blood sugar') && !Number.isNaN(numericValue)) {
+      if (numericValue > 180 || numericValue < 70) return 'text-red-500';
+      if (numericValue > 140) return 'text-amber-500';
+      return 'text-green-500';
+    }
+
+    if (typeof value === 'boolean') {
+      return value ? 'text-green-500' : 'text-gray-500';
+    }
+
+    return 'text-green-500';
+  }
+
+  getDisplayAnswer(question: SymptomsQuestion | null, value: unknown): string {
+    const formatted = this.formatAnswerValue(value);
+    if (!question) return formatted;
+
+    const unit = this.getPreviewUnit(question);
+    if (!unit) return formatted;
+
+    if (typeof value === 'number') return `${value} ${unit}`;
+    if (typeof value === 'string' && value.trim() !== '' && !Number.isNaN(Number(value))) {
+      return `${value} ${unit}`;
+    }
+
+    return formatted;
+  }
+
+  getPreviewUnit(question: SymptomsQuestion): string {
+    const label = question.label.toLowerCase();
+    if (label.includes('temperature')) return 'degC';
+    if (label.includes('heart rate')) return 'bpm';
+    if (label.includes('spo2') || label.includes('oxygen')) return '%';
+    if (label.includes('blood pressure')) return 'mmHg';
+    if (label.includes('blood sugar')) return 'mg/dL';
+    return '';
+  }
+
+  getQuestionIcon(question: SymptomsQuestion | null): string {
+    if (!question) return '•';
+
+    const label = question.label.toLowerCase();
+    if (label.includes('temperature')) return '🌡️';
+    if (label.includes('heart')) return '❤️';
+    if (label.includes('oxygen') || label.includes('spo2')) return '🫁';
+    if (label.includes('blood pressure')) return '🩺';
+    if (label.includes('blood sugar')) return '🧪';
+    if (label.includes('pain')) return '⚠️';
+    return '•';
+  }
+
   selectResponse(index: number): void {
     const response = this.orderedResponses[index];
     this.selectedResponse = response || null;
@@ -413,6 +557,35 @@ export class SymptomsRendererComponent implements OnInit {
     const min = question.validation?.min ?? 1;
     const max = question.validation?.max ?? 10;
     return Array.from({ length: max - min + 1 }, (_, index) => min + index);
+  }
+
+  isAnswered(question: SymptomsQuestion): boolean {
+    return this.isQuestionAnswered(question);
+  }
+
+  getQuestionUnit(question: SymptomsQuestion): string {
+    const label = question.label.toLowerCase();
+
+    if (label.includes('temperature')) return 'degC';
+    if (label.includes('heart rate')) return 'bpm';
+    if (label.includes('spo2') || label.includes('oxygen')) return '%';
+    if (label.includes('blood sugar') || label.includes('glycemia') || label.includes('glucose')) return 'mg/dL';
+
+    return '';
+  }
+
+  getQuestionPlaceholder(question: SymptomsQuestion): string {
+    const label = question.label.toLowerCase();
+    const type = this.normalizeType(question.type);
+
+    if (label.includes('temperature')) return '36-40 degC';
+    if (label.includes('heart rate')) return '60-100 bpm';
+    if (label.includes('spo2') || label.includes('oxygen')) return '95-100 %';
+    if (label.includes('blood sugar') || label.includes('glycemia') || label.includes('glucose')) return '70-140 mg/dL';
+    if (type === 'number') return 'Enter value';
+    if (type === 'text') return 'Describe your symptoms clearly';
+
+    return 'Enter value';
   }
 
   onScaleSelectFor(question: SymptomsQuestion, value: number): void {
@@ -743,6 +916,10 @@ export class SymptomsRendererComponent implements OnInit {
       this.getControl(question)?.markAsTouched();
       this.getControl(question)?.updateValueAndValidity();
     }
+  }
+
+  private scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   private normalizeForm(form: SymptomsAssignedForm): SymptomsAssignedForm {

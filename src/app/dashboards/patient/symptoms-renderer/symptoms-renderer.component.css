@@ -1,7 +1,65 @@
 .step-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .step-card:hover {
   transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.medical-range {
+  accent-color: #3b82f6;
+}
+
+.medical-range::-webkit-slider-thumb {
+  cursor: pointer;
+}
+
+.medical-range::-moz-range-thumb {
+  cursor: pointer;
+}
+
+.preview-card {
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+}
+
+.preview-wrapper {
+  position: sticky;
+  top: 100px;
+}
+
+.preview-container {
+  max-height: 80vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.preview-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.preview-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.answer-card {
+  padding: 12px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 1279px) {
+  .preview-wrapper {
+    position: static;
+  }
+
+  .preview-container {
+    max-height: none;
+    overflow-y: visible;
+    padding-right: 0;
+  }
 }
