@@ -1,5 +1,5 @@
 <div class="min-h-screen bg-gray-50 p-4 dark:bg-gray-950 sm:p-6">
-  <div class="mx-auto max-w-2xl">
+  <div class="max-w-7xl">
 
     <div *ngIf="isLoading"
          class="flex flex-col items-center justify-center gap-3 py-24">
@@ -114,18 +114,52 @@
           </div>
 
           <div *ngIf="selectedResponse"
-               class="rounded-2xl border border-gray-200 bg-white p-6
+               class="rounded-2xl border border-gray-200 bg-white p-4
                       dark:border-white/[0.05] dark:bg-white/[0.03]">
-            <div class="space-y-4">
-              <div *ngFor="let answer of selectedResponseAnswers"
-                   class="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4
-                          dark:border-white/[0.06] dark:bg-white/[0.02]">
-                <p class="text-sm font-semibold text-gray-800 dark:text-white/90">
-                  {{ getQuestionLabel(answer.questionId) }}
-                </p>
-                <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                  {{ formatAnswerValue(answer.value) }}
-                </p>
+            <div class="mb-3 flex items-center justify-between">
+              <div>
+                <div class="text-lg font-bold text-gray-900 dark:text-white">Submission</div>
+                <div class="mt-1 text-sm font-medium" [ngClass]="getGlobalStatusClass(selectedResponseAnswers)">
+                  {{ getGlobalStatus(selectedResponseAnswers) }}
+                </div>
+              </div>
+              <div *ngIf="getResponseTime(selectedResponse)" class="text-sm text-gray-500 dark:text-gray-400">
+                {{ getResponseTime(selectedResponse) }}
+              </div>
+            </div>
+
+            <div class="preview-container space-y-4">
+              <div *ngFor="let group of getSubmissionGroups(selectedResponseAnswers)">
+                <div class="mb-2 text-lg font-semibold text-gray-900 dark:text-white">
+                  {{ group.label }}
+                </div>
+
+                <div class="space-y-2">
+                  <div *ngFor="let item of group.items"
+                       class="answer-card preview-card rounded-xl border bg-white p-3 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.02]">
+                    <div class="flex items-start gap-3">
+                      <div class="text-lg leading-none">
+                        {{ getQuestionIcon(item.question) }}
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <div class="text-xs text-gray-400 dark:text-gray-500">Question</div>
+                        <div class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">
+                          {{ item.question?.label || item.answer.questionId }}
+                        </div>
+                        <div class="mt-2 flex items-center justify-between gap-3">
+                          <span class="text-xs"
+                                [ngClass]="getStatusColor(item.question, item.answer.value)">
+                            {{ getStatusColor(item.question, item.answer.value).includes('red') ? 'Danger' : (getStatusColor(item.question, item.answer.value).includes('amber') ? 'Warning' : 'Normal') }}
+                          </span>
+                        </div>
+                        <div class="mt-1 text-lg font-bold"
+                             [ngClass]="getStatusColor(item.question, item.answer.value)">
+                          {{ getDisplayAnswer(item.question, item.answer.value) }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -139,11 +173,11 @@
       </div>
 
       <div *ngIf="!isHistoryMode && form">
-        <div class="mb-4 rounded-2xl border border-gray-200 bg-white p-4
+        <div class="mb-3 rounded-2xl border border-gray-200 bg-white p-4
                     dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div class="mb-2 flex items-center justify-between text-sm">
             <span class="text-gray-500 dark:text-gray-400">
-              Question {{ currentIndex + 1 }} of {{ totalQuestions }}
+              {{ answeredQuestions }} / {{ totalQuestions }} answered
             </span>
             <span class="font-semibold text-brand-500">
               {{ progressPercent }}%
@@ -156,276 +190,370 @@
           </div>
         </div>
 
-        <div *ngIf="errorMessage"
-             class="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3
-                    text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20
-                    dark:text-error-400">
-          {{ errorMessage }}
+        <div class="mb-3 flex flex-wrap items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white p-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
+          <ng-container *ngFor="let step of steps; let i = index">
+            <div class="flex items-center gap-2">
+              <div
+                class="flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold"
+                [ngClass]="{
+                  'bg-blue-500 text-white': i === currentStep,
+                  'bg-green-500 text-white': i < currentStep,
+                  'bg-gray-300 text-gray-700 dark:bg-gray-700 dark:text-gray-200': i > currentStep
+                }"
+              >
+                {{ i + 1 }}
+              </div>
+
+              <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ step.label }}</span>
+
+              <div *ngIf="i < steps.length - 1" class="h-[2px] w-10 bg-gray-300 dark:bg-gray-700"></div>
+            </div>
+          </ng-container>
         </div>
 
-        <div *ngIf="hasSubmittedToday"
-             class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3
-                    text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20
-                    dark:text-amber-400">
-          {{ submissionMessage || 'You can review today\'s submissions below.' }}
-        </div>
+        <div class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <div class="xl:col-span-8">
+            <div class="mb-3 rounded-2xl border border-gray-200 bg-white p-4
+                        dark:border-white/[0.05] dark:bg-white/[0.03]">
+              <div class="mb-1 flex justify-between text-sm">
+                <span>Step {{ currentStep + 1 }} / 4</span>
+                <span>{{ stepProgress.answered }} / {{ stepProgress.total }}</span>
+              </div>
 
-        <div *ngIf="todayResponses.length >= 3"
-             class="mb-4 rounded-lg border border-error-200 bg-error-50 px-4 py-3
-                    text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20
-                    dark:text-error-400">
-          You have reached the maximum of 3 submissions today
-        </div>
+              <div class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-800">
+                <div
+                  class="h-2 rounded-full bg-blue-500 transition-all duration-300"
+                  [style.width.%]="stepProgressPercent"
+                ></div>
+              </div>
+            </div>
 
-        <div *ngIf="todayResponses.length > 0"
-             class="mb-4 rounded-2xl border border-gray-200 bg-white p-4
-                    dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <p class="text-sm font-semibold text-gray-800 dark:text-white/90">
-            Select a submission
-          </p>
-          <div class="mt-3 flex flex-wrap gap-2">
-            <button *ngFor="let response of orderedResponses; let i = index"
-                    type="button"
-                    (click)="selectResponse(i)"
-                    class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition"
-                    [ngClass]="selectedResponse === response
-                      ? 'border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-              <span>{{ getAttemptLabel(i) }}</span>
-              <span *ngIf="getResponseTime(response)" class="text-xs opacity-75">
-                {{ getResponseTime(response) }}
-              </span>
-            </button>
+            <div *ngIf="errorMessage"
+                 class="mb-3 rounded-lg border border-error-200 bg-error-50 px-4 py-3
+                        text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20
+                        dark:text-error-400">
+              {{ errorMessage }}
+            </div>
+
+            <div *ngIf="hasSubmittedToday"
+                 class="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3
+                        text-sm text-amber-700 dark:border-amber-800 dark:bg-amber-900/20
+                        dark:text-amber-400">
+              {{ submissionMessage || 'You can review today\'s submissions below.' }}
+            </div>
+
+            <div *ngIf="todayResponses.length >= 3"
+                 class="mb-3 rounded-lg border border-error-200 bg-error-50 px-4 py-3
+                        text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20
+                        dark:text-error-400">
+              You have reached the maximum of 3 submissions today
+            </div>
+
+            <form [formGroup]="formGroup"
+                  class="rounded-2xl border border-gray-200 bg-white p-4
+                         dark:border-white/[0.05] dark:bg-white/[0.03]">
+              <div class="space-y-4">
+            <div *ngFor="let question of currentQuestions"
+                 class="step-card rounded-xl border bg-white p-4 shadow-sm dark:bg-white/[0.02]"
+                 [ngClass]="isAnswered(question)
+                   ? 'border-green-500 shadow-green-100/60 dark:border-green-500'
+                   : 'border-gray-100 dark:border-white/[0.06]'">
+              <div class="mb-5 flex items-start justify-between gap-4">
+                <div>
+                  <p class="text-base font-semibold text-gray-800 dark:text-white/90">
+                    {{ question.label }}
+                    <span *ngIf="question.required" class="ml-1 text-error-500">*</span>
+                  </p>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    {{ getQuestionPlaceholder(question) }}
+                  </p>
+                </div>
+                <span *ngIf="isAnswered(question)"
+                      class="inline-flex items-center rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-600 dark:bg-green-900/20 dark:text-green-400">
+                  Completed
+                </span>
+              </div>
+
+              <ng-container [ngSwitch]="question.type">
+                <ng-container *ngSwitchCase="'text'">
+                  <textarea
+                    [formControl]="getFormControl(question)"
+                    rows="4"
+                    [placeholder]="getQuestionPlaceholder(question)"
+                    class="w-full rounded-xl border px-4 py-3 text-sm text-gray-700
+                           placeholder:text-gray-400 focus:outline-none focus:ring-3
+                           focus:ring-brand-500/10 dark:text-gray-200 resize-none transition"
+                    [ngClass]="isTouchedFor(question) && getFieldErrorFor(question)
+                      ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+                      : 'border-gray-200 bg-white focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'">
+                  </textarea>
+                  <div class="mt-1.5 flex items-center justify-between text-xs">
+                    <span *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="text-error-500">
+                      {{ getFieldErrorFor(question) }}
+                    </span>
+                    <span *ngIf="!getFieldErrorFor(question)" class="text-gray-400">
+                      Minimum 3 characters
+                    </span>
+                    <span class="ml-auto"
+                          [ngClass]="isTouchedFor(question) && getFieldErrorFor(question) ? 'text-error-500' : 'text-gray-400'">
+                      {{ getFormControl(question).value?.length || 0 }} chars
+                    </span>
+                  </div>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'number'">
+                  <div class="flex items-center gap-3">
+                    <input
+                      [formControl]="getFormControl(question)"
+                      type="number"
+                      [min]="question.validation?.min ?? null"
+                      [max]="question.validation?.max ?? null"
+                      [placeholder]="getQuestionPlaceholder(question)"
+                      class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
+                             placeholder:text-gray-400 focus:outline-none focus:ring-3
+                             focus:ring-brand-500/10 dark:text-gray-200 transition"
+                      [ngClass]="isTouchedFor(question) && getFieldErrorFor(question)
+                        ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+                        : 'border-gray-200 bg-white focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'" />
+                    <span *ngIf="getQuestionUnit(question)"
+                          class="shrink-0 text-sm font-medium text-gray-400 dark:text-gray-500">
+                      {{ getQuestionUnit(question) }}
+                    </span>
+                  </div>
+                  <div class="mt-1.5 flex items-center justify-between text-xs">
+                    <span *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="text-error-500">
+                      {{ getFieldErrorFor(question) }}
+                    </span>
+                  </div>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'date'">
+                  <input
+                    [formControl]="getFormControl(question)"
+                    type="date"
+                    class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
+                           focus:outline-none focus:ring-3 focus:ring-brand-500/10
+                           dark:text-gray-200 transition"
+                    [ngClass]="isTouchedFor(question) && getFieldErrorFor(question)
+                      ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+                      : 'border-gray-200 bg-white focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'" />
+                  <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-1.5 text-xs text-error-500">
+                    {{ getFieldErrorFor(question) }}
+                  </p>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'boolean'">
+                  <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-brand-300 dark:border-gray-700 dark:bg-transparent dark:text-gray-300">
+                    <input
+                      type="checkbox"
+                      class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
+                      [checked]="getFormControl(question).value === true"
+                      (change)="onSingleChoiceSelectFor(question, $any($event.target).checked)" />
+                    <span>Yes / No</span>
+                  </label>
+                  <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-2 text-xs text-error-500">
+                    {{ getFieldErrorFor(question) }}
+                  </p>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'single_choice'">
+                  <div class="flex flex-col gap-3">
+                    <label *ngFor="let opt of (question.options || [])"
+                           class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-brand-200 hover:bg-brand-50/50 dark:border-gray-700 dark:bg-transparent dark:text-gray-300">
+                      <input
+                        type="radio"
+                        [name]="question._id || question.label"
+                        class="h-4 w-4 border-gray-300 text-brand-500 focus:ring-brand-500/30"
+                        [checked]="getFormControl(question).value === opt"
+                        (change)="onSingleChoiceSelectFor(question, opt)" />
+                      <span>{{ opt }}</span>
+                    </label>
+                  </div>
+                  <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-2 text-xs text-error-500">
+                    {{ getFieldErrorFor(question) }}
+                  </p>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'multiple_choice'">
+                  <div class="flex flex-col gap-3">
+                    <label *ngFor="let opt of (question.options || []); let i = index"
+                           class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-brand-200 hover:bg-brand-50/50 dark:border-gray-700 dark:bg-transparent dark:text-gray-300">
+                      <input
+                        type="checkbox"
+                        class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
+                        [checked]="isOptionCheckedFor(question, i)"
+                        (change)="onMultipleChoiceToggleFor(question, i)" />
+                      <span>{{ opt }}</span>
+                    </label>
+                  </div>
+                  <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-2 text-xs text-error-500">
+                    {{ getFieldErrorFor(question) }}
+                  </p>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'select'">
+                  <select
+                    [formControl]="getFormControl(question)"
+                    class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
+                           focus:outline-none focus:ring-3 focus:ring-brand-500/10
+                           dark:text-gray-200 transition"
+                    [ngClass]="isTouchedFor(question) && getFieldErrorFor(question)
+                      ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
+                      : 'border-gray-200 bg-white focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'">
+                    <option value="">Select an option</option>
+                    <option *ngFor="let opt of (question.options || [])" [value]="opt">
+                      {{ opt }}
+                    </option>
+                  </select>
+                  <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-2 text-xs text-error-500">
+                    {{ getFieldErrorFor(question) }}
+                  </p>
+                </ng-container>
+
+                <ng-container *ngSwitchCase="'scale'">
+                  <div class="rounded-xl border border-gray-200 bg-white px-4 py-4 dark:border-gray-700 dark:bg-gray-800">
+                    <div class="mb-3 flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+                      <span>Low</span>
+                      <span class="rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-600 dark:bg-brand-900/20 dark:text-brand-300">
+                        {{ getFormControl(question).value || (question.validation?.min ?? 1) }}/{{ question.validation?.max ?? 10 }}
+                      </span>
+                      <span>High</span>
+                    </div>
+                    <input
+                      [formControl]="getFormControl(question)"
+                      type="range"
+                      [min]="question.validation?.min ?? 1"
+                      [max]="question.validation?.max ?? 10"
+                      class="medical-range w-full" />
+                  </div>
+                  <p *ngIf="isTouchedFor(question) && getFieldErrorFor(question)" class="mt-1.5 text-xs text-error-500">
+                    {{ getFieldErrorFor(question) }}
+                  </p>
+                </ng-container>
+              </ng-container>
+            </div>
+              </div>
+
+              <div class="mt-4 flex items-center justify-between">
+                <button (click)="prevStep()"
+                  type="button"
+                  *ngIf="currentStep > 0"
+                  class="inline-flex h-11 items-center justify-center rounded-xl border
+                         border-gray-200 bg-white px-5 text-sm font-medium text-gray-600
+                         transition hover:bg-gray-50
+                         dark:border-gray-700 dark:bg-transparent dark:text-gray-400">
+                  Previous
+                </button>
+                <div *ngIf="currentStep === 0"></div>
+
+                <button *ngIf="currentStep < 3"
+                  (click)="next()"
+                  type="button"
+                  [disabled]="!canGoNext()"
+                  class="inline-flex h-11 items-center justify-center rounded-xl bg-brand-500
+                         px-6 text-sm font-medium text-white transition hover:bg-brand-600
+                         disabled:cursor-not-allowed disabled:opacity-40">
+                  Next
+                </button>
+
+                <button *ngIf="currentStep === 3"
+                  (click)="submit()"
+                  type="button"
+                  [disabled]="responseForm.invalid || isSubmitting || hasReachedDailyLimit"
+                  class="inline-flex h-11 items-center justify-center gap-2 rounded-xl
+                         bg-brand-500 px-6 text-sm font-medium text-white transition
+                         hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40">
+                  <svg *ngIf="isSubmitting"
+                       class="animate-spin" xmlns="http://www.w3.org/2000/svg"
+                       width="15" height="15" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10"
+                            stroke="currentColor" stroke-width="4"/>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                  {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                </button>
+              </div>
+            </form>
           </div>
-        </div>
 
-        <div *ngIf="selectedResponse && !isHistoryMode"
-             class="mb-4 rounded-2xl border border-gray-200 bg-white p-6
-                    dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <div class="mb-4 flex items-center justify-between">
-            <p class="text-sm font-semibold text-gray-800 dark:text-white/90">
-              Submission Preview
-            </p>
-            <span *ngIf="getResponseTime(selectedResponse)"
-                  class="text-xs text-gray-500 dark:text-gray-400">
-              {{ getResponseTime(selectedResponse) }}
-            </span>
-          </div>
-          <div class="space-y-4">
-            <div *ngFor="let answer of selectedResponseAnswers"
-                 class="rounded-2xl border border-gray-100 bg-gray-50 px-4 py-4
-                        dark:border-white/[0.06] dark:bg-white/[0.02]">
-              <p class="text-sm font-semibold text-gray-800 dark:text-white/90">
-                {{ getQuestionLabel(answer.questionId) }}
-              </p>
-              <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                {{ formatAnswerValue(answer.value) }}
-              </p>
+          <div class="xl:col-span-4">
+            <div class="preview-wrapper space-y-3">
+              <div *ngIf="todayResponses.length > 0"
+                   class="rounded-2xl border border-gray-200 bg-white p-4
+                          dark:border-white/[0.05] dark:bg-white/[0.03]">
+                <p class="text-sm font-semibold text-gray-800 dark:text-white/90">
+                  Select a submission
+                </p>
+                <div class="mt-3 flex flex-wrap gap-2">
+                  <button *ngFor="let response of orderedResponses; let i = index"
+                          type="button"
+                          (click)="selectResponse(i)"
+                          class="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-medium transition"
+                          [ngClass]="selectedResponse === response
+                            ? 'border-brand-500 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
+                            : 'border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
+                    <span>{{ getAttemptLabel(i) }}</span>
+                    <span *ngIf="getResponseTime(response)" class="text-xs opacity-75">
+                      {{ getResponseTime(response) }}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <div *ngIf="selectedResponse && !isHistoryMode"
+                   class="rounded-2xl border border-gray-200 bg-white p-4
+                          dark:border-white/[0.05] dark:bg-white/[0.03]">
+                <div class="mb-3 flex items-center justify-between">
+                  <div>
+                    <div class="text-lg font-bold text-gray-900 dark:text-white">Submission</div>
+                    <div class="mt-1 text-sm font-medium" [ngClass]="getGlobalStatusClass(selectedResponseAnswers)">
+                      {{ getGlobalStatus(selectedResponseAnswers) }}
+                    </div>
+                  </div>
+                  <span *ngIf="getResponseTime(selectedResponse)"
+                        class="text-sm text-gray-500 dark:text-gray-400">
+                    {{ getResponseTime(selectedResponse) }}
+                  </span>
+                </div>
+
+                <div class="preview-container space-y-4">
+                  <div *ngFor="let group of getSubmissionGroups(selectedResponseAnswers)">
+                    <div class="mb-2 text-base font-semibold text-gray-900 dark:text-white">
+                      {{ group.label }}
+                    </div>
+
+                    <div class="space-y-2">
+                      <div *ngFor="let item of group.items"
+                           class="answer-card preview-card rounded-xl border bg-white p-3 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.02]">
+                        <div class="flex items-start gap-3">
+                          <div class="text-lg leading-none">
+                            {{ getQuestionIcon(item.question) }}
+                          </div>
+                          <div class="min-w-0 flex-1">
+                            <div class="text-xs text-gray-400 dark:text-gray-500">Question</div>
+                            <div class="mt-1 text-sm font-medium text-gray-800 dark:text-white/90">
+                              {{ item.question?.label || item.answer.questionId }}
+                            </div>
+                            <div class="mt-2 flex items-center justify-between gap-3">
+                              <span class="text-xs"
+                                    [ngClass]="getStatusColor(item.question, item.answer.value)">
+                                {{ getStatusColor(item.question, item.answer.value).includes('red') ? 'Danger' : (getStatusColor(item.question, item.answer.value).includes('amber') ? 'Warning' : 'Normal') }}
+                              </span>
+                            </div>
+                            <div class="mt-1 text-lg font-bold"
+                                 [ngClass]="getStatusColor(item.question, item.answer.value)">
+                              {{ getDisplayAnswer(item.question, item.answer.value) }}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <form [formGroup]="formGroup"
-              class="rounded-2xl border border-gray-200 bg-white p-6
-                     dark:border-white/[0.05] dark:bg-white/[0.03]">
-          <p *ngIf="currentQuestion"
-             class="mb-5 text-base font-semibold text-gray-800 dark:text-white/90">
-            {{ currentQuestion.label }}
-            <span *ngIf="currentQuestion.required" class="ml-1 text-error-500">*</span>
-          </p>
-
-          <ng-container *ngIf="currentQuestion">
-            <ng-container [ngSwitch]="currentQuestion.type">
-              <ng-container *ngSwitchCase="'text'">
-                <textarea
-                  [formControl]="currentQuestionFormControl"
-                  rows="4"
-                  placeholder="Your answer..."
-                  class="w-full rounded-xl border px-4 py-3 text-sm text-gray-700
-                         placeholder:text-gray-400 focus:outline-none focus:ring-3
-                         focus:ring-brand-500/10 dark:text-gray-200 resize-none transition"
-                  [ngClass]="isTouched() && getFieldError()
-                    ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
-                    : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'">
-                </textarea>
-                <div class="mt-1.5 flex items-center justify-between text-xs">
-                  <span *ngIf="isTouched() && getFieldError()" class="text-error-500">
-                    {{ getFieldError() }}
-                  </span>
-                  <span *ngIf="!getFieldError()" class="text-gray-400">
-                    Minimum 3 characters
-                  </span>
-                  <span class="ml-auto"
-                        [ngClass]="isTouched() && getFieldError() ? 'text-error-500' : 'text-gray-400'">
-                    {{ formGroup.get(currentQuestion._id!)?.value?.length || 0 }} chars
-                  </span>
-                </div>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'number'">
-                <input
-                  [formControl]="currentQuestionFormControl"
-                  type="number"
-                  [min]="currentQuestion.validation?.min ?? null"
-                  [max]="currentQuestion.validation?.max ?? null"
-                  placeholder="Enter a number..."
-                  class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
-                         placeholder:text-gray-400 focus:outline-none focus:ring-3
-                         focus:ring-brand-500/10 dark:text-gray-200 transition"
-                  [ngClass]="isTouched() && getFieldError()
-                    ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
-                    : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'" />
-                <div class="mt-1.5 flex items-center justify-between text-xs">
-                  <span *ngIf="isTouched() && getFieldError()" class="text-error-500">
-                    {{ getFieldError() }}
-                  </span>
-                </div>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'date'">
-                <input
-                  [formControl]="currentQuestionFormControl"
-                  type="date"
-                  class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
-                         focus:outline-none focus:ring-3 focus:ring-brand-500/10
-                         dark:text-gray-200 transition"
-                  [ngClass]="isTouched() && getFieldError()
-                    ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
-                    : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'" />
-                <p *ngIf="isTouched() && getFieldError()" class="mt-1.5 text-xs text-error-500">
-                  {{ getFieldError() }}
-                </p>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'boolean'">
-                <div class="flex flex-col gap-3">
-                  <button *ngFor="let opt of ['Yes', 'No']"
-                    type="button"
-                    (click)="onSingleChoiceSelect(opt === 'Yes')"
-                    class="flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition"
-                    [ngClass]="formGroup.get(currentQuestion._id!)?.value === (opt === 'Yes')
-                      && formGroup.get(currentQuestion._id!)?.value !== null
-                      ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
-                      : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-                    {{ opt }}
-                  </button>
-                </div>
-                <p *ngIf="isTouched() && getFieldError()" class="mt-2 text-xs text-error-500">
-                  {{ getFieldError() }}
-                </p>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'single_choice'">
-                <div class="flex flex-col gap-3">
-                  <button *ngFor="let opt of (currentQuestion.options || [])"
-                    type="button"
-                    (click)="onSingleChoiceSelect(opt)"
-                    class="flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition"
-                    [ngClass]="formGroup.get(currentQuestion._id!)?.value === opt
-                      ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
-                      : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-                    {{ opt }}
-                  </button>
-                </div>
-                <p *ngIf="isTouched() && getFieldError()" class="mt-2 text-xs text-error-500">
-                  {{ getFieldError() }}
-                </p>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'multiple_choice'">
-                <div class="flex flex-col gap-3">
-                  <button *ngFor="let opt of (currentQuestion.options || []); let i = index"
-                    type="button"
-                    (click)="onMultipleChoiceToggle(i)"
-                    class="flex items-center gap-3 rounded-xl border px-4 py-3.5 text-sm text-left transition"
-                    [ngClass]="isOptionChecked(i)
-                      ? 'border-brand-400 bg-brand-50 text-brand-700 dark:border-brand-600 dark:bg-brand-900/20 dark:text-brand-300'
-                      : 'border-gray-200 bg-white hover:border-brand-200 hover:bg-brand-50/50 text-gray-700 dark:border-gray-700 dark:bg-transparent dark:text-gray-300'">
-                    {{ opt }}
-                  </button>
-                </div>
-                <p *ngIf="isTouched() && getFieldError()" class="mt-2 text-xs text-error-500">
-                  {{ getFieldError() }}
-                </p>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'select'">
-                <select
-                  [formControl]="currentQuestionFormControl"
-                  class="h-11 w-full rounded-xl border px-4 text-sm text-gray-700
-                         focus:outline-none focus:ring-3 focus:ring-brand-500/10
-                         dark:text-gray-200 transition"
-                  [ngClass]="isTouched() && getFieldError()
-                    ? 'border-error-400 bg-error-50 dark:border-error-700 dark:bg-error-900/10'
-                    : 'border-gray-200 bg-gray-50 focus:border-brand-300 dark:border-gray-700 dark:bg-gray-800'">
-                  <option value="">Select an option</option>
-                  <option *ngFor="let opt of (currentQuestion.options || [])" [value]="opt">
-                    {{ opt }}
-                  </option>
-                </select>
-                <p *ngIf="isTouched() && getFieldError()" class="mt-2 text-xs text-error-500">
-                  {{ getFieldError() }}
-                </p>
-              </ng-container>
-
-              <ng-container *ngSwitchCase="'scale'">
-                <div class="flex flex-wrap gap-2">
-                  <button *ngFor="let n of scaleValues"
-                    type="button"
-                    (click)="onScaleSelect(n)"
-                    class="flex h-11 w-11 items-center justify-center rounded-xl border text-sm font-medium transition"
-                    [ngClass]="isScaleSelected(n)
-                      ? 'border-brand-500 bg-brand-500 text-white'
-                      : 'border-gray-200 bg-white text-gray-600 hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:bg-transparent dark:text-gray-400'">
-                    {{ n }}
-                  </button>
-                </div>
-                <p *ngIf="isTouched() && getFieldError()" class="mt-1.5 text-xs text-error-500">
-                  {{ getFieldError() }}
-                </p>
-              </ng-container>
-            </ng-container>
-          </ng-container>
-
-          <div class="mt-4 flex items-center justify-between">
-            <button (click)="previous()"
-              type="button"
-              [disabled]="isFirstQuestion"
-              class="inline-flex h-11 items-center justify-center rounded-xl border
-                     border-gray-200 bg-white px-5 text-sm font-medium text-gray-600
-                     transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40
-                     dark:border-gray-700 dark:bg-transparent dark:text-gray-400">
-              Previous
-            </button>
-
-            <button *ngIf="!isLastQuestion"
-              (click)="next()"
-              type="button"
-              [disabled]="!canGoNext()"
-              class="inline-flex h-11 items-center justify-center rounded-xl bg-brand-500
-                     px-6 text-sm font-medium text-white transition hover:bg-brand-600
-                     disabled:cursor-not-allowed disabled:opacity-40">
-              Next
-            </button>
-
-            <button *ngIf="isLastQuestion"
-              (click)="submit()"
-              type="button"
-              [disabled]="!canGoNext() || isSubmitting || hasReachedDailyLimit"
-              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl
-                     bg-brand-500 px-6 text-sm font-medium text-white transition
-                     hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40">
-              <svg *ngIf="isSubmitting"
-                   class="animate-spin" xmlns="http://www.w3.org/2000/svg"
-                   width="15" height="15" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10"
-                        stroke="currentColor" stroke-width="4"/>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-              </svg>
-              {{ isSubmitting ? 'Submitting...' : 'Submit' }}
-            </button>
-          </div>
-        </form>
       </div>
     </div>
   </div>

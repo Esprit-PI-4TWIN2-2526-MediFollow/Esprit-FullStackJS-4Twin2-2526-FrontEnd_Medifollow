@@ -61,14 +61,36 @@
             [ngClass]="{
               'border-red-500': loginForm.get('password')?.touched && loginForm.get('password')?.invalid
             }"
-            class="w-full border rounded p-2"
+            class="w-full border rounded p-2 pr-10"
           />
-          <span
+          <button
+            type="button"
             (click)="togglePasswordVisibility()"
-            class="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
+            class="absolute right-3 top-1/2 z-30 inline-flex -translate-y-1/2 items-center justify-center rounded-md p-1 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+            [attr.aria-label]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+            [title]="showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
           >
-            <!-- icône œil ici -->
-          </span>
+            <svg
+              *ngIf="showPassword; else hiddenPasswordIcon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="h-5 w-5"
+            >
+              <path d="M10 4.5c-3.827 0-7.076 2.323-8.25 5.5 1.174 3.177 4.423 5.5 8.25 5.5s7.076-2.323 8.25-5.5C17.076 6.823 13.827 4.5 10 4.5Zm0 9a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Z" />
+              <path d="M10 8a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z" />
+            </svg>
+            <ng-template #hiddenPasswordIcon>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                class="h-5 w-5"
+              >
+                <path d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l2.03 2.03A9.94 9.94 0 0 0 1.75 10c1.174 3.177 4.423 5.5 8.25 5.5 1.662 0 3.228-.439 4.582-1.205l2.138 2.138a.75.75 0 1 0 1.06-1.06l-14.5-14.5Zm7.572 10.754A3.5 3.5 0 0 1 7.026 9.15l3.826 3.825Zm1.738-.677-5.887-5.886A8.235 8.235 0 0 1 10 4.5c3.827 0 7.076 2.323 8.25 5.5a9.786 9.786 0 0 1-2.544 3.63l-1.348-1.348A3.48 3.48 0 0 0 14.5 11c0-1.933-1.567-3.5-3.5-3.5-.464 0-.907.09-1.313.254l-1.32-1.32A3.49 3.49 0 0 1 11 6.5c1.933 0 3.5 1.567 3.5 3.5 0 .597-.15 1.16-.41 1.652l-1.5-1.5Z" />
+              </svg>
+            </ng-template>
+          </button>
         </div>
         <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
              class="text-sm text-red-500 mt-1">
