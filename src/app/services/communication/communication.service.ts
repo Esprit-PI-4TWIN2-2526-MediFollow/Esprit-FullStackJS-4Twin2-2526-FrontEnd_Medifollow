@@ -10,6 +10,7 @@ import { Message } from '../../models/message';
 export class CommunicationService implements OnDestroy {
   private socket!: Socket;
   private readonly SERVER_URL = 'http://localhost:3000';
+  private currentUser = JSON.parse(localStorage.getItem('user') ?? '{}');
 
   // Streams réactifs pour les composants
   private messages$ = new BehaviorSubject<Message[]>([]);
@@ -42,7 +43,25 @@ export class CommunicationService implements OnDestroy {
 
     this.socket.on('receive-message', (message: Message) => {
       const current = this.messages$.getValue();
-      this.messages$.next([...current, message]);
+      const incomingSenderId = this.getUserId(message.sender);
+      const optimisticIndex = current.findIndex(existing =>
+        existing._id.startsWith('temp-') &&
+        existing.roomId === message.roomId &&
+        existing.content === message.content &&
+        this.getUserId(existing.sender) === incomingSenderId
+      );
+
+      if (optimisticIndex >= 0) {
+        const next = [...current];
+        next[optimisticIndex] = message;
+        this.messages$.next(next);
+        return;
+      }
+
+      const alreadyExists = current.some(existing => existing._id === message._id);
+      if (!alreadyExists) {
+        this.messages$.next([...current, message]);
+      }
     });
 
     this.socket.on('typing', (data: { name: string; isTyping: boolean }) => {
@@ -58,7 +77,7 @@ export class CommunicationService implements OnDestroy {
       this.messages$.next(updated);
     });
 
-    this.socket.on('connect_error', (err) => {
+    this.socket.on('connect_error', (err: Error) => {
       console.error('[Socket] Erreur :', err.message);
     });
   }
@@ -75,7 +94,26 @@ export class CommunicationService implements OnDestroy {
   sendMessage(content: string): void {
     const roomId = this.currentRoomId$.getValue();
     if (!roomId || !content.trim()) return;
-    this.socket.emit('send-message', { roomId, content });
+
+    const trimmedContent = content.trim();
+    const optimisticMessage: Message = {
+      _id: `temp-${Date.now()}`,
+      roomId,
+      content: trimmedContent,
+      createdAt: new Date().toISOString(),
+      read: false,
+      senderRoleName: this.currentUser?.role?.name ?? this.currentUser?.role ?? '',
+      sender: {
+        _id: this.getUserId(this.currentUser),
+        firstName: this.currentUser?.firstName ?? '',
+        lastName: this.currentUser?.lastName ?? '',
+        avatarUrl: this.currentUser?.avatarUrl ?? '',
+        isOnline: true,
+      },
+    };
+
+    this.messages$.next([...this.messages$.getValue(), optimisticMessage]);
+    this.socket.emit('send-message', { roomId, content: trimmedContent });
   }
 
   sendTyping(isTyping: boolean): void {
@@ -116,5 +154,11 @@ export class CommunicationService implements OnDestroy {
 
   ngOnDestroy(): void {
     this.disconnect();
+  }
+
+  private getUserId(user: any): string {
+    if (!user) return '';
+    if (typeof user === 'string') return user;
+    return user._id ?? user.id ?? '';
   }
 }
