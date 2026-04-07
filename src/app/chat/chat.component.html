@@ -1,129 +1,265 @@
-<div class="chat-container">
+<div class="chat-layout">
 
-  <!-- Header -->
-  <div class="chat-header">
-    <div class="header-left">
-      <img
-        *ngIf="recipient?.avatarUrl; else initials"
-        [src]="recipient?.avatarUrl"
-        class="header-avatar"
-        [class.online]="isConnected"
-        [alt]="recipient?.firstName || ''"
-      />
-      <ng-template #initials>
-        <div class="header-avatar" [class.online]="isConnected">
-          {{ recipient?.firstName?.[0] }}{{ recipient?.lastName?.[0] }}
-        </div>
-      </ng-template>
-      <div class="header-info">
-        <span class="header-name">{{ recipient?.firstName }} {{ recipient?.lastName }}</span>
-        <span class="header-status">
-          <span class="status-dot" [class.connected]="isConnected"></span>
-          {{ isConnected ? 'En ligne maintenant' : 'Hors ligne' }}
-        </span>
-      </div>
+  <!-- ══════════════════════════════════════════════════════
+       COLONNE 1 — LISTE DES CONTACTS
+  ══════════════════════════════════════════════════════ -->
+  <div class="contacts-panel">
+    <div class="contacts-header">
+      <h2>Messages</h2>
+      <button class="new-chat-btn" title="Nouveau message">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
     </div>
-    <div class="header-actions">
-      <button class="icon-btn" title="Appel">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.16 1.18 2 2 0 012.13 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/>
-        </svg>
-      </button>
-      <button class="icon-btn" title="Plus">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-          <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
-        </svg>
-      </button>
+
+    <div class="contacts-list">
+      <div
+        *ngFor="let contact of contacts"
+        class="contact-item"
+        [class.active]="contact._id === activeContactId"
+        (click)="openChat(contact._id)"
+      >
+        <div class="contact-avatar-wrap">
+          <div class="contact-avatar">
+            <img
+              *ngIf="contact.avatarUrl"
+              [src]="contact.avatarUrl"
+              [alt]="contact.firstName"
+            />
+            <span *ngIf="!contact.avatarUrl">
+              {{ contact.firstName?.[0] }}{{ contact.lastName?.[0] }}
+            </span>
+          </div>
+          <span *ngIf="contact.isOnline" class="online-dot"></span>
+        </div>
+
+        <div class="contact-body">
+          <div class="contact-top">
+            <span class="contact-name">{{ contact.firstName }} {{ contact.lastName }}</span>
+            <span class="contact-time">{{ contact.lastMessageTime || '' }}</span>
+          </div>
+          <div class="contact-bottom">
+            <span class="last-message">{{ contact.lastMessage || getRoleName(contact) }}</span>
+            <span *ngIf="contact.unreadCount" class="unread-badge">{{ contact.unreadCount }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!loading && contacts.length === 0" style="padding: 32px 16px; text-align: center; color: #aaa; font-size: 13px;">
+        Aucun contact disponible
+      </div>
     </div>
   </div>
 
-  <!-- Messages -->
-  <div class="messages-list">
 
-    <ng-container *ngFor="let msg of messages; let i = index">
-      <!-- Séparateur de date si premier message du jour -->
-      <div *ngIf="isNewDay(msg, messages[i - 1])" class="date-separator">
-        <span>{{ msg.createdAt | date:'dd MMMM yyyy' }}</span>
+  <!-- ══════════════════════════════════════════════════════
+       COLONNE 2 — ZONE CHAT
+  ══════════════════════════════════════════════════════ -->
+  <div class="chat-panel">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="header-left">
+        <div class="header-avatar" [class.online]="isConnected">
+          <img
+            *ngIf="recipient?.avatarUrl"
+            [src]="recipient?.avatarUrl"
+            [alt]="recipient?.firstName"
+          />
+          <span *ngIf="!recipient?.avatarUrl">
+            {{ recipient?.firstName?.[0] }}{{ recipient?.lastName?.[0] }}
+          </span>
+        </div>
+        <div class="header-info">
+          <span class="header-name">{{ recipient?.firstName }} {{ recipient?.lastName }}</span>
+          <span class="header-status">
+          </span>
+        </div>
       </div>
 
-      <div
-        class="message-row"
-        [class.mine]="isMyMessage(msg)"
-        [class.theirs]="!isMyMessage(msg)"
-      >
-        <!-- Avatar (autres seulement) -->
-        <img
-          *ngIf="!isMyMessage(msg)"
-          [src]="msg.sender.avatarUrl || 'assets/default-avatar.png'"
-          class="avatar"
-          [class.online]="msg.sender.isOnline"
-          [alt]="msg.sender.firstName"
-        />
+      <div class="header-actions">
+        <!-- <button class="icon-btn" title="Appel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.16 1.18 2 2 0 012.13 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/>
+          </svg>
+        </button> -->
+        <button class="icon-btn" title="Plus">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+          </svg>
+        </button>
+      </div>
+    </div>
 
-        <div class="message-group">
-          <!-- Nom + rôle (premier message du groupe) -->
-          <div *ngIf="!isMyMessage(msg) && isFirstInGroup(msg, messages[i - 1])" class="sender-info">
-            <strong>{{ msg.sender.firstName }} {{ msg.sender.lastName }}</strong>
-            <span class="role-badge">{{ msg.senderRoleName }}</span>
-          </div>
+    <!-- Messages -->
+    <div class="messages-list">
+      <ng-container *ngFor="let msg of messages; let i = index">
 
-          <div class="message-bubble">
-            <p class="message-content">{{ msg.content }}</p>
-            <div class="message-meta">
-              <span class="message-time">{{ msg.createdAt | date:'HH:mm' }}</span>
-              <span *ngIf="isMyMessage(msg)" class="read-status" [class.read]="msg.read">
-                {{ msg.read ? '✓✓' : '✓' }}
+        <div *ngIf="isNewDay(msg, messages[i - 1])" class="date-separator">
+          <span>{{ msg.createdAt | date:'dd MMMM yyyy' }}</span>
+        </div>
+
+        <div
+          class="message-row"
+          [class.mine]="isMyMessage(msg)"
+          [class.theirs]="!isMyMessage(msg)"
+          [class.group-start]="isFirstInGroup(msg, messages[i - 1])"
+        >
+          <!-- Avatar (autres seulement, caché si même groupe) -->
+          <ng-container *ngIf="!isMyMessage(msg)">
+            <div
+              class="avatar"
+              [class.placeholder]="!isFirstInGroup(msg, messages[i - 1])"
+            >
+              <img
+                *ngIf="msg.sender.avatarUrl && isFirstInGroup(msg, messages[i - 1])"
+                [src]="msg.sender.avatarUrl"
+                [alt]="msg.sender.firstName"
+                style="width:100%;height:100%;object-fit:cover;border-radius:50%"
+              />
+              <span *ngIf="!msg.sender.avatarUrl && isFirstInGroup(msg, messages[i - 1])">
+                {{ msg.sender.firstName?.[0] }}{{ msg.sender.lastName?.[0] }}
               </span>
+            </div>
+          </ng-container>
+
+          <div class="message-group">
+            <!-- Nom + rôle -->
+            <div *ngIf="!isMyMessage(msg) && isFirstInGroup(msg, messages[i - 1])" class="sender-info">
+              <strong>{{ msg.sender.firstName }} {{ msg.sender.lastName }}</strong>
+            </div>
+
+            <div class="message-bubble">
+              <p class="message-content">{{ msg.content }}</p>
+              <div class="message-meta">
+                <span class="message-time">{{ msg.createdAt | date:'HH:mm' }}</span>
+                <span *ngIf="isMyMessage(msg)" class="read-status" [class.read]="msg.read">
+                  {{ msg.read ? '✓✓' : '✓' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </ng-container>
 
-    <!-- Typing -->
-    <div *ngIf="typingInfo?.isTyping" class="typing-row">
-      <div class="avatar"></div>
-      <div class="typing-bubble">
-        <span></span><span></span><span></span>
+      </ng-container>
+
+      <!-- Typing indicator -->
+      <div *ngIf="typingInfo?.isTyping" class="typing-row">
+        <div class="avatar"></div>
+        <div class="typing-bubble">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+
+      <div #messagesEnd></div>
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area">
+
+
+      <div class="input-row">
+        <div class="textarea-wrap">
+          <textarea
+            [(ngModel)]="newMessage"
+            (input)="onTyping()"
+            (keydown)="onKeyDown($event)"
+            placeholder="Write a message..."
+            rows="1"
+            [disabled]="!isConnected"
+          ></textarea>
+        </div>
+        <button
+          class="send-btn"
+          (click)="sendMessage()"
+          [disabled]="!newMessage.trim() || !isConnected"
+        >
+          <svg viewBox="0 0 24 24">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
       </div>
     </div>
 
-    <div #messagesEnd></div>
   </div>
 
-  <!-- Input -->
-  <div class="chat-input-area">
-    <div class="input-toolbar">
-      <button class="tool-btn" title="Fichier">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+
+  <!-- ══════════════════════════════════════════════════════
+       COLONNE 3 — FICHE PATIENT
+  ══════════════════════════════════════════════════════ -->
+  <div class="patient-panel" *ngIf="recipient">
+    <div class="patient-panel-title">Fiche</div>
+
+    <!-- Avatar + nom -->
+    <div class="patient-avatar-block">
+      <div class="patient-avatar-circle">
+        <img *ngIf="recipient.avatarUrl" [src]="recipient.avatarUrl" [alt]="recipient.firstName" />
+        <svg *ngIf="!recipient.avatarUrl" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
         </svg>
-      </button>
-      <button class="tool-btn" title="Emoji">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/>
-        </svg>
-      </button>
-    </div>
-    <div class="input-row">
-      <div class="textarea-wrap">
-        <textarea
-          [(ngModel)]="newMessage"
-          (input)="onTyping()"
-          (keydown)="onKeyDown($event)"
-          placeholder="Écrire un message…"
-          rows="1"
-          [disabled]="!isConnected"
-        ></textarea>
       </div>
-      <button
-        class="send-btn"
-        (click)="sendMessage()"
-        [disabled]="!newMessage.trim() || !isConnected"
-      >
-        <svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-      </button>
+      <div class="patient-name">{{ recipient.firstName }} {{ recipient.lastName }}</div>
+      <div class="patient-role-badge">{{ recipientRole }}</div>
     </div>
+
+    <!-- Informations
+    <div class="info-section">
+      <div class="info-section-title">Informations</div>
+      <div class="info-row">
+        <span class="info-label">Âge</span>
+        <span class="info-value" [class.empty]="!patientInfo?.exitDate">{{ patientInfo?.age || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Chambre</span>
+        <span class="info-value" [class.empty]="!patientInfo?.room">{{ patientInfo?.room || '—' }}</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Service</span>
+        <span class="info-value tag" *ngIf="patientInfo?.service">{{ patientInfo?.service }}</span>
+        <span class="info-value empty" *ngIf="!patientInfo?.service">—</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Sortie</span>
+        <span class="info-value" [class.empty]="!patientInfo?.exitDate">{{ patientInfo?.exitDate || '—' }}</span>
+      </div>
+    </div> -->
+
+    <!-- Actions rapides -->
+    <div class="info-section">
+      <div class="info-section-title">Actions</div>
+      <div class="quick-actions">
+        <button class="quick-action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
+          View file        </button>
+        <!-- <button class="quick-action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/>
+            <line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+          </svg>
+          Planifier RDV
+        </button> -->
+        <button class="quick-action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+          Mark as followed
+                </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Colonne 3 vide si aucun recipient -->
+  <div class="patient-panel" *ngIf="!recipient" style="display:flex;align-items:center;justify-content:center;">
+    <span style="color:#ccc;font-size:13px;text-align:center;">Sélectionnez un contact<br>pour voir sa fiche</span>
   </div>
 
 </div>

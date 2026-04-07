@@ -1,22 +1,222 @@
-.chat-container {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  max-width: 800px;
-  margin: 0 auto;
-  background: var(--color-background-primary, #fff);
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+// ── Host fix — CRITIQUE pour que height:100% fonctionne ─────────────────────
+:host {
+  display: block;
+  height: 100%;
   overflow: hidden;
 }
 
-// ── Header ──────────────────────────────
+// ── Variables ────────────────────────────────────────────────────────────────
+$blue: #185fa5;
+$blue-dark: #0c447c;
+$blue-light: #e6f1fb;
+$green-online: #3b6d11;
+$border: rgba(0, 0, 0, 0.09);
+$text-primary: #111;
+$text-secondary: #666;
+$text-muted: #aaa;
+$bg-page: #f5f6f8;
+$bg-white: #fff;
+$radius: 12px;
+
+// ── Wrapper 3 colonnes ───────────────────────────────────────────────────────
+.chat-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  height: 100%;          // prend toute la hauteur du parent (router-outlet)
+  min-height: 0;
+  background: $bg-page;
+  overflow: hidden;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COLONNE 1 — LISTE DES CONTACTS
+// ═══════════════════════════════════════════════════════════════════════════
+.contacts-panel {
+  background: $bg-white;
+  border-right: 0.5px solid $border;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;       // empêche le débordement vertical
+  min-height: 0;
+}
+
+.contacts-header {
+  padding: 20px 18px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 0.5px solid $border;
+  flex-shrink: 0;         // reste fixe, ne rétrécit pas
+
+  h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: $text-primary;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .new-chat-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 0.5px solid $border;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $text-secondary;
+    transition: background 0.15s;
+
+    &:hover { background: $bg-page; }
+
+    svg { width: 14px; height: 14px; }
+  }
+}
+
+.contacts-list {
+  flex: 1;
+  overflow-y: auto;       // scroll interne uniquement ici
+  padding: 8px 0;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 0; }
+}
+
+// Contact item
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+
+  &:hover { background: $bg-page; }
+
+  &.active {
+    background: $blue-light;
+
+    .contact-name { color: $blue; }
+    .last-message { color: darken($blue-light, 40%); }
+  }
+}
+
+.contact-avatar-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.contact-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: $blue-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: $blue;
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.online-dot {
+  position: absolute;
+  bottom: 1px;
+  right: 1px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #3b6d11;
+  border: 2px solid $bg-white;
+}
+
+.contact-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 3px;
+}
+
+.contact-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: $text-primary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-time {
+  font-size: 11px;
+  color: $text-muted;
+  white-space: nowrap;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.contact-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.last-message {
+  font-size: 12px;
+  color: $text-secondary;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.unread-badge {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  background: $blue;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+  flex-shrink: 0;
+  margin-left: 6px;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COLONNE 2 — ZONE CHAT
+// ═══════════════════════════════════════════════════════════════════════════
+.chat-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;       // CRITIQUE — contient le scroll interne
+  min-height: 0;          // CRITIQUE — permet la compression flex
+  height: 100%;
+}
+
+// ── Header du chat ───────────────────────────────────────────────────────────
 .chat-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 0.5px solid $border;
+  background: $bg-white;
+  flex-shrink: 0;         // CRITIQUE — ne rétrécit jamais
 
   .header-left {
     display: flex;
@@ -25,20 +225,23 @@
   }
 
   .header-avatar {
-    width: 38px;
-    height: 38px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    background: #e6f1fb;
+    background: $blue-light;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 13px;
-    font-weight: 500;
-    color: #185fa5;
+    font-size: 12px;
+    font-weight: 600;
+    color: $blue;
     flex-shrink: 0;
+    overflow: hidden;
+
+    img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
 
     &.online {
-      box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #3b6d11;
+      box-shadow: 0 0 0 2px $bg-white, 0 0 0 3.5px $green-online;
     }
   }
 
@@ -49,16 +252,18 @@
 
     .header-name {
       font-size: 14px;
-      font-weight: 500;
-      color: #111;
+      font-weight: 600;
+      color: $text-primary;
+      line-height: 1.2;
     }
 
     .header-status {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 12px;
-      color: #888;
+      font-size: 11.5px;
+      color: $green-online;
+      font-weight: 500;
     }
   }
 
@@ -71,94 +276,103 @@
     width: 32px;
     height: 32px;
     border-radius: 8px;
-    border: 0.5px solid rgba(0, 0, 0, 0.12);
+    border: 0.5px solid $border;
     background: transparent;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #888;
-    font-size: 15px;
+    color: $text-secondary;
+    transition: background 0.15s;
 
-    &:hover { background: rgba(0, 0, 0, 0.04); }
+    &:hover { background: $bg-page; }
+
+    svg { width: 15px; height: 15px; }
   }
 }
 
-// ── Status dot ──────────────────────────
 .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: #ccc;
 
-  &.connected { background: #3b6d11; }
+  &.connected { background: $green-online; }
 }
 
-// ── Messages list ───────────────────────
+// ── Messages ─────────────────────────────────────────────────────────────────
 .messages-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: 20px;
+  flex: 1;                // prend tout l'espace entre header et input
+  overflow-y: auto;       // scroll uniquement ici
+  padding: 20px 20px 10px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  min-height: 0;          // CRITIQUE — sans ça flex ne compresse pas
+  gap: 4px;
+  background: $bg-white;
 
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.12);
+    background: rgba(0,0,0,0.1);
     border-radius: 2px;
   }
 }
 
-// ── Date separator ──────────────────────
 .date-separator {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 4px 0;
+  margin: 10px 0;
 
   span {
     font-size: 11px;
-    color: #aaa;
+    color: $text-muted;
     white-space: nowrap;
+    font-weight: 500;
   }
 
   &::before, &::after {
     content: '';
     flex: 1;
     height: 0.5px;
-    background: rgba(0, 0, 0, 0.1);
+    background: $border;
   }
 }
 
-// ── Message row ─────────────────────────
 .message-row {
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  margin-bottom: 2px;
 
   &.mine { flex-direction: row-reverse; }
+
+  &.group-start { margin-top: 10px; }
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  background: $blue-light;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: $blue;
 
-  &.online {
-    box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #3b6d11;
-  }
+  &.placeholder { visibility: hidden; }
 }
 
-// ── Message group ────────────────────────
 .message-group {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  max-width: 62%;
+  gap: 2px;
+  max-width: 65%;
 
   .mine & { align-items: flex-end; }
 }
@@ -168,32 +382,34 @@
   align-items: center;
   gap: 6px;
   margin-bottom: 4px;
-  padding: 0 2px;
+  padding: 0 4px;
 
   strong {
     font-size: 12px;
-    font-weight: 500;
-    color: #111;
+    font-weight: 600;
+    color: $text-primary;
   }
 }
 
 .role-badge {
-  background: #e6f1fb;
-  color: #185fa5;
-  padding: 2px 7px;
+  background: $blue-light;
+  color: $blue;
+  padding: 1px 7px;
   border-radius: 20px;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
+  text-transform: lowercase;
 }
 
-// ── Bubble ───────────────────────────────
 .message-bubble {
-  padding: 10px 14px;
-  background: #f0f0f0;
+  padding: 9px 13px;
+  background: #f1f3f5;
   border-radius: 4px 16px 16px 16px;
+  max-width: 100%;
+  word-break: break-word;
 
   .mine & {
-    background: #185fa5;
+    background: $blue;
     color: #fff;
     border-radius: 16px 4px 16px 16px;
   }
@@ -201,9 +417,9 @@
 
 .message-content {
   margin: 0;
-  font-size: 14px;
+  font-size: 13.5px;
   line-height: 1.5;
-  color: #111;
+  color: $text-primary;
 
   .mine & { color: #fff; }
 }
@@ -212,34 +428,36 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 4px;
-  margin-top: 4px;
+  gap: 3px;
+  margin-top: 3px;
 }
 
 .message-time {
   font-size: 10px;
-  color: #aaa;
+  color: $text-muted;
 
-  .mine & { color: rgba(255, 255, 255, 0.55); }
+  .mine & { color: rgba(255,255,255,0.55); }
 }
 
 .read-status {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.65);
+  color: rgba(255,255,255,0.55);
+  line-height: 1;
 
   &.read { color: #9fe1cb; }
 }
 
-// ── Typing indicator ─────────────────────
+// ── Typing ────────────────────────────────────────────────────────────────────
 .typing-row {
   display: flex;
   align-items: center;
   gap: 8px;
+  margin-top: 6px;
 }
 
 .typing-bubble {
   padding: 10px 14px;
-  background: #f0f0f0;
+  background: #f1f3f5;
   border-radius: 4px 16px 16px 16px;
   display: flex;
   align-items: center;
@@ -263,18 +481,20 @@
   40% { opacity: 1; transform: scale(1); }
 }
 
-// ── Input area ───────────────────────────
+// ── Input — FIXE en bas, ne scroll pas ───────────────────────────────────────
 .chat-input-area {
-  padding: 12px 16px;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.1);
+  padding: 12px 16px 14px;
+  border-top: 0.5px solid $border;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  background: $bg-white;
+  flex-shrink: 0;         // CRITIQUE — reste toujours visible en bas
 }
 
 .input-toolbar {
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .tool-btn {
@@ -284,33 +504,33 @@
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 14px;
   color: #bbb;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: background 0.12s, color 0.12s;
 
-  &:hover {
-    background: rgba(0, 0, 0, 0.04);
-    color: #666;
-  }
+  svg { width: 14px; height: 14px; }
+
+  &:hover { background: $bg-page; color: $text-secondary; }
 }
 
 .input-row {
   display: flex;
   align-items: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 .textarea-wrap {
   flex: 1;
-  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  border: 0.5px solid rgba(0,0,0,0.18);
   border-radius: 20px;
   padding: 9px 16px;
+  transition: border-color 0.15s, box-shadow 0.15s;
 
   &:focus-within {
-    border-color: #185fa5;
-    box-shadow: 0 0 0 3px rgba(24, 95, 165, 0.08);
+    border-color: $blue;
+    box-shadow: 0 0 0 3px rgba(24,95,165,0.08);
   }
 
   textarea {
@@ -318,41 +538,178 @@
     border: none;
     outline: none;
     resize: none;
-    font-size: 14px;
+    font-size: 13.5px;
     background: transparent;
     font-family: inherit;
     line-height: 1.5;
     max-height: 100px;
-    color: #111;
+    color: $text-primary;
 
-    &::placeholder { color: #bbb; }
+    &::placeholder { color: #c0c0c0; }
   }
 }
 
 .send-btn {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: none;
-  background: #185fa5;
+  background: $blue;
   color: white;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: background 0.15s;
+  transition: background 0.15s, transform 0.1s;
 
-  &:hover { background: #0c447c; }
-  &:disabled { background: #ccc; cursor: not-allowed; }
+  &:hover { background: $blue-dark; transform: scale(1.04); }
+  &:disabled { background: #d0d0d0; cursor: not-allowed; transform: none; }
 
   svg {
-    width: 16px;
-    height: 16px;
+    width: 15px;
+    height: 15px;
     fill: none;
     stroke: white;
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// COLONNE 3 — FICHE PATIENT
+// ═══════════════════════════════════════════════════════════════════════════
+.patient-panel {
+  background: $bg-white;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;       // scroll interne si contenu dépasse
+  padding: 20px 18px;
+  min-height: 0;
+
+  &::-webkit-scrollbar { width: 0; }
+}
+
+.patient-panel-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 18px;
+  flex-shrink: 0;
+}
+
+.patient-avatar-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.patient-avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ece9f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+
+  svg { width: 28px; height: 28px; color: #8b7dd8; }
+}
+
+.patient-name {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: $text-primary;
+  text-align: center;
+  line-height: 1.3;
+}
+
+.patient-role-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c0392b;
+  background: #fdecea;
+  padding: 2px 10px;
+  border-radius: 20px;
+  text-align: center;
+}
+
+// Section infos
+.info-section {
+  margin-bottom: 20px;
+}
+
+.info-section-title {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: $text-muted;
+  margin-bottom: 10px;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 0;
+  border-bottom: 0.5px solid $border;
+  font-size: 12.5px;
+
+  &:last-child { border-bottom: none; }
+
+  .info-label { color: $text-secondary; }
+
+  .info-value {
+    color: $text-primary;
+    font-weight: 500;
+    text-align: right;
+
+    &.empty { color: $text-muted; font-weight: 400; }
+    &.tag {
+      background: $blue-light;
+      color: $blue;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+  }
+}
+
+// Actions rapides
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.quick-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 14px;
+  border: 0.5px solid $border;
+  border-radius: 9px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  color: $text-primary;
+  font-family: inherit;
+  transition: background 0.12s;
+  text-align: left;
+  font-weight: 500;
+
+  &:hover { background: $bg-page; }
+
+  svg { width: 15px; height: 15px; color: $text-secondary; flex-shrink: 0; }
 }
