@@ -6,6 +6,8 @@ import { UsersService } from '../../services/user/users.service';
 import { QuestionnaireResponsePopulated } from '../../models/questionnaire-response';
 import { Questionnaire } from '../../models/questionnaire';
 import { QuestionnaireService } from '../../services/questionnaire.service';
+import { Alert } from '../../models/alert';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-dashboard-physician',
@@ -41,7 +43,9 @@ currentPageQuestionnaire=1;
   // Responses count per patient
   responsesCountMap: Record<string, number> = {};
 
-
+// ── Propriétés  Alerts──────────────────────────────────────────────
+alerts: Alert[] = [];
+isLoadingAlerts = false;
   // ── Charts ───────────────────────────────────────────────
 
   genderChartData: ChartData<'doughnut'> = {
@@ -121,7 +125,8 @@ currentPageQuestionnaire=1;
   constructor(
     private usersService: UsersService,
     private questionnaireService: QuestionnaireService,
-    private router: Router
+    private router: Router,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -137,8 +142,10 @@ currentPageQuestionnaire=1;
       const localUser = JSON.parse(userStr);
       this.usersService.getUserByEmail(localUser.email).subscribe({
         next: (doctor) => {
+console.log('👨‍⚕️ Doctor _id:', doctor._id);  // ← vérifier cet ID
           this.currentDoctor = doctor;
           this.loadPatients(doctor.firstName + ' ' + doctor.lastName);
+        this.loadAlerts(doctor._id);//passer l'id de docteur pour charger les alertes
           const service = doctor.assignedDepartment || doctor.specialization || '';
           if (service) this.loadQuestionnaires(service);
         },
@@ -416,11 +423,172 @@ get paginatedQuestionnaires(): Questionnaire[] {
     this.router.navigate(['/doctor/patient', patientId, 'responses']);
   }
 
+  viewPatientResponsesAlert(patientId: string): void {
+    this.router.navigate(['/doctor/patient', patientId, 'symptoms']);
+  }
+
+
+  viewPatientSymptoms(patientId: string): void {
+    this.router.navigate(['/doctor/patient', patientId, 'symptoms']);
+  }
+
   viewQuestionnaire(id: string): void {
     this.router.navigate(['/doctor/viewQu', id]);
   }
 
+// ── Alerts ─────────────────────────────────────────────
+// ── Méthodes ────────────────────────────────────────────────
 
+
+loadAlerts(doctorId: string): void {
+  this.isLoadingAlerts = true;
+  this.alertService.getUnreadAlertsForDoctor(doctorId).subscribe({
+    next: (alerts) => {
+      this.alerts = alerts || [];
+      this.isLoadingAlerts = false;
+      console.log('Alerts loaded:', this.alerts.length, this.alerts); // ← Pour debug
+    },
+    error: (err) => {
+      console.error('Error loading alerts:', err);
+      this.alerts = [];
+      this.isLoadingAlerts = false;
+    }
+  });
+}
+
+markAlertAsRead(alertId: string): void {
+  this.alertService.markAsRead(alertId).subscribe({
+    next: () => {
+      this.alerts = this.alerts.filter(a => a._id !== alertId);
+    }
+  });
+}
+
+getSeverityClass(severity: string): string {
+  const map: Record<string, string> = {
+    critical: 'border-error-200 bg-error-50 dark:border-error-800 dark:bg-error-900/20',
+    high:     'border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-900/20',
+    medium:   'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20',
+    low:      'border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-900/20',
+  };
+  return map[severity] || map['low'];
+}
+
+getSeverityTextClass(severity: string): string {
+  const map: Record<string, string> = {
+    critical: 'text-error-600 dark:text-error-400',
+    high:     'text-orange-600 dark:text-orange-400',
+    medium:   'text-amber-600 dark:text-amber-400',
+    low:      'text-blue-600 dark:text-blue-400',
+  };
+  return map[severity] || map['low'];
+}
+
+getSeverityDotClass(severity: string): string {
+  const map: Record<string, string> = {
+    critical: 'bg-error-500',
+    high:     'bg-orange-500',
+    medium:   'bg-amber-500',
+    low:      'bg-blue-500',
+  };
+  return map[severity] || 'bg-blue-500';
+}
+// ── Alert Management ─────────────────────────────────────
+getPatientAlerts(patientId: string): Alert[] {
+  // Pour l'instant on filtre depuis les alerts déjà chargés
+  // (on peut améliorer plus tard en faisant un appel API par patient si besoin)
+  return this.alerts.filter(alert =>
+    alert.patient?._id === patientId || alert.patient._id === patientId
+  );
+}
+
+// Nouvelle version - affiche le bouton même si l'alerte est déjà lue
+// hasAlerts(patientId: string): boolean {
+//   return this.alerts.some(alert =>
+//     (alert.patient?._id === patientId || alert.patient._id === patientId)
+//   );
+// }
+
+// Vérifie si le patient a AU MOINS UNE alerte (lue ou non lue)
+hasAlerts(patientId: string): boolean {
+  if (!patientId || !this.alerts || this.alerts.length === 0) return false;
+
+  return this.alerts.some(alert => {
+    const alertPatientId = typeof alert.patient === 'object'
+      ? alert.patient._id
+      : alert.patient;
+
+    return alertPatientId === patientId;
+  });
+}
+
+// getLatestAlert(patientId: string): Alert | null {
+//   const patientAlerts = this.alerts.filter(alert =>
+//     alert.patient?._id === patientId || alert.patient._id === patientId
+//   );
+
+//   if (patientAlerts.length === 0) return null;
+
+//   // Trie par date décroissante et retourne la plus récente
+//   return [...patientAlerts].sort((a, b) =>
+//     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+//   )[0];
+// }
+
+// Retourne la dernière alerte du patient
+getLatestAlert(patientId: string): Alert | null {
+  if (!patientId || !this.alerts || this.alerts.length === 0) return null;
+
+  const patientAlerts = this.alerts.filter(alert => {
+    const alertPatientId = typeof alert.patient === 'object'
+      ? alert.patient._id
+      : alert.patient;
+    return alertPatientId === patientId;
+  });
+
+  if (patientAlerts.length === 0) return null;
+
+  // Retourne l'alerte la plus récente
+  return [...patientAlerts].sort((a, b) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  )[0];
+}
+
+getAlertsForPatient(patientId: string): Alert[] {
+  if (!patientId || !this.alerts || this.alerts.length === 0) return [];
+  return this.alerts.filter(alert => {
+    const alertPatientId = typeof alert.patient === 'object'
+      ? alert.patient._id
+      : alert.patient;
+    return alertPatientId === patientId;
+  });
+}
+
+viewPatientAlerts(patientId: string): void {
+  this.router.navigate(['/doctor/alert/patient', patientId]);
+}
+
+// kept for backwards compatibility (route alert/:id)
+viewAlert(alertId: string): void {
+  this.router.navigate(['/doctor/alert', alertId]);
+}
+// ── Alert Statistics ─────────────────────────────────────
+get totalAlerts(): number {
+  return this.alerts.length;
+}
+
+get criticalAlerts(): number {
+  return this.alerts.filter(a => a.severity?.toLowerCase() === 'critical').length;
+}
+
+get highAlerts(): number {
+  return this.alerts.filter(a => a.severity?.toLowerCase() === 'high').length;
+}
+
+get unreadAlertsCount(): number {
+  return this.alerts.length;   // si tu charges seulement les unread
+  // Si tu charges tous les alerts plus tard, utilise : this.alerts.filter(a => !a.isRead).length;
+}
   // ── Helpers ─────────────────────────────────────────────
 
   getUserInitials(user: Users): string {

@@ -11,12 +11,17 @@ import { PatientResponsesComponent } from './patient-responses/patient-responses
 import { NgChartsModule } from 'ng2-charts';
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
 import { ChatComponent } from '../../chat/chat.component';
+import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
+import { AlertService } from '../../services/alert.service';
+import { ViewAlertComponent } from './view-alert/view-alert.component';
 
 @NgModule({
   declarations: [
     DashboardDoctorComponent,
     PatientResponsesComponent,
-    ViewQuestionnaireComponent
+    ViewQuestionnaireComponent,
+    DoctorViewSymptomsComponent,
+    ViewAlertComponent
   ],
   imports: [
     CommonModule,
@@ -28,7 +33,8 @@ import { ChatComponent } from '../../chat/chat.component';
   ],
   providers: [
     QuestionnaireService,
-    UsersService
+    UsersService,
+    AlertService
   ]
 })
 export class DoctorModule { }

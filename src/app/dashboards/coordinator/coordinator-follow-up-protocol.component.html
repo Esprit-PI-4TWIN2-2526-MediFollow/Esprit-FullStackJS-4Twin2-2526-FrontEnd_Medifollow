@@ -1,0 +1,100 @@
+<div class="space-y-6 p-6">
+  <section class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div>
+        <p class="text-sm font-medium uppercase tracking-[0.2em] text-brand-500">Coordinator</p>
+        <h1 class="mt-2 text-2xl font-semibold text-gray-900 dark:text-white">Follow-Up Protocol</h1>
+        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+          One row per patient with questionnaire, symptoms, vital signs, and coordinator validation status.
+        </p>
+      </div>
+
+      <div class="relative">
+        <input
+          type="text"
+          (input)="onSearchInput($event)"
+          placeholder="Search patient, email, or department..."
+          class="h-11 w-full rounded-2xl border border-gray-300 bg-white px-4 text-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200 lg:w-80">
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="errorMessage"
+       class="rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-900/20 dark:text-rose-300">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="isLoading"
+       class="rounded-3xl border border-gray-200 bg-white px-6 py-16 text-center text-sm text-gray-500 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-gray-400">
+    Loading follow-up protocol...
+  </div>
+
+  <section *ngIf="!isLoading && filteredPatients.length > 0"
+           class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
+    <div class="overflow-x-auto">
+      <table class="min-w-full">
+        <thead class="border-b border-gray-100 bg-gray-50/70 dark:border-white/[0.06] dark:bg-white/[0.02]">
+          <tr>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Patient</th>
+            <th class="px-4 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Department</th>
+            <th class="px-4 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Questionnaire</th>
+            <th class="px-4 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Symptoms</th>
+            <th class="px-4 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Vital signs</th>
+            <th class="px-4 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Coordinator validation</th>
+            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 dark:text-gray-400">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let patient of filteredPatients"
+              class="border-b border-gray-100 last:border-b-0 dark:border-white/[0.06]">
+            <td class="px-6 py-4">
+              <div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ patient.patientName }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ patient.patientEmail || 'No email provided' }}</p>
+              </div>
+            </td>
+            <td class="px-4 py-4 text-sm text-gray-600 dark:text-gray-300">{{ patient.patientDepartment || 'Unassigned' }}</td>
+            <td class="px-4 py-4">
+              <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
+                    [ngClass]="getStatusClasses(getStatus(patient, 'questionnaireCompleted'))">
+                {{ getStatus(patient, 'questionnaireCompleted').done ? 'Completed' : 'Pending' }}
+              </span>
+            </td>
+            <td class="px-4 py-4">
+              <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
+                    [ngClass]="getStatusClasses(getStatus(patient, 'symptomsSubmitted'))">
+                {{ getStatus(patient, 'symptomsSubmitted').done ? 'Submitted' : 'Pending' }}
+              </span>
+            </td>
+            <td class="px-4 py-4">
+              <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
+                    [ngClass]="getStatusClasses(getStatus(patient, 'vitalSignsSubmitted'))">
+                {{ getStatus(patient, 'vitalSignsSubmitted').done ? 'Submitted' : 'Pending' }}
+              </span>
+            </td>
+            <td class="px-4 py-4">
+              <span class="inline-flex rounded-full border px-3 py-1 text-xs font-medium"
+                    [ngClass]="getStatusClasses(getStatus(patient, 'coordinatorValidation'))">
+                {{ getStatus(patient, 'coordinatorValidation').done ? 'Validated' : 'Pending' }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <button
+                type="button"
+                (click)="openDetails(patient)"
+                class="inline-flex h-10 items-center justify-center rounded-2xl bg-brand-500 px-4 text-sm font-medium text-white transition hover:bg-brand-600">
+                View details
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div *ngIf="!isLoading && filteredPatients.length === 0"
+       class="rounded-3xl border border-dashed border-gray-300 bg-white px-6 py-16 text-center text-sm text-gray-500 dark:border-white/[0.08] dark:bg-white/[0.03] dark:text-gray-400">
+    No follow-up protocol rows match the current search.
+  </div>
+</div>
+

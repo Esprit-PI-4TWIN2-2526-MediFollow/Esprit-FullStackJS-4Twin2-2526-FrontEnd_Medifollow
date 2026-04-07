@@ -7,7 +7,9 @@ import {
   SymptomAiQuestion,
   SymptomQuestionType,
   SymptomService,
+  QuestionCategory,
 } from '../services/symptom.service';
+import { ServiceManagementService } from '../../services/service/service-management.service';
 
 // Internal model (mirrors Questionnaires' Question shape)
 interface SymptomQuestion {
@@ -16,6 +18,7 @@ interface SymptomQuestion {
   options: string[];
   required: boolean;
   order: number;
+  category: QuestionCategory;
 }
 
 @Component({
@@ -45,16 +48,41 @@ export class BuilderComponent implements OnInit {
   patientsWithForm: string[] = [];
   questions: SymptomQuestion[] = [];
   patients: Users[] = [];
+  currentStep = 0;
 
   // ── Validation state ─────────────────────────────────────
   submitted = false;
   touchedQuestions: Set<number> = new Set();
 
   // ── Static data ──────────────────────────────────────────
-  medicalServices = [
-    'Cardiology', 'Neurology', 'Pediatrics', 'Oncology',
-    'General Medicine', 'Orthopedics', 'Dermatology',
-    'Psychiatry', 'Radiology', 'Surgery',
+  // medicalServices = [
+  //   'Cardiology', 'Neurology', 'Pediatrics', 'Oncology',
+  //   'General Medicine', 'Orthopedics', 'Dermatology',
+  //   'Psychiatry', 'Radiology', 'Surgery',
+  // ];
+medicalServices: string[] = [];
+
+  readonly steps: { key: QuestionCategory; label: string; description: string }[] = [
+    {
+      key: 'vital_parameters',
+      label: 'Vital parameters',
+      description: 'Temperature, heart rate, blood pressure, SpO2, weight, respiratory rate',
+    },
+    {
+      key: 'subjective_symptoms',
+      label: 'Symptoms',
+      description: 'Pain, fatigue, palpitations, shortness of breath, nausea, dizziness',
+    },
+    {
+      key: 'patient_context',
+      label: 'Patient context',
+      description: 'Profile, medical history, current treatments',
+    },
+    {
+      key: 'clinical_data',
+      label: 'Clinical data',
+      description: 'Blood sugar, CRP, diuresis, hydration',
+    },
   ];
 
   readonly inputTypes: { value: SymptomQuestionType; label: string }[] = [
@@ -69,60 +97,15 @@ export class BuilderComponent implements OnInit {
 
   // ── Default static questions added on form creation ──────
   private readonly defaultQuestions: Omit<SymptomQuestion, 'order'>[] = [
-    {
-      label:    'What is your pain level?',
-      type:     'scale',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'What is your body temperature (°C)?',
-      type:     'number',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'Have you changed your dressing?',
-      type:     'boolean',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'What is your oxygen level (SpO2 %)?',
-      type:     'number',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'What is your blood sugar level (mg/dL)?',
-      type:     'number',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'What is your heart rate (bpm)?',
-      type:     'number',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'What is your blood pressure (e.g. 120/80)?',
-      type:     'text',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'Is your urine output normal?',
-      type:     'boolean',
-      options:  [],
-      required: true,
-    },
-    {
-      label:    'What is your level of consciousness?',
-      type:     'scale',
-      options:  [],
-      required: true,
-    },
+    { label: 'What is your body temperature (°C)?', type: 'number', options: [], required: true, category: 'vital_parameters' },
+    { label: 'What is your heart rate (bpm)?', type: 'number', options: [], required: true, category: 'vital_parameters' },
+    { label: 'What is your blood pressure (e.g. 120/80)?', type: 'text', options: [], required: true, category: 'vital_parameters' },
+    { label: 'What is your oxygen level (SpO2 %)?', type: 'number', options: [], required: true, category: 'vital_parameters' },
+    { label: 'What is your pain level?', type: 'scale', options: [], required: true, category: 'subjective_symptoms' },
+    { label: 'What is your level of consciousness?', type: 'scale', options: [], required: true, category: 'subjective_symptoms' },
+    { label: 'Have you changed your dressing?', type: 'boolean', options: [], required: true, category: 'subjective_symptoms' },
+    { label: 'Is your urine output normal?', type: 'boolean', options: [], required: true, category: 'patient_context' },
+    { label: 'What is your blood sugar level (mg/dL)?', type: 'number', options: [], required: true, category: 'clinical_data' },
   ];
 
   constructor(
@@ -130,6 +113,7 @@ export class BuilderComponent implements OnInit {
     private router: Router,
     private symptomService: SymptomService,
     private usersService: UsersService,
+private serviceManagementService:ServiceManagementService
   ) {}
 
   ngOnInit(): void {
@@ -137,6 +121,7 @@ export class BuilderComponent implements OnInit {
     this.isEditMode = !!this.formId;
     this.loadPatients();
     this.loadPatientsWithForms();
+this.loadDepartments();
 
     if (this.isEditMode) {
       this.loadForm();
@@ -145,6 +130,18 @@ export class BuilderComponent implements OnInit {
 
     this.addDefaultQuestions();
   }
+
+//loadservices
+loadDepartments(): void {
+  this.serviceManagementService.getAll().subscribe({
+    next: (services) => {
+      this.medicalServices = services
+        .filter(s => s.statut === 'ACTIF')  // uniquement les services actifs
+        .map(s => s.nom);
+    },
+    error: (err) => console.error('Error loading departments:', err)
+  });
+}
 
   // ── Validation helpers ───────────────────────────────────
 
@@ -172,6 +169,78 @@ export class BuilderComponent implements OnInit {
 
   isQuestionValid(index: number): boolean {
     return this.isQuestionLabelValid(index) && this.hasEnoughOptions(index);
+  }
+
+  get currentStepCategory(): QuestionCategory {
+    return this.steps[this.currentStep].key;
+  }
+
+  get currentStepQuestions(): SymptomQuestion[] {
+    return this.questions.filter((q) => q.category === this.currentStepCategory);
+  }
+
+  getQuestionsForStep(stepIndex: number): SymptomQuestion[] {
+    return this.questions.filter((q) => q.category === this.steps[stepIndex].key);
+  }
+
+  getGlobalIndexOf(stepQuestion: SymptomQuestion): number {
+    return this.questions.indexOf(stepQuestion);
+  }
+
+  isStepValid(stepIndex: number): boolean {
+    const stepQuestions = this.getQuestionsForStep(stepIndex);
+    return stepQuestions.every((q) => {
+      const globalIndex = this.getGlobalIndexOf(q);
+      return this.isQuestionValid(globalIndex);
+    });
+  }
+
+  isStepCompleted(stepIndex: number): boolean {
+    return stepIndex < this.currentStep && this.isStepValid(stepIndex);
+  }
+
+  get canGoNext(): boolean {
+    const stepQuestions = this.currentStepQuestions;
+    if (stepQuestions.length === 0) return true;
+    return stepQuestions.every((q) => {
+      const globalIndex = this.getGlobalIndexOf(q);
+      return this.isQuestionValid(globalIndex);
+    });
+  }
+
+  get isLastStep(): boolean {
+    return this.currentStep === this.steps.length - 1;
+  }
+
+  get isFirstStep(): boolean {
+    return this.currentStep === 0;
+  }
+
+  nextStep(): void {
+    if (!this.isLastStep) {
+      this.currentStep++;
+    }
+  }
+
+  prevStep(): void {
+    if (!this.isFirstStep) {
+      this.currentStep--;
+    }
+  }
+
+  goToStep(index: number): void {
+    if (index <= this.currentStep) {
+      this.currentStep = index;
+      return;
+    }
+
+    for (let i = this.currentStep; i < index; i++) {
+      if (!this.isStepValid(i) && this.getQuestionsForStep(i).length > 0) {
+        return;
+      }
+    }
+
+    this.currentStep = index;
   }
 
   get allQuestionsValid(): boolean {
@@ -213,11 +282,12 @@ export class BuilderComponent implements OnInit {
     this.questions = [
       ...this.questions,
       {
-        label:    '',
-        type:     'text',
-        options:  [],
+        label: '',
+        type: 'text',
+        options: [],
         required: true,
-        order:    this.questions.length,
+        order: this.questions.length,
+        category: this.currentStepCategory,
       },
     ];
   }
@@ -358,15 +428,21 @@ export class BuilderComponent implements OnInit {
     this.generateError = '';
 
     this.symptomService
-      .generateQuestionsWithAI(this.title, this.description, this.generateCount)
+      .generateQuestionsWithAI(
+        this.title,
+        this.description,
+        this.generateCount,
+        this.currentStepCategory
+      )
       .subscribe({
         next: (result) => {
           const normalized = result.questions.map((q, i) => ({
             ...this.normalizeAiQuestion(q),
             required: true,
-            order:    this.questions.length + i,
+            order: this.questions.length + i,
+            category: q.category || this.currentStepCategory,
           }));
-          this.questions   = [...this.questions, ...normalized];
+          this.questions = [...this.questions, ...normalized];
           this.isGenerating = false;
         },
         error: (err) => {
@@ -397,6 +473,7 @@ export class BuilderComponent implements OnInit {
         type:     q.type,
         required: q.required,
         order:    q.order,
+        category: q.category,
         ...(this.hasOptions(q.type)
           ? { options: q.options.map(o => o.trim()).filter(Boolean) }
           : {}),
@@ -473,6 +550,7 @@ export class BuilderComponent implements OnInit {
             : [],
           required: true,
           order: index,
+          category: question.category || 'vital_parameters',
         }));
 
         if (this.questions.length === 0) {

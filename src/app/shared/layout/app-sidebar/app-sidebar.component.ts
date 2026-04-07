@@ -28,10 +28,10 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     SUPERADMIN: '/super-admin',
     ADMIN: '/admin',
     AUDITOR: '/auditor',
-    COORDINATOR: '/coordinator',
+    COORDINATOR: '/coordinator/dashboard',
     NURSE: '/nurse/dashboard',
     PATIENT: '/patient',
-    DOCTOR: '/physician',
+    DOCTOR: '/doctor/dashboard',
 
   };
 
@@ -42,6 +42,18 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V9V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V9V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2ZM8 5.25H5.5C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H16H8ZM19.25 9.75H4.75V19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75Z" fill="currentColor"/></svg>`,
       name: 'Calendar',
       path: '/calendar',
+    },
+    {
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.75 6.75A2 2 0 0 1 6.75 4.75H17.25A2 2 0 0 1 19.25 6.75V17.25A2 2 0 0 1 17.25 19.25H6.75A2 2 0 0 1 4.75 17.25V6.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8 9.25H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 14.75H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+      name: 'Follow-Up Protocol',
+      path: '/coordinator/follow-up/protocol',
+      roles: ['COORDINATOR'],
+    },
+    {
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4.75H17C18.2426 4.75 19.25 5.75736 19.25 7V17C19.25 18.2426 18.2426 19.25 17 19.25H7C5.75736 19.25 4.75 18.2426 4.75 17V7C4.75 5.75736 5.75736 4.75 7 4.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 12H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="15.5" cy="15.5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M17.25 17.25L19 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+      name: 'Symptoms Review',
+      path: '/coordinator/symptoms-review',
+      roles: ['COORDINATOR'],
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.25 3.5C4.00736 3.5 3 4.50736 3 5.75V11.25C3 12.4926 4.00736 13.5 5.25 13.5H10.75C11.9926 13.5 13 12.4926 13 11.25V5.75C13 4.50736 11.9926 3.5 10.75 3.5H5.25ZM4.5 5.75C4.5 5.33579 4.83579 5 5.25 5H10.75C11.1642 5 11.5 5.33579 11.5 5.75V11.25C11.5 11.6642 11.1642 12 10.75 12H5.25C4.83579 12 4.5 11.6642 4.5 11.25V5.75ZM13.25 10.5C13.25 9.25736 14.2574 8.25 15.5 8.25H18.5C19.7426 8.25 20.75 9.25736 20.75 10.5V18.25C20.75 19.4926 19.7426 20.5 18.5 20.5H5.5C4.25736 20.5 3.25 19.4926 3.25 18.25V15.5C3.25 14.2574 4.25736 13.25 5.5 13.25H13.25V10.5Z" fill="currentColor"/></svg>`,

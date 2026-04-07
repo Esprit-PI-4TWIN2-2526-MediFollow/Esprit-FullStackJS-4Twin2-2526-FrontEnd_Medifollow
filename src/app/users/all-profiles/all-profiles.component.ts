@@ -8,6 +8,8 @@ import { UsersService } from '../../services/user/users.service';
 import { RoleService } from '../../services/role/role.service';
 import { Role } from '../../models/roles';
 import { SpeechRecognitionService } from '../../services/speech-recognition.service';
+import { ComplianceService } from '../../models/dashbored.interfaces';
+import { ServiceManagementService } from '../../services/service/service-management.service';
 
 type RoleKey = string;
 type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
@@ -106,7 +108,8 @@ export class AllProfilesComponent implements OnInit {
 
 
 
-  departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'General Medicine', 'Orthopedics', 'Dermatology', 'Psychiatry', 'Radiology', 'Surgery'];
+  //departments = ['Cardiology', 'Neurology', 'Pediatrics', 'Oncology', 'General Medicine', 'Orthopedics', 'Dermatology', 'Psychiatry', 'Radiology', 'Surgery'];
+departments: string[] = [];
   doctors: string[] = [];
   auditScopes = ['Logs', 'Data', 'Full Access'];
   sexeOptions = ['Male', 'Female'];
@@ -157,13 +160,15 @@ export class AllProfilesComponent implements OnInit {
     private fb: FormBuilder,
     private readonly http: HttpClient,
     private roleService: RoleService,
-  public speech: SpeechRecognitionService ){ }
+  public speech: SpeechRecognitionService,
+private serviceManagementService:ServiceManagementService ){ }
 
   ngOnInit(): void {
     this.loadUsers();
     this.initSignupForm();
     this.setDateRange();
     this.loadRoles();
+this.loadDepartments();
   }
   // Ajoutez cette méthode dans la classe AllProfilesComponent
   getUserInitials(user: Users): string {
@@ -184,6 +189,7 @@ export class AllProfilesComponent implements OnInit {
         this.users = res;
         this.doctors = this.extractDoctorNames(res);
         console.log('Doctors extracted:', this.doctors);
+
         this.sanitizeSelectedUsers();
       },
       error: (err) => console.error(err),
@@ -197,11 +203,25 @@ export class AllProfilesComponent implements OnInit {
       .filter((name) => !!name);
   }
 
+
+
   private getUserFullName(user: Users): string {
     const firstName = String((user as any)?.firstName ?? (user as any)?.firstname ?? '').trim();
     const lastName = String((user as any)?.lastName ?? (user as any)?.lastname ?? '').trim();
     return `${firstName} ${lastName}`.trim();
   }
+
+//loadservices
+loadDepartments(): void {
+  this.serviceManagementService.getAll().subscribe({
+    next: (services) => {
+      this.departments = services
+        .filter(s => s.statut === 'ACTIF')  // uniquement les services actifs
+        .map(s => s.nom);
+    },
+    error: (err) => console.error('Error loading departments:', err)
+  });
+}
 
   get totalPages(): number {
     return Math.max(1, Math.ceil(this.filteredUsers.length / this.itemsPerPage));
@@ -910,7 +930,8 @@ loadRoles(): void {
       lastName: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(50)]],
       email: ['', [Validators.required, Validators.email, Validators.minLength(4), Validators.maxLength(50)]],
       password: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(100)]],
-      phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.pattern('^\\+\\d{1,4}\\s[0-9 ]{6,15}$')]],
+      //phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.pattern('^\\+\\d{1,4}\\s[0-9 ]{6,15}$')]],
+phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.pattern('^\\+216\\s?(\\d{2}\\s?){3}\\d{2}$')]],
       sexe: ['', [Validators.required]],
       address: ['', [Validators.required, Validators.minLength(4), Validators.maxLength(120)]],
       dateOfBirth: [''],
@@ -996,10 +1017,34 @@ onVoiceInput(fieldName: string, transcript: string): void {
         .replace(/\s+/g, '');
       break;
 
-    case 'phoneNumber':
+     case 'phoneNumber':
       // garde uniquement chiffres, +, espaces
       value = transcript.replace(/[^\d+\s]/g, '');
       break;
+
+// case 'phoneNumber':
+//   // 1. Nettoyer : garder uniquement chiffres et +
+//   let cleaned = transcript.replace(/[^\d+]/g, '');
+
+//   // 2. Ajouter le +216 si l'utilisateur n'a dit que les 8 ou 9 derniers chiffres
+//   if (!cleaned.startsWith('+216') && !cleaned.startsWith('216')) {
+//     cleaned = '+216' + cleaned.replace(/^\+?0?/, ''); // supprime 0 initial éventuel
+//   } else if (cleaned.startsWith('216')) {
+//     cleaned = '+' + cleaned;
+//   }
+
+//   // 3. Formater joliment comme dans ta capture : +216 20 308 507
+//   // On enlève le +216, on prend les 8 chiffres restants, et on les groupe
+//   let digits = cleaned.replace(/^\+216/, '').replace(/\D/g, '');
+
+//   if (digits.length === 8) {
+//     // Format tunisien standard : XX XXX XXX
+//     value = `+216 ${digits.slice(0,2)} ${digits.slice(2,5)} ${digits.slice(5,8)}`;
+//   } else {
+//     // Fallback si longueur incorrecte
+//     value = `+216 ${digits}`;
+//   }
+//   break;
 
     case 'yearsOfExperience':
       // convertit "cinq" → 5 si le navigateur retourne du texte

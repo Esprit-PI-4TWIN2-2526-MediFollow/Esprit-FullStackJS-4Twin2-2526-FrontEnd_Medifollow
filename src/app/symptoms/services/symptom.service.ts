@@ -11,6 +11,12 @@ export type SymptomQuestionType =
   | 'date'
   | 'boolean';
 
+export type QuestionCategory =
+  | 'vital_parameters'
+  | 'subjective_symptoms'
+  | 'patient_context'
+  | 'clinical_data';
+
 export interface SymptomQuestion {
   _id?: string;
   label: string;
@@ -18,6 +24,7 @@ export interface SymptomQuestion {
   options?: string[];
   required?: boolean;
   order?: number;
+  category?: QuestionCategory;
 }
 
 export interface SymptomForm {
@@ -45,6 +52,7 @@ export interface SymptomAiQuestion {
   label: string;
   type: SymptomQuestionType | string;
   options?: string[];
+  category?: QuestionCategory;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -97,7 +105,8 @@ export class SymptomService {
   generateQuestionsWithAI(
     title: string,
     description: string,
-    count = 5
+    count = 5,
+    category?: QuestionCategory
   ): Observable<{ questions: SymptomAiQuestion[] }> {
     return this.http.post<{ questions: SymptomAiQuestion[] }>(
       'http://localhost:3000/ai/generate-questions',
@@ -106,6 +115,7 @@ export class SymptomService {
         title,
         description,
         count,
+        ...(category ? { category } : {}),
       }
     );
   }
