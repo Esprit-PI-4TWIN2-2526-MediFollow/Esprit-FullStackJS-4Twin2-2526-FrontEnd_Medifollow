@@ -115,6 +115,8 @@ import { MicButtonComponent } from './users/mic-button/mic-button.component';
 import { ManageServiceComponent } from './manage-service/manage-service.component';
 import { UnauthorizedComponent } from './pages/other-page/unauthorized/unauthorized.component';
 import { authInterceptor } from './services/auth/auth.interceptor';
+import { ChatComponent } from './chat/chat.component';
+import { ContactsComponent } from './chat/contacts/contacts.component';
 
 
 
@@ -225,6 +227,7 @@ import { authInterceptor } from './services/auth/auth.interceptor';
     RoleManageComponent,
     ManageServiceComponent,
     UnauthorizedComponent,
+  
 
 
   ],

@@ -10,6 +10,7 @@ import { UsersService } from '../../services/user/users.service';
 import { PatientResponsesComponent } from './patient-responses/patient-responses.component';
 import { NgChartsModule } from 'ng2-charts';
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
+import { ChatComponent } from '../../chat/chat.component';
 
 @NgModule({
   declarations: [
@@ -23,6 +24,7 @@ import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionna
     HttpClientModule,
     DoctorRoutingModule,
     NgChartsModule,
+    ChatComponent
   ],
   providers: [
     QuestionnaireService,
