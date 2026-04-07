@@ -218,7 +218,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
 
   isMyMessage(message: Message): boolean {
-    return message.sender._id === this.currentUser?._id;
+    return this.getUserId(message.sender) === this.getUserId(this.currentUser);
   }
 
   isFirstInGroup(current: Message, previous: Message | undefined): boolean {
@@ -242,6 +242,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   private getRoleFromUser(user: any): string {
     return this.getRoleName(user);
+  }
+
+  private getUserId(user: any): string {
+    if (!user) return '';
+    if (typeof user === 'string') return user;
+    return user._id ?? user.id ?? '';
   }
 
   private scrollToBottom(): void {
