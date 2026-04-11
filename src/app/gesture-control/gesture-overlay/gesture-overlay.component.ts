@@ -25,23 +25,26 @@ export class GestureOverlayComponent implements AfterViewInit, OnDestroy {
   active = false;
   currentGesture: GestureType | null = null;
 
-  /* readonly gestureLabels: Record<GestureType, { icon: string; label: string }> = {
-    SCROLL_UP:   { icon: '☝️', label: 'Défiler vers le haut' },
-    SCROLL_DOWN: { icon: '👇', label: 'Défiler vers le bas' },
-    CLICK:       { icon: '🤏', label: 'Cliquer' },
-    SWIPE_LEFT:  { icon: '👈', label: 'Page précédente' },
-    SWIPE_RIGHT: { icon: '👉', label: 'Page suivante' },
-    OPEN_HAND:   { icon: '✋', label: 'Stop' },
-    PEACE:       { icon: '✌️', label: 'Menu' },
-  }; */
+
+// readonly gestureLabels: Record<GestureType, { icon: string; label: string }> = {
+//   SCROLL_UP:   { icon: '☝️',  label: 'Défiler vers le haut' },
+//   SCROLL_DOWN: { icon: '👇',  label: 'Défiler vers le bas'  },
+//   CLICK:       { icon: '✊',  label: 'Cliquer'              },
+//   SWIPE_LEFT:  { icon: '✌️←', label: 'Page précédente'      },
+//   SWIPE_RIGHT: { icon: '✌️→', label: 'Page suivante'        },
+//   OPEN_HAND:   { icon: '✋',  label: 'Stop / Fermer'        },
+//   FIST:        { icon: '✊',  label: 'Cliquer'              },
+// };
+
 readonly gestureLabels: Record<GestureType, { icon: string; label: string }> = {
-  SCROLL_UP:   { icon: '☝️',  label: 'Défiler vers le haut' },
-  SCROLL_DOWN: { icon: '👇',  label: 'Défiler vers le bas'  },
-  CLICK:       { icon: '✊',  label: 'Cliquer'              },
-  SWIPE_LEFT:  { icon: '✌️←', label: 'Page précédente'      },
-  SWIPE_RIGHT: { icon: '✌️→', label: 'Page suivante'        },
-  OPEN_HAND:   { icon: '✋',  label: 'Stop / Fermer'        },
-  FIST:        { icon: '✊',  label: 'Cliquer'              },
+  SCROLL_UP:   { icon: '☝️',  label: 'Défiler vers le haut'           },
+//SCROLL_DOWN: { icon: '👇', label: 'Index pointé vers le bas' },
+SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
+  CLICK:       { icon: '✊',  label: 'Poing maintenu 400ms'           },
+  SWIPE_LEFT:  { icon: '✌️←', label: 'Page précédente'               },
+  SWIPE_RIGHT: { icon: '✌️→', label: 'Page suivante'                 },
+  OPEN_HAND:   { icon: '✋',  label: 'Stop / Fermer'                  },
+  FIST:        { icon: '✊',  label: 'Poing maintenu 400ms'           },
 };
   private sub = new Subscription();
   private badgeTimer: any;

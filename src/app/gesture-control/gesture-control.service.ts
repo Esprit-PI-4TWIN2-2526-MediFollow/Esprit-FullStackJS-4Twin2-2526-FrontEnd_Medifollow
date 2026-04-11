@@ -1,16 +1,12 @@
 import { Injectable, NgZone, Inject, Optional } from '@angular/core';
 import { Subject, BehaviorSubject } from 'rxjs';
 import {
-  GestureEvent,
-  GestureType,
-  GestureConfig,
-  GestureLogEntry,
-  DEFAULT_GESTURE_CONFIG,
+  GestureEvent, GestureType, GestureConfig,
+  GestureLogEntry, DEFAULT_GESTURE_CONFIG,
 } from './gesture.models';
 import { GESTURE_CONFIG } from './gesture.config';
 
 @Injectable({ providedIn: 'root' })
-
 export class GestureControlService {
   readonly gesture$ = new Subject<GestureEvent>();
   readonly active$ = new BehaviorSubject<boolean>(false);
@@ -23,8 +19,12 @@ export class GestureControlService {
   private lastGestureType: GestureType | null = null;
   private lastGestureTime = 0;
 
-  private swipeStartX: number | null = null;
+  // ── Variables séparées pour chaque geste ──
+  private swipeStartX: number | null = null;   // pour SWIPE gauche/droite
   private swipeStartTime = 0;
+
+  private scrollDownStartY: number | null = null;  // pour SCROLL_DOWN
+  private scrollDownStartTime = 0;
 
   private pinchStartTime: number | null = null;
   private pinchFired = false;
@@ -40,23 +40,18 @@ export class GestureControlService {
 
   async init(videoEl: HTMLVideoElement): Promise<void> {
     this.videoElement = videoEl;
-
     const { Hands } = await import('@mediapipe/hands' as any);
-
     this.hands = new Hands({
       locateFile: (file: string) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`,
     });
-
     this.hands.setOptions({
       maxNumHands: 1,
       modelComplexity: 1,
       minDetectionConfidence: 0.72,
       minTrackingConfidence: 0.55,
     });
-
     this.hands.onResults((results: any) => this.processResults(results));
-
     await this.startCamera();
     this.active$.next(true);
   }
@@ -86,9 +81,7 @@ export class GestureControlService {
   private runDetectionLoop(): void {
     const loop = async () => {
       if (!this.active$.value) return;
-      try {
-        await this.hands.send({ image: this.videoElement });
-      } catch {}
+      try { await this.hands.send({ image: this.videoElement }); } catch {}
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
@@ -106,158 +99,146 @@ export class GestureControlService {
     if (gesture) this.emitGesture(gesture, lm[8], confidence);
   }
 
-/*  private detectGesture(lm: any[]): GestureType | null {
+  private detectGesture(lm: any[]): GestureType | null {
     const indexTip  = lm[8];
-    const thumbTip  = lm[4];
+    const indexPIP  = lm[6];
     const middleTip = lm[12];
+    const middlePIP = lm[10];
     const ringTip   = lm[16];
+    const ringPIP   = lm[14];
     const pinkyTip  = lm[20];
-    const indexMCP  = lm[5];
-    const middleMCP = lm[9];
+    const pinkyPIP  = lm[18];
     const wrist     = lm[0];
 
-    const pinchDist = this.dist2D(indexTip, thumbTip);
+    const indexUp  = indexTip.y  < indexPIP.y;
+    const middleUp = middleTip.y < middlePIP.y;
+    const ringUp   = ringTip.y   < ringPIP.y;
+    const pinkyUp  = pinkyTip.y  < pinkyPIP.y;
+    const fingersUpCount = [indexUp, middleUp, ringUp, pinkyUp].filter(Boolean).length;
 
-    // CLICK — pinch maintenu
-    if (pinchDist < this.config.pinchThreshold) {
-      const now = Date.now();
-      if (this.pinchStartTime === null) {
-        this.pinchStartTime = now;
-        this.pinchFired = false;
-      } else if (!this.pinchFired && now - this.pinchStartTime >= this.config.pinchHoldMs) {
-        this.pinchFired = true;
-        return 'CLICK';
-      }
-      return null;
-    } else {
+    // ── MAIN OUVERTE ✋ → OPEN_HAND ──────────────
+    if (fingersUpCount === 4) {
+      this.resetAllTrackers();
+      return 'OPEN_HAND';
+    }
+
+    // ── INDEX SEUL ☝️ → SCROLL_UP ────────────────
+    if (indexUp && !middleUp && !ringUp && !pinkyUp) {
+      this.resetAllTrackers();
+      return 'SCROLL_UP';
+    }
+
+    // ── INDEX + MAJEUR ✌️ → SWIPE ────────────────
+    if (indexUp && middleUp && !ringUp && !pinkyUp) {
+      this.scrollDownStartY = null; // reset scroll down
       this.pinchStartTime = null;
       this.pinchFired = false;
-    }
 
-    // PEACE ✌️
-    const isPeace =
-      indexTip.y < indexMCP.y - 0.10 &&
-      middleTip.y < middleMCP.y - 0.10 &&
-      ringTip.y > middleMCP.y &&
-      pinkyTip.y > middleMCP.y;
-    if (isPeace) return 'PEACE';
+      const now = Date.now();
+      const palmX = wrist.x;
 
-    // OPEN HAND ✋
-    const fingersUp = [8, 12, 16, 20].filter(i => lm[i].y < lm[i - 2].y).length;
-    if (fingersUp === 4) return 'OPEN_HAND';
-
-    // SCROLL UP / DOWN ☝️
-    const indexOnly =
-      indexTip.y < indexMCP.y - 0.12 &&
-      middleTip.y > middleMCP.y &&
-      ringTip.y > middleMCP.y;
-
-    if (indexOnly) {
-      if (indexTip.y < indexMCP.y - 0.20) return 'SCROLL_UP';
-      if (indexTip.y > indexMCP.y + 0.05) return 'SCROLL_DOWN';
-    }
-
-    // SWIPE
-    const palmX = wrist.x;
-    const now = Date.now();
-    if (this.swipeStartX === null) {
-      this.swipeStartX = palmX;
-      this.swipeStartTime = now;
-    } else {
-      const elapsed = now - this.swipeStartTime;
-      const delta = palmX - this.swipeStartX;
-      if (elapsed < 600 && Math.abs(delta) > this.config.swipeMinDelta) {
-        this.swipeStartX = null;
-        return delta < 0 ? 'SWIPE_LEFT' : 'SWIPE_RIGHT';
-      }
-      if (elapsed > 600) {
+      if (this.swipeStartX === null) {
         this.swipeStartX = palmX;
         this.swipeStartTime = now;
+      } else {
+        const elapsed = now - this.swipeStartTime;
+        const delta   = palmX - this.swipeStartX;
+
+        if (elapsed < 700 && Math.abs(delta) > this.config.swipeMinDelta) {
+          this.swipeStartX = null;
+          return delta < 0 ? 'SWIPE_LEFT' : 'SWIPE_RIGHT';
+        }
+        if (elapsed > 700) {
+          this.swipeStartX = palmX;
+          this.swipeStartTime = now;
+        }
       }
+      return null;
     }
 
-    return null;
-  }*/
+    // ── POING FERMÉ ✊ → CLICK ou SCROLL_DOWN ────
+    if (fingersUpCount === 0) {
+      this.swipeStartX = null; // reset swipe
 
-private detectGesture(lm: any[]): GestureType | null {
-  // Points clés
-  const thumbTip   = lm[4];
-  const indexTip   = lm[8];
-  const indexPIP   = lm[6];   // articulation milieu index
-  const indexMCP   = lm[5];   // base index
-  const middleTip  = lm[12];
-  const middlePIP  = lm[10];
-  const ringTip    = lm[16];
-  const ringPIP    = lm[14];
-  const pinkyTip   = lm[20];
-  const pinkyPIP   = lm[18];
-  const wrist      = lm[0];
+      const now = Date.now();
+      const palmY = wrist.y;
 
-  // Doigt levé = tip plus haut (y plus petit) que PIP
-  const indexUp  = indexTip.y  < indexPIP.y;
-  const middleUp = middleTip.y < middlePIP.y;
-  const ringUp   = ringTip.y   < ringPIP.y;
-  const pinkyUp  = pinkyTip.y  < pinkyPIP.y;
+      // Suivi mouvement vertical pour SCROLL_DOWN
+      if (this.scrollDownStartY === null) {
+        this.scrollDownStartY = palmY;
+        this.scrollDownStartTime = now;
+        // Démarrer aussi le timer pour CLICK
+        if (this.pinchStartTime === null) {
+          this.pinchStartTime = now;
+          this.pinchFired = false;
+        }
+      } else {
+        const elapsed = now - this.scrollDownStartTime;
+        const deltaY  = palmY - this.scrollDownStartY;
 
-  const fingersUpCount = [indexUp, middleUp, ringUp, pinkyUp].filter(Boolean).length;
+        // Mouvement vers le bas détecté → SCROLL_DOWN
+        if (elapsed < 500 && deltaY > 0.07) {
+          this.scrollDownStartY = null;
+          this.pinchStartTime = null;
+          this.pinchFired = false;
+          return 'SCROLL_DOWN';
+        }
 
-  // ── POING FERMÉ → CLICK ──────────────────────
-  // Aucun doigt levé
-  if (fingersUpCount === 0) {
-    const now = Date.now();
-    if (this.pinchStartTime === null) {
-      this.pinchStartTime = now;
-      this.pinchFired = false;
-    } else if (!this.pinchFired && now - this.pinchStartTime >= this.config.pinchHoldMs) {
-      this.pinchFired = true;
-      return 'CLICK';
+        // Reset si trop long sans mouvement
+        if (elapsed > 500) {
+          this.scrollDownStartY = palmY;
+          this.scrollDownStartTime = now;
+        }
+
+        // CLICK si poing fixe maintenu assez longtemps
+        if (!this.pinchFired && now - (this.pinchStartTime ?? now) >= this.config.pinchHoldMs) {
+          this.pinchFired = true;
+          this.scrollDownStartY = null;
+          return 'CLICK';
+        }
+      }
+
+      return null;
     }
+
+// // ── INDEX POINTÉ VERS LE BAS 👇 → SCROLL_DOWN ──
+// // Main retournée : dos de la main vers vous, index vers le bas
+// if (!indexUp && !middleUp && !ringUp && !pinkyUp === false) {
+//   // index baissé mais tip EN DESSOUS du poignet
+//   if (!indexUp && !middleUp && !ringUp && !pinkyUp &&
+//       indexTip.y > wrist.y + 0.05) {
+//     this.resetAllTrackers();
+//     return 'SCROLL_DOWN';
+//   }
+// }
+
+// // ── POING FERMÉ FIXE ✊ → CLICK uniquement ────
+// if (fingersUpCount === 0) {
+//   this.swipeStartX = null;
+//   const now = Date.now();
+
+//   if (this.pinchStartTime === null) {
+//     this.pinchStartTime = now;
+//     this.pinchFired = false;
+//   } else if (!this.pinchFired && now - this.pinchStartTime >= this.config.pinchHoldMs) {
+//     this.pinchFired = true;
+//     return 'CLICK';
+//   }
+//   return null;
+// }
+
+    // Aucun geste reconnu → reset tout
+    this.resetAllTrackers();
     return null;
-  } else {
+  }
+
+  // Remet à zéro tous les trackers
+  private resetAllTrackers(): void {
+    this.swipeStartX = null;
+    this.scrollDownStartY = null;
     this.pinchStartTime = null;
     this.pinchFired = false;
   }
-
-  // ── MAIN OUVERTE → OPEN_HAND ─────────────────
-  // 4 doigts levés
-  if (fingersUpCount === 4) return 'OPEN_HAND';
-
-  // ── INDEX SEUL LEVÉ ──────────────────────────
-  if (indexUp && !middleUp && !ringUp && !pinkyUp) {
-    // Index pointé vers le haut → SCROLL_UP
-    if (indexTip.y < wrist.y - 0.25) return 'SCROLL_UP';
-    // Index pointé vers le bas → SCROLL_DOWN
-    if (indexTip.y > indexMCP.y)     return 'SCROLL_DOWN';
-  }
-
-  // ── INDEX + MAJEUR → SWIPE ───────────────────
-  if (indexUp && middleUp && !ringUp && !pinkyUp) {
-    const now = Date.now();
-    const palmX = wrist.x;
-
-    if (this.swipeStartX === null) {
-      this.swipeStartX = palmX;
-      this.swipeStartTime = now;
-    } else {
-      const elapsed = now - this.swipeStartTime;
-      const delta   = palmX - this.swipeStartX;
-
-      if (elapsed < 700 && Math.abs(delta) > this.config.swipeMinDelta) {
-        this.swipeStartX = null;
-        return delta < 0 ? 'SWIPE_LEFT' : 'SWIPE_RIGHT';
-      }
-      if (elapsed > 700) {
-        this.swipeStartX = palmX;
-        this.swipeStartTime = now;
-      }
-    }
-  } else {
-    // Réinitialiser swipe si autre geste
-    this.swipeStartX = null;
-  }
-
-  return null;
-}
 
   private emitGesture(type: GestureType, indexTip: any, confidence: number): void {
     const now = Date.now();
