@@ -10,13 +10,14 @@ import {
 } from '../../models/auth';
 import { Router } from '@angular/router';
 import { Role } from '../../models/roles';
+import { ApiConfig } from '../../config/api.config';
 
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = ApiConfig.AUTH;
   private readonly ONBOARDING_TOKEN_KEY = 'onboardingToken';
 
   constructor(private http: HttpClient, private router: Router) { }

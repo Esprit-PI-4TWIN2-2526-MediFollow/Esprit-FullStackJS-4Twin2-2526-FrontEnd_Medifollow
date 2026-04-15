@@ -2,6 +2,7 @@ import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Users } from '../../models/users';
+import { ApiConfig } from '../../config/api.config';
 
 
 @Injectable({
@@ -10,7 +11,7 @@ import { Users } from '../../models/users';
 export class UsersService {
 
   constructor(private http: HttpClient) { }
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = ApiConfig.USERS;
 
   //create user with image
   createUser(user: Partial<Users>, avatarFile?: File) {

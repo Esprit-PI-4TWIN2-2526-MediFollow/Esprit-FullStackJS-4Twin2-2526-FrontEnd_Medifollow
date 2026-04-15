@@ -5,13 +5,14 @@ import { Observable } from 'rxjs';
 import { Questionnaire } from '../models/questionnaire';
 import { Question } from '../models/question';
 import { QuestionnaireResponse, QuestionnaireResponsePopulated } from '../models/questionnaire-response';
+import { ApiConfig } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class QuestionnaireService {
 
-  private readonly API = 'http://localhost:3000/questionnaires';
+  private readonly API = ApiConfig.QUESTIONNAIRES;
 
   constructor(private http: HttpClient) {}
 
@@ -62,7 +63,7 @@ generateQuestionsWithAI(
   count: number = 7
 ): Observable<{ questions: Question[] }> {
   return this.http.post<{ questions: Question[] }>(
-    'http://localhost:3000/ai/generate-questions',
+    `${ApiConfig.AI}/generate-questions`,
     { medicalService, title, description, count }
   );
 }
@@ -126,7 +127,7 @@ generateQuestionsWithAI(
 //summary with ai
 generatePatientSummary(patientName: string, medicalService: string, responses: any[]) {
   return this.http.post<{ summary: string }>(
-    'http://localhost:3000/ai/generate-summary',   // ← URL correcte
+    `${ApiConfig.AI}/generate-summary`,
     {
       patientName,
       medicalService,

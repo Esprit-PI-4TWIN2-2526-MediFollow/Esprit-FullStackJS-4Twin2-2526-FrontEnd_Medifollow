@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Alert } from '../models/alert';
+import { ApiConfig } from '../config/api.config';
 
 
 @Injectable({ providedIn: 'root' })
 export class AlertService {
 
-  private apiUrl = 'http://localhost:3000/alerts';
+  private apiUrl = ApiConfig.ALERTS;
 
   constructor(private http: HttpClient) {}
 
