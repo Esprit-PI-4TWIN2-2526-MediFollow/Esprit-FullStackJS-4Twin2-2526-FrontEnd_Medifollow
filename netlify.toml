@@ -4,9 +4,6 @@
   
   # Publish directory (where the built files are)
   publish = "dist/frontend-medifollow/browser"
-  
-  # Base directory (where your frontend code is)
-  base = "FrontEnd_Medifollow"
 
 # Redirect all requests to index.html for SPA routing
 [[redirects]]
