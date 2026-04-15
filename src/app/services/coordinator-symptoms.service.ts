@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
+import { ApiConfig } from '../config/api.config';
 
 export type CoordinatorSymptomsFilter = 'all' | 'pending' | 'validated';
 
@@ -25,8 +26,8 @@ export interface CoordinatorSymptomsResponse {
 })
 export class CoordinatorSymptomsService {
   private readonly apiUrls = [
-    'http://localhost:3000/symptoms/coordinator/responses',
-    'http://localhost:3000/api/symptoms/coordinator/responses'
+    `${ApiConfig.BASE_URL}/symptoms/coordinator/responses`,
+    `${ApiConfig.BASE_URL}/api/symptoms/coordinator/responses`
   ] as const;
 
   constructor(private http: HttpClient) {}

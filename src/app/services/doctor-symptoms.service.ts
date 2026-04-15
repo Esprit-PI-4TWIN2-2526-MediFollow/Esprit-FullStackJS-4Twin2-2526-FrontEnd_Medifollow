@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
+import { ApiConfig } from '../config/api.config';
 
 export interface DoctorSymptomsSubmission {
   _id: string;
@@ -17,7 +18,7 @@ export class DoctorSymptomsService {
   constructor(private http: HttpClient) {}
 
   getPatientSymptoms(patientId: string): Observable<DoctorSymptomsSubmission[]> {
-    return this.http.get<unknown>(`http://localhost:3000/symptoms/doctor/patient/${patientId}/view-symptoms`).pipe(
+    return this.http.get<unknown>(`${ApiConfig.SYMPTOMS}/doctor/patient/${patientId}/view-symptoms`).pipe(
       map((payload) => this.extractArray(payload).map((item) => this.mapSubmission(item)))
     );
   }

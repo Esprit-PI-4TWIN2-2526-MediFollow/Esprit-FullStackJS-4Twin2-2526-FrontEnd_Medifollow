@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
+import { ApiConfig } from '../config/api.config';
 
 declare const ngDevMode: boolean | undefined;
 
@@ -39,8 +40,8 @@ export interface CoordinatorProtocolDetails {
 })
 export class CoordinatorFollowUpService {
   private readonly protocolUrls = [
-    'http://localhost:3000/coordinator/follow-up/protocol',
-    'http://localhost:3000/api/coordinator/follow-up/protocol'
+    `${ApiConfig.BASE_URL}/coordinator/follow-up/protocol`,
+    `${ApiConfig.BASE_URL}/api/coordinator/follow-up/protocol`
   ] as const;
 
   constructor(private http: HttpClient) {}

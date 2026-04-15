@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, map, of, switchMap } from 'rxjs';
+import { ApiConfig } from '../../config/api.config';
 
 export type CarouselRole = {
   id?: string;
@@ -35,8 +36,8 @@ type RoleApiResponse =
   providedIn: 'root'
 })
 export class RoleService {
-  private readonly rolesApiUrl = 'http://localhost:3000/api/roles';
-  private readonly legacyApiUrl = 'http://localhost:3000/api';
+  private readonly rolesApiUrl = ApiConfig.ROLES;
+  private readonly legacyApiUrl = ApiConfig.USERS;
 
   constructor(private http: HttpClient) { }
 

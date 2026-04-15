@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfig } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthPasswordService {
-  private readonly baseUrl = 'http://localhost:3000/users/forgetpassword';
+  private readonly baseUrl = ApiConfig.FORGET_PASSWORD;
 
   constructor(private http: HttpClient) {}
 

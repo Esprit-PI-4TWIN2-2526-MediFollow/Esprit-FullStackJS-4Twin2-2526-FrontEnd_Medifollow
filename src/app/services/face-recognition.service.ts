@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import * as faceapi from 'face-api.js';
+import { ApiConfig } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FaceRecognitionService {
-  private apiUrl = 'http://localhost:3000/api/face-recognition';
+  private apiUrl = ApiConfig.FACE_RECOGNITION;
   private modelsLoaded = false;
 
   constructor(private http: HttpClient) {

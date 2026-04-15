@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, throwError, forkJoin } from 'rxjs';
 import { Users } from '../../../../models/users';
 import { UsersService } from '../../../../services/user/users.service';
+import { ApiConfig } from '../../../../config/api.config';
 
 export interface NurseVitalSnapshot {
   bloodPressure?: string | number | null;
@@ -44,7 +45,7 @@ interface NurseIdentity {
   providedIn: 'root'
 })
 export class SymptomsNurseService {
-  private readonly apiUrl = 'http://localhost:3000/symptoms';
+  private readonly apiUrl = ApiConfig.SYMPTOMS;
 
   constructor(
     private http: HttpClient,

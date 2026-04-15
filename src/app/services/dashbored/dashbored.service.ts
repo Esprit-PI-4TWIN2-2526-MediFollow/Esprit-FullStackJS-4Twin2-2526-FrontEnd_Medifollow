@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ActivityPoint, Alert, ComplianceService, GlobalFollowupRate, HighRiskPatient, InactivePatient, QuestionnaireStats, Summary } from '../../models/dashbored.interfaces';
+import { ApiConfig } from '../../config/api.config';
 
 
 
@@ -9,7 +10,7 @@ import { ActivityPoint, Alert, ComplianceService, GlobalFollowupRate, HighRiskPa
   providedIn: 'root'
 })
 export class DashboardService {
-  private readonly API = 'http://localhost:3000/dashboard';
+  private readonly API = `${ApiConfig.BASE_URL}/dashboard`;
 
   constructor(private http: HttpClient) {}
 

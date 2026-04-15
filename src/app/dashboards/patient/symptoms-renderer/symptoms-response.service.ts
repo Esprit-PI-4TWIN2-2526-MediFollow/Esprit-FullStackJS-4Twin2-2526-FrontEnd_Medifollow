@@ -7,10 +7,11 @@ import {
   SymptomsSubmitPayload,
   SymptomsTodayResponse,
 } from './symptoms-response.model';
+import { ApiConfig } from '../../../config/api.config';
 
 @Injectable({ providedIn: 'root' })
 export class SymptomsResponseService {
-  private readonly apiUrl = 'http://localhost:3000/symptoms';
+  private readonly apiUrl = ApiConfig.SYMPTOMS;
 
   constructor(private http: HttpClient) {}
 

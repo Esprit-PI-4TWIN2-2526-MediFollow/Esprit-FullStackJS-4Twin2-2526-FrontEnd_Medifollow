@@ -7,12 +7,13 @@ import {
   type PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/browser';
 import { Observable, from, switchMap } from 'rxjs';
+import { ApiConfig } from '../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WebauthnService {
-  private apiUrl = 'http://localhost:3000/api/webauthn';
+  private apiUrl = ApiConfig.WEBAUTHN;
 
   constructor(private http: HttpClient) {}
 

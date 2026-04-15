@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, tap, throwError } from 'rxjs';
+import { ApiConfig } from '../config/api.config';
 
 export type CoordinatorRange = '7d' | '30d' | '90d';
 
@@ -27,8 +28,8 @@ export interface CoordinatorDashboardMetrics {
 })
 export class CoordinatorDashboardService {
   private readonly apiUrls = [
-    'http://localhost:3000/coordinator/dashboard',
-    'http://localhost:3000/api/coordinator/dashboard'
+    `${ApiConfig.BASE_URL}/coordinator/dashboard`,
+    `${ApiConfig.BASE_URL}/api/coordinator/dashboard`
   ] as const;
 
   constructor(private http: HttpClient) {}

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
+import { ApiConfig } from '../../config/api.config';
 
 export type SymptomQuestionType =
   | 'text'
@@ -57,7 +58,7 @@ export interface SymptomAiQuestion {
 
 @Injectable({ providedIn: 'root' })
 export class SymptomService {
-  private readonly API = 'http://localhost:3000/symptoms';
+  private readonly API = ApiConfig.SYMPTOMS;
 
   constructor(private http: HttpClient) {}
 
@@ -109,7 +110,7 @@ export class SymptomService {
     category?: QuestionCategory
   ): Observable<{ questions: SymptomAiQuestion[] }> {
     return this.http.post<{ questions: SymptomAiQuestion[] }>(
-      'http://localhost:3000/ai/generate-questions',
+      `${ApiConfig.AI}/generate-questions`,
       {
         medicalService: 'Symptoms Monitoring',
         title,

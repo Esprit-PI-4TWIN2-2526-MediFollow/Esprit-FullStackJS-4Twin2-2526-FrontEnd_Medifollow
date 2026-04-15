@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiConfig } from '../../config/api.config';
 
 export interface Horaire {
   jour: string;
@@ -31,7 +32,7 @@ export interface Service {
   providedIn: 'root',
 })
 export class ServiceManagementService {
-  private readonly apiUrl = 'http://localhost:3000/services';
+  private readonly apiUrl = ApiConfig.SERVICES;
 
   constructor(private http: HttpClient) { }
 

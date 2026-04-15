@@ -10,6 +10,7 @@ import { Role } from '../../models/roles';
 import { SpeechRecognitionService } from '../../services/speech-recognition.service';
 import { ComplianceService } from '../../models/dashbored.interfaces';
 import { ServiceManagementService } from '../../services/service/service-management.service';
+import { ApiConfig } from '../../config/api.config';
 
 type RoleKey = string;
 type CarouselRole = { id?: string; key: string; label: string; imageKey?: string; isOther?: boolean };
@@ -35,7 +36,7 @@ type RoleApiResponse = RoleApiItem[] | { data?: RoleApiItem[] };
   `],
 })
 export class AllProfilesComponent implements OnInit {
-  private readonly rolesApiUrl = 'http://localhost:3000/api/roles';
+  private readonly rolesApiUrl = `${ApiConfig.BASE_URL}/api/roles`;
 
   // ── Data ──────────────────────────────────────────────────────
   users: Users[] = [];
