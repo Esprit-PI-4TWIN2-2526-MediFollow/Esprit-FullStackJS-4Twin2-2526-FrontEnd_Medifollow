@@ -26,6 +26,7 @@
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
+    "@mediapipe/hands": "^0.4.1675469240",
     "@popperjs/core": "^2.11.8",
     "@simplewebauthn/browser": "^13.2.2",
     "apexcharts": "^4.7.0",

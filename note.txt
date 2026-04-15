@@ -4,3 +4,7 @@ yahyakaroui☺2003ddddszszs
 
 //pour statistique installez:
 npm install chart.js ng2-charts@5 --legacy-peer-deps
+
+// pour la navigation avec geste 
+
+npm install @mediapipe/hands --legacy-peer-deps

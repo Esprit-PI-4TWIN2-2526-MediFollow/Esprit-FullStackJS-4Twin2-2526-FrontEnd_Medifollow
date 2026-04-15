@@ -9,23 +9,25 @@ import { SpeechRecognitionService } from '../../services/speech-recognition.serv
   styleUrls: ['./mic-button.component.css']
 })
 export class MicButtonComponent implements OnDestroy {
-  @Input() lang = 'fr-FR';
-  @Input() fieldName = '';
-  @Output() transcriptReady = new EventEmitter<string>();
+  @Input() lang = 'fr-FR'; // langue de reconnaissance, configurable depuis le parent
+  @Input() fieldName = '';  // identifiant du champ (pour usage dans le template)
+  @Output() transcriptReady = new EventEmitter<string>(); // envoie le texte final au parent
 
   listening = false;
   private sub?: Subscription;
 
-readonly btnIdle      = 'mic-idle';
-readonly btnListening = 'mic-listening';
+readonly btnIdle      = 'mic-idle'; // classe CSS état repos
+readonly btnListening = 'mic-listening'; // classe CSS état actif
   constructor(public speech: SpeechRecognitionService) {}
 
   toggle(): void {
     if (this.listening) {
+//arrete l'écoute en cours, que ce soit pour ce champ ou un autre
       this.speech.stop();
       this.listening = false;
       this.sub?.unsubscribe();
     } else {
+//démarre l'écoute pour ce champ, en arrêtant proprement tout autre champ qui écouterait déjà
       this.listening = true;
       this.sub = this.speech.start(this.lang).subscribe(result => {
         if (result.isFinal) {
@@ -35,6 +37,9 @@ readonly btnListening = 'mic-listening';
       });
     }
   }
+
+
+// coupe le micro si le composant est détruit en cours d'écoute
 
   ngOnDestroy(): void {
     this.sub?.unsubscribe();

@@ -38,6 +38,107 @@
     </div>
   </div>
 
+ <!-- === AI ANALYSIS SECTION === -->
+      <div *ngIf="selectedSubmission" class="mt-6">
+        <div class="rounded-2xl border border-gray-200 bg-white dark:border-white/[0.05] dark:bg-white/[0.02] overflow-hidden">
+
+          <!-- Header -->
+          <div class="flex flex-wrap items-center justify-between gap-3 border-b border-gray-100 px-5 py-4 dark:border-white/[0.05]">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/30">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2">
+                  <path d="M12 2a8 8 0 0 1 8 8c0 3.5-2 6.5-5 7.7V20a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2.3C6 16.5 4 13.5 4 10a8 8 0 0 1 8-8z"/>
+                  <path d="M9 21h6"/>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white">AI Clinical Analysis</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">
+  {{ patient?.firstName }} {{ patient?.lastName }}
+  <span *ngIf="aiAnalysis?.createdAt">
+    · {{ (aiAnalysis?.createdAt | date:'MMM d, y, h:mm a') }}
+  </span>
+</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <!-- Severity badge -->
+              <span *ngIf="aiAnalysis" [ngClass]="getGravityClasses(aiAnalysis.gravity)"
+                    class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide">
+                <span class="h-2 w-2 rounded-full" [ngClass]="{
+                  'bg-red-500': aiAnalysis.gravity === 'critical',
+                  'bg-amber-500': aiAnalysis.gravity === 'high',
+                  'bg-blue-500': aiAnalysis.gravity === 'medium',
+                  'bg-green-500': aiAnalysis.gravity === 'low'
+                }"></span>
+                {{ aiAnalysis.gravity | uppercase }} severity
+              </span>
+
+              <button (click)="loadAiAnalysis(selectedSubmission)"
+                      [disabled]="isLoadingAnalysis"
+                      class="flex items-center gap-2 rounded-xl border border-gray-200 bg-red-500 px-4 py-2 text-xs font-medium text-white hover:bg-red-600 disabled:opacity-50 dark:border-white/[0.08] dark:bg-white/[0.03]">
+                <span *ngIf="isLoadingAnalysis" class="animate-spin">⟳</span>
+                {{ isLoadingAnalysis ? 'Analyzing...' : 'Refresh analysis' }}
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="isLoadingAnalysis" class="flex flex-col items-center justify-center gap-3 py-14 text-gray-400">
+            <div class="h-7 w-7 animate-spin rounded-full border-[3px] border-violet-500 border-t-transparent"></div>
+            <p class="text-sm">AI is analyzing symptoms...</p>
+          </div>
+
+          <!-- Error -->
+          <div *ngIf="analysisError && !isLoadingAnalysis" class="m-5 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-900/20 dark:text-rose-300">
+            {{ analysisError }}
+          </div>
+
+          <!-- Main Content -->
+          <div *ngIf="aiAnalysis && !isLoadingAnalysis" class="p-5">
+            <!-- Key Findings -->
+            <div class="mb-6">
+              <p class="mb-2.5 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Key findings</p>
+              <div class="flex flex-wrap gap-2">
+                <span *ngFor="let finding of aiAnalysis.key_findings"
+                      class="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-300">
+                  <span class="h-1.5 w-1.5 rounded-full bg-red-500"></span>
+                  {{ finding }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Recommendations -->
+            <div>
+              <p class="mb-2.5 text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">Recommendations</p>
+              <div class="divide-y divide-gray-100 dark:divide-white/[0.05]">
+                <ng-container *ngFor="let rec of getRecommendations()">
+                  <div class="flex items-start gap-3 py-3">
+                    <div class="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#92400E" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-800 dark:text-white">{{ rec.title }}</p>
+                      <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">{{ rec.detail }}</p>
+                    </div>
+                  </div>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div *ngIf="aiAnalysis && !isLoadingAnalysis" class="border-t border-gray-100 px-5 py-3 text-xs text-gray-400 dark:border-white/[0.05]">
+            Powered by MediFollow AI · Results are for decision support only
+          </div>
+        </div>
+      </div>
+<br>
+
+
   <div *ngIf="isLoadingSymptoms"
        class="flex flex-col items-center justify-center gap-3 py-16 text-gray-400">
     <svg class="h-8 w-8 animate-spin text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -134,7 +235,14 @@
           </div>
         </div>
       </div>
+
+
+
+
     </div>
   </div>
 </div>
+
+
+
 
