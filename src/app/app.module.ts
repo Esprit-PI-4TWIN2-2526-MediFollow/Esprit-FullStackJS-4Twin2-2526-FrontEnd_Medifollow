@@ -116,6 +116,8 @@ import { ManageServiceComponent } from './manage-service/manage-service.componen
 import { UnauthorizedComponent } from './pages/other-page/unauthorized/unauthorized.component';
 import { authInterceptor } from './services/auth/auth.interceptor';
 import { GestureControlModule } from './gesture-control/gesture-control.module';
+import { ChatComponent } from './chat/chat.component';
+import { ContactsComponent } from './chat/contacts/contacts.component';
 
 
 
@@ -226,6 +228,7 @@ import { GestureControlModule } from './gesture-control/gesture-control.module';
     RoleManageComponent,
     ManageServiceComponent,
     UnauthorizedComponent,
+
 
 
   ],
