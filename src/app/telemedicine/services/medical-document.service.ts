@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { MedicalDocument, UploadDocumentDto } from '../models/medical-document.model';
+import { ApiConfig } from '../../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MedicalDocumentService {
-  private apiUrl = 'http://localhost:3000/medical-documents';
+  private apiUrl = `${ApiConfig.BASE_URL}/medical-documents`;
 
   constructor(private http: HttpClient) {}
 

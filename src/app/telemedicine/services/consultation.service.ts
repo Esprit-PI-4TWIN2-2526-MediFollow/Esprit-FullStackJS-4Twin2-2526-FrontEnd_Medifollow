@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Consultation, CreateConsultationDto, UpdateConsultationDto } from '../models/consultation.model';
+import { ApiConfig } from '../../config/api.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ConsultationService {
-  private apiUrl = 'http://localhost:3000/consultations';
+  private apiUrl = `${ApiConfig.BASE_URL}/consultations`;
 
   constructor(private http: HttpClient) {}
 
