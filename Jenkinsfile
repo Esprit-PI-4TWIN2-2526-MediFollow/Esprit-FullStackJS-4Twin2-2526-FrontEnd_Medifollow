@@ -25,13 +25,13 @@
              }
  
             stage('Test & Coverage') {
-                 steps {
-                      sh '''
-                     export CHROME_BIN=/usr/bin/google-chrome
-                      npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
-                      '''
-                 }
-             }
+                steps {
+                    sh '''
+                    export CHROME_BIN=/usr/bin/chromium-browser
+                     npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
+                        '''
+                }
+}
  
              stage('SonarQube') {
                  steps {
