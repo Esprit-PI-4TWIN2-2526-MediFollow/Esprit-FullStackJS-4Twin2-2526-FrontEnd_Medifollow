@@ -23,14 +23,24 @@
                      sh 'npm install --legacy-peer-deps'
                  }
              }
+             stage('Install Chrome') {
+    steps {
+        sh '''
+        apt-get update
+        apt-get install -y chromium
+        '''
+    }
+}
  
             stage('Test & Coverage') {
-                steps {
-                    sh '''
-                    export CHROME_BIN=/usr/bin/chromium-browser
-                     npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
-                        '''
-                }
+    steps {
+        sh '''
+        export CHROME_BIN=$(which chromium)
+        echo "Chrome used: $CHROME_BIN"
+        npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
+        '''
+    }
+}
 }
  
              stage('SonarQube') {
