@@ -1,5 +1,8 @@
      pipeline {
          agent any
+         tools {
+             nodejs 'nodejs'
+         }
  
          environment {
              SONAR_TOKEN = credentials('sonar-token')
@@ -7,12 +10,7 @@
          }
  
          stages {
-            stage('Check Node') {
-                steps {
-                    sh 'node -v'
-                    sh 'npm -v'
-                }
-        }
+            
  
              stage('Checkout') {
                  steps {
