@@ -23,24 +23,17 @@
                      sh 'npm install --legacy-peer-deps'
                  }
              }
-             stage('Install Chrome') {
-                steps {
-                 sh '''
-                    sudo apt-get update
-                    sudo apt-get install -y chromium
-                '''
-                 }
-            }
+             
  
             stage('Test & Coverage') {
-                steps {
-                    sh '''
-                     export CHROME_BIN=$(which chromium)
-                      echo "Chrome used: $CHROME_BIN"
-                    npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
-                      '''
-                     }
-            }
+    steps {
+        sh '''
+        export CHROME_BIN=$(node -e "console.log(require('puppeteer').executablePath())")
+        echo "Using Chrome from Puppeteer: $CHROME_BIN"
+        npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
+        '''
+    }
+}
 
  
              stage('SonarQube') {
