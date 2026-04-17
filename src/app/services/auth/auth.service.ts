@@ -11,6 +11,7 @@ import {
 } from '../../models/auth';
 import { Router } from '@angular/router';
 import { Role } from '../../models/roles';
+import { CommunicationService } from '../communication/communication.service';
 
 
 @Injectable({
@@ -20,7 +21,8 @@ export class AuthService {
   private readonly API_URL = 'http://localhost:3000/api';
   private readonly ONBOARDING_TOKEN_KEY = 'onboardingToken';
 
-  constructor(private http: HttpClient, private router: Router) { }
+  constructor(private http: HttpClient, private router: Router, private communicationService: CommunicationService, // ← ajouté
+  ) { }
 
   signIn(payload: SignInRequest): Observable<SignInResponse> {
     return this.http.post<SignInResponse>(`${this.API_URL}/signin`, payload);
@@ -50,6 +52,8 @@ export class AuthService {
     localStorage.removeItem('user');         // ← vide d'abord
     localStorage.setItem('accessToken', token);
     localStorage.setItem('user', JSON.stringify(user));
+    this.communicationService.connect(); // ← ajouté : connecte le socket après login
+
   }
 
 
@@ -78,6 +82,8 @@ export class AuthService {
   }
 
   logout() {
+    this.communicationService.disconnect(); // ← ajouté : déconnecte le socket avant logout
+
     localStorage.clear();
     sessionStorage.clear();
     this.router.navigate(['/signin']);

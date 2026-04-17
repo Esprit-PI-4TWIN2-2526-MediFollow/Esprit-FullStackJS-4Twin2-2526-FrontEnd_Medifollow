@@ -137,6 +137,22 @@
                     }
                   </a>
                 }
+                @else if (nav.action) {
+                  <button (click)="nav.action()"
+                    class="lmenu-btn"
+                    [ngClass]="{
+                      'justify-center': !((isExpanded$ | async) || (isHovered$ | async)),
+                      'justify-start': (isExpanded$ | async) || (isHovered$ | async)
+                    }"
+                  >
+                    <span class="lmenu-icon"
+                      [innerHTML]="nav.icon | safeHtml">
+                    </span>
+                    @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
+                      <span class="lmenu-label">{{ nav.name }}</span>
+                    }
+                  </button>
+                }
               }
             </li>
           }
@@ -238,21 +254,31 @@
                     }
                   </a>
                 }
+                @else if (nav.action) {
+                  <button (click)="nav.action()"
+                    class="lmenu-btn"
+                    [ngClass]="{
+                      'justify-center': !((isExpanded$ | async) || (isHovered$ | async)),
+                      'justify-start': (isExpanded$ | async) || (isHovered$ | async)
+                    }"
+                  >
+                    <span class="lmenu-icon"
+                      [innerHTML]="nav.icon | safeHtml">
+                    </span>
+                    @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
+                      <span class="lmenu-label">{{ nav.name }}</span>
+                    }
+                  </button>
+                }
               }
             </li>
-            
           }
-
         </ul>
       </div>
 
     </nav>
-
   </div>
-
-
 
 </aside>
 
 <!-- ====== LIGHT SIDEBAR STYLES ====== -->
-

@@ -8,6 +8,7 @@ import { QuestionnaireRendererComponent } from './questionnaire-renderer/questio
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { SymptomsRendererComponent } from './symptoms-renderer/symptoms-renderer.component';
+import { ChatComponent } from '../../chat/chat.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { SymptomsRendererComponent } from './symptoms-renderer/symptoms-renderer
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-    PatientRoutingModule
+    PatientRoutingModule,
+    ChatComponent
   ],
   providers: [
     QuestionnaireService

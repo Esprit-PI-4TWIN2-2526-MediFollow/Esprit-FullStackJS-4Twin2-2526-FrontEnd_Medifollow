@@ -259,11 +259,6 @@ export class SymptomsRendererComponent implements OnInit {
     });
   }
 
-  onScaleSelect(value: number): void {
-    this.currentQuestionControl?.setValue(value);
-    this.currentQuestionControl?.markAsTouched();
-  }
-
   isScaleSelected(value: number): boolean {
     return this.currentQuestionControl?.value === value;
   }
@@ -548,6 +543,10 @@ export class SymptomsRendererComponent implements OnInit {
     return control;
   }
 
+  getAnswer(question: SymptomsQuestion): unknown {
+    return this.getControl(question)?.value ?? null;
+  }
+
   getMultipleChoiceArray(question: SymptomsQuestion): FormArray | null {
     const control = this.getControl(question);
     return control instanceof FormArray ? control : null;
@@ -593,6 +592,10 @@ export class SymptomsRendererComponent implements OnInit {
     this.getControl(question)?.markAsTouched();
   }
 
+  onScaleSelect(question: SymptomsQuestion, value: number): void {
+    this.onScaleSelectFor(question, value);
+  }
+
   isScaleSelectedFor(question: SymptomsQuestion, value: number): boolean {
     return this.getControl(question)?.value === value;
   }
@@ -600,6 +603,10 @@ export class SymptomsRendererComponent implements OnInit {
   onSingleChoiceSelectFor(question: SymptomsQuestion, value: string | boolean): void {
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
+  }
+
+  onBooleanSelect(question: SymptomsQuestion, value: boolean): void {
+    this.onSingleChoiceSelectFor(question, value);
   }
 
   onMultipleChoiceToggleFor(question: SymptomsQuestion, option: number | string): void {

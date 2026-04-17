@@ -126,6 +126,26 @@ export class ViewSymptomsComponent implements OnInit {
     return Array.isArray(value) && value.includes(option);
   }
 
+  selectScaleValue(questionIndex: number, value: number): void {
+    const control = this.responseForm.get(this.getControlName(questionIndex));
+    control?.setValue(value);
+    control?.markAsTouched();
+  }
+
+  selectBooleanValue(questionIndex: number, value: boolean): void {
+    const control = this.responseForm.get(this.getControlName(questionIndex));
+    control?.setValue(value);
+    control?.markAsTouched();
+  }
+
+  getAnswerValue(questionId: string | undefined, questionIndex: number): ResponseValue {
+    if (!questionId) {
+      return null;
+    }
+
+    return this.responseForm.get(this.getControlName(questionIndex))?.value ?? null;
+  }
+
   private loadForm(id: string): void {
     this.isLoading = true;
     this.errorMessage = '';
