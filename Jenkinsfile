@@ -28,7 +28,9 @@
             stage('Test & Coverage') {
     steps {
         sh '''
-        npx ng test --code-coverage --watch=false --browsers=ChromeHeadlessNoSandbox
+        export CHROME_BIN=$(node -e "console.log(require('puppeteer').executablePath())")
+        echo "Using Chrome: $CHROME_BIN"
+        npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
         '''
     }
 }
