@@ -79,6 +79,7 @@
             },
             "development": {
               "buildTarget": "Frontend_Medifollow:build:development"
+
             }
           },
           "defaultConfiguration": "development"

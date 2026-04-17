@@ -10,6 +10,7 @@ import { UsersService } from '../../services/user/users.service';
 import { PatientResponsesComponent } from './patient-responses/patient-responses.component';
 import { NgChartsModule } from 'ng2-charts';
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
+import { ChatComponent } from '../../chat/chat.component';
 import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
 import { AlertService } from '../../services/alert.service';
 import { ViewAlertComponent } from './view-alert/view-alert.component';
@@ -28,6 +29,7 @@ import { ViewAlertComponent } from './view-alert/view-alert.component';
     HttpClientModule,
     DoctorRoutingModule,
     NgChartsModule,
+    ChatComponent
   ],
   providers: [
     QuestionnaireService,

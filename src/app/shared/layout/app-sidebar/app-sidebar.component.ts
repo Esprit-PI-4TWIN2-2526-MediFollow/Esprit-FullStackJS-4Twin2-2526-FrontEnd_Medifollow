@@ -96,6 +96,14 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
       path: '/questionnaire',
       roles: ['SUPERADMIN', 'ADMIN'],
     },
+    {
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 13.8387 2.48697 15.5651 3.33788 17.0535L2.07071 21.9293L6.94648 20.6621C8.43491 21.513 10.1613 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM3.5 12C3.5 7.30558 7.30558 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C10.2929 20.5 8.70722 19.9804 7.39089 19.0921L7.05353 18.8713L4.42929 19.5707L5.12868 16.9465L4.90785 16.6091C4.01963 15.2928 3.5 13.7071 3.5 12ZM8.75 11.25C8.75 10.8358 9.08579 10.5 9.5 10.5H14.5C14.9142 10.5 15.25 10.8358 15.25 11.25C15.25 11.6642 14.9142 12 14.5 12H9.5C9.08579 12 8.75 11.6642 8.75 11.25ZM9.5 13.5C9.08579 13.5 8.75 13.8358 8.75 14.25C8.75 14.6642 9.08579 15 9.5 15H12C12.4142 15 12.75 14.6642 12.75 14.25C12.75 13.8358 12.4142 13.5 12 13.5H9.5Z" fill="currentColor"/>
+    </svg>`,
+      name: 'Messages',
+      action: () => this.navigateToChat(),
+       roles: ['DOCTOR', 'PATIENT', 'NURSE'],
+    },
 
 
   ];
@@ -263,5 +271,19 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     this.isMobileOpen$.subscribe(isMobile => {
       if (isMobile) this.sidebarService.setMobileOpen(false);
     }).unsubscribe();
+  }
+  navigateToChat(): void {
+    const stored = localStorage.getItem('user');
+    const user = stored ? JSON.parse(stored) : null;
+    const role = (user?.role?.name ?? user?.role ?? '').toUpperCase();
+
+    const chatRoutes: Record<string, string> = {
+      DOCTOR: '/doctor/contacts',
+      PATIENT: '/patient/contacts',
+      NURSE: '/nurse/contacts',
+    };
+
+    const route = chatRoutes[role];
+    if (route) this.router.navigate([route]);
   }
 }

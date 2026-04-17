@@ -115,6 +115,9 @@ import { MicButtonComponent } from './users/mic-button/mic-button.component';
 import { ManageServiceComponent } from './manage-service/manage-service.component';
 import { UnauthorizedComponent } from './pages/other-page/unauthorized/unauthorized.component';
 import { authInterceptor } from './services/auth/auth.interceptor';
+import { GestureControlModule } from './gesture-control/gesture-control.module';
+import { ChatComponent } from './chat/chat.component';
+import { ContactsComponent } from './chat/contacts/contacts.component';
 
 
 
@@ -227,6 +230,7 @@ import { authInterceptor } from './services/auth/auth.interceptor';
     UnauthorizedComponent,
 
 
+
   ],
   imports: [
     BrowserModule,
@@ -235,6 +239,12 @@ import { authInterceptor } from './services/auth/auth.interceptor';
     ReactiveFormsModule,
     NgApexchartsModule,
     FullCalendarModule,
+GestureControlModule.forRoot({
+      cooldownMs: 800,
+      pinchHoldMs: 600,
+      audioFeedback: true,
+      auditLog: true,
+    }),
 
   ],
   providers: [
