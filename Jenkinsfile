@@ -6,7 +6,6 @@ pipeline {
  
          environment {
              SONAR_TOKEN = credentials('sonar-token')
-             CHROME_BIN = '/usr/bin/chromium-browser'
          }
  
          stages {
@@ -30,7 +29,7 @@ pipeline {
         sh '''
         export CHROME_BIN=$(node -e "console.log(require('puppeteer').executablePath())")
         echo "Using Chrome: $CHROME_BIN"
-        npx ng test --code-coverage --watch=false --browsers=ChromeHeadless
+        npm run test:cov
         '''
     }
 }
