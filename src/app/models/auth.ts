@@ -16,7 +16,15 @@ export interface FirstLoginRequiredResponse {
   message: string;
 }
 
-export type SignInResponse = SignInSuccessResponse | FirstLoginRequiredResponse;
+export interface TwoFactorRequiredResponse {
+  requiresTwoFactor: true;
+  twoFactorToken: string;
+}
+
+export type SignInResponse =
+  | SignInSuccessResponse
+  | FirstLoginRequiredResponse
+  | TwoFactorRequiredResponse;
 
 export interface FirstLoginChangePasswordRequest {
   onboardingToken: string;
