@@ -36,7 +36,7 @@ pipeline {
                 echo "Using Chrome: $CHROME_BIN"
                 $CHROME_BIN --version || true
 
-                npm run test:cov -- --watch=false --browsers=ChromeHeadless
+                npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
                 '''
             }
         }
