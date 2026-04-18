@@ -1,4 +1,7 @@
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { ViewAlertComponent } from './view-alert.component';
 
@@ -8,7 +11,20 @@ describe('ViewAlertComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ViewAlertComponent]
+      declarations: [ViewAlertComponent],
+      imports: [HttpClientTestingModule, RouterTestingModule],
+      providers: [
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              paramMap: {
+                get: (key: string) => '1'
+              }
+            }
+          }
+        }
+      ]
     })
     .compileComponents();
 
