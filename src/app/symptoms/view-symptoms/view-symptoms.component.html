@@ -62,7 +62,10 @@
 
       <div class="rounded-2xl border border-gray-200 bg-white p-5">
         <p class="text-xs uppercase tracking-wide text-gray-400">Questions</p>
-        <p class="mt-2 text-2xl font-semibold text-gray-800">{{ symptomForm.questions.length }}</p>
+        <p class="mt-2 text-2xl font-semibold text-gray-800">{{ visibleQuestions.length }}</p>
+        <p *ngIf="visibleQuestions.length !== symptomForm.questions.length" class="mt-1 text-xs text-gray-400">
+          {{ symptomForm.questions.length - visibleQuestions.length }} completed or blocked today
+        </p>
       </div>
 
       <div class="rounded-2xl border border-gray-200 bg-white p-5">
@@ -77,32 +80,57 @@
       <div class="mb-6 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-semibold text-gray-800">Patient Response</h2>
-          <p class="mt-1 text-sm text-gray-500">Answer all required questions before submitting the form.</p>
+          <p class="mt-1 text-sm text-gray-500">Answer the questions available for this measurement.</p>
         </div>
 
         <button
           type="submit"
-          [disabled]="responseForm.invalid || isSubmitting"
+          [disabled]="responseForm.invalid || isSubmitting || visibleQuestions.length === 0"
           class="inline-flex h-[42px] items-center justify-center rounded-lg bg-brand-500 px-5 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ isSubmitting ? 'Submitting...' : 'Submit Response' }}
         </button>
       </div>
 
-      <div class="space-y-5">
+      <div
+        *ngIf="visibleQuestions.length === 0"
+        class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-8 text-center"
+      >
+        <p class="text-sm font-medium text-gray-700">No measurements are available right now.</p>
+        <p class="mt-1 text-xs text-gray-500">Your care team settings control when each question becomes available.</p>
+      </div>
+
+      <div *ngIf="visibleQuestions.length > 0" class="space-y-5">
         <div
-          *ngFor="let question of symptomForm.questions; let i = index"
+          *ngFor="let question of visibleQuestions; let i = index"
           class="rounded-2xl border border-gray-100 bg-gray-50/40 p-5"
         >
           <div class="mb-4 flex items-start justify-between gap-4">
             <div>
               <p class="text-sm font-semibold text-gray-800">
                 {{ i + 1 }}. {{ question.label }}
-                <span *ngIf="question.required" class="text-error-500">*</span>
+                <span *ngIf="isQuestionRequired(question)" class="text-error-500">*</span>
               </p>
               <p class="mt-1 text-xs uppercase tracking-wide text-gray-400">
                 {{ question.type.replace('_', ' ') }}
               </p>
+              <p class="mt-1 text-xs text-gray-500">
+                {{ getOccurrenceSummary(question) }}
+              </p>
+            </div>
+
+            <div class="flex shrink-0 flex-wrap justify-end gap-2">
+              <span
+                class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold"
+                [ngClass]="isQuestionRequired(question)
+                  ? 'bg-error-50 text-error-600'
+                  : 'bg-gray-100 text-gray-500'"
+              >
+                {{ isQuestionRequired(question) ? 'REQUIRED' : 'Optional' }}
+              </span>
+              <span class="inline-flex items-center rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-600">
+                {{ getMeasurementProgress(question) }}
+              </span>
             </div>
           </div>
 

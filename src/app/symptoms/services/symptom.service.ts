@@ -23,6 +23,7 @@ export interface SymptomQuestion {
   type: SymptomQuestionType;
   options?: string[];
   required?: boolean;
+  occurrencesPerDay?: number;
   order?: number;
   category?: QuestionCategory;
 }
@@ -33,6 +34,7 @@ export interface SymptomForm {
   description?: string;
   medicalService?: string;
   patientId?: string;
+  patientIds?: string[];
   questions: SymptomQuestion[];
   status?: 'active' | 'inactive';
   responsesCount?: number;
@@ -53,6 +55,21 @@ export interface SymptomAiQuestion {
   type: SymptomQuestionType | string;
   options?: string[];
   category?: QuestionCategory;
+}
+
+export interface SymptomQuestionTodayStatus {
+  questionId?: string;
+  questionText?: string;
+  question?: string | { _id?: string };
+  required?: boolean;
+  isRequired?: boolean;
+  isBlocked?: boolean;
+  remainingRequired?: number;
+  remainingOptional?: number;
+  occurrencesPerDay?: number;
+  occurrencesToday?: number;
+  completedOccurrences?: number;
+  currentOccurrence?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -91,6 +108,20 @@ export class SymptomService {
           catchError((error) => throwError(() => error))
         )
       )
+    );
+  }
+
+  getTodayQuestionStatus(patientId: string): Observable<SymptomQuestionTodayStatus[]> {
+    return this.http.get<
+      SymptomQuestionTodayStatus[] | { questions?: SymptomQuestionTodayStatus[]; statuses?: SymptomQuestionTodayStatus[] }
+    >(`${this.API}/questions/status/today/${patientId}`).pipe(
+      map((response) => {
+        if (Array.isArray(response)) {
+          return response;
+        }
+
+        return response.questions ?? response.statuses ?? [];
+      })
     );
   }
 
