@@ -1,0 +1,299 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Back Button -->
+  <button
+    (click)="goBack()"
+    class="mb-4 text-teal-600 hover:text-teal-700 flex items-center gap-2">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+    </svg>
+    Retour
+  </button>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-12">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+    <p class="text-gray-600 mt-4">Chargement...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+    {{ error }}
+  </div>
+
+  <!-- Consultation Details -->
+  <div *ngIf="!loading && !error && consultation" class="space-y-6">
+    <!-- Header -->
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <div class="flex justify-between items-start">
+        <div class="flex-1">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 rounded-full bg-teal-100 flex items-center justify-center">
+              <span class="text-teal-700 font-bold text-2xl">
+                {{ isDoctor() ? consultation.patient.firstName[0] : consultation.doctor.firstName[0] }}
+              </span>
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">
+                <span *ngIf="isDoctor()">
+                  {{ consultation.patient.firstName }} {{ consultation.patient.lastName }}
+                </span>
+                <span *ngIf="!isDoctor()">
+                  Dr. {{ consultation.doctor.firstName }} {{ consultation.doctor.lastName }}
+                </span>
+              </h1>
+              <p class="text-gray-600">
+                <span *ngIf="isDoctor()">{{ consultation.patient.email }}</span>
+                <span *ngIf="!isDoctor()">{{ consultation.doctor.specialization }}</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div>
+              <span class="text-sm text-gray-600">Date</span>
+              <p class="font-medium">{{ formatDate(consultation.scheduledAt) }}</p>
+            </div>
+            <div>
+              <span class="text-sm text-gray-600">Statut</span>
+              <span [class]="'inline-flex px-3 py-1 text-sm font-semibold rounded-full ' + getStatusBadgeClass(consultation.status)">
+                {{ getStatusLabel(consultation.status) }}
+              </span>
+            </div>
+            <div *ngIf="consultation.duration">
+              <span class="text-sm text-gray-600">Durée</span>
+              <p class="font-medium">{{ consultation.duration }} minutes</p>
+            </div>
+            <div>
+              <span class="text-sm text-gray-600">Type</span>
+              <p class="font-medium">{{ consultation.type }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex flex-col gap-2 ml-4" *ngIf="isDoctor()">
+          <button
+            *ngIf="consultation.status === 'pending'"
+            (click)="startConsultation()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Démarrer
+          </button>
+          <button
+            *ngIf="consultation.status === 'in-progress'"
+            (click)="openVideoMeeting()"
+            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Rejoindre Vidéo
+          </button>
+          <button
+            *ngIf="consultation.status === 'in-progress'"
+            (click)="openEndForm()"
+            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            Terminer
+          </button>
+          <button
+            *ngIf="consultation.status === 'pending' || consultation.status === 'in-progress'"
+            (click)="cancelConsultation()"
+            class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            Annuler
+          </button>
+        </div>
+
+        <!-- Patient Actions -->
+        <div class="flex flex-col gap-2 ml-4" *ngIf="!isDoctor()">
+          <button
+            *ngIf="consultation.status === 'in-progress'"
+            (click)="openVideoMeeting()"
+            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm transition-colors flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            Rejoindre la Consultation
+          </button>
+          <div *ngIf="consultation.status === 'pending'" class="text-sm text-gray-600 bg-yellow-50 p-3 rounded-lg">
+            ⏳ En attente du médecin pour démarrer
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white rounded-lg shadow-sm">
+      <div class="border-b border-gray-200">
+        <nav class="flex -mb-px">
+          <button
+            (click)="activeTab = 'details'"
+            [class.border-teal-600]="activeTab === 'details'"
+            [class.text-teal-600]="activeTab === 'details'"
+            class="px-6 py-4 border-b-2 font-medium text-sm transition-colors">
+            Détails
+          </button>
+          <button
+            (click)="activeTab = 'prescriptions'"
+            [class.border-teal-600]="activeTab === 'prescriptions'"
+            [class.text-teal-600]="activeTab === 'prescriptions'"
+            class="px-6 py-4 border-b-2 font-medium text-sm transition-colors">
+            Prescriptions ({{ prescriptions.length }})
+          </button>
+          <button
+            (click)="activeTab = 'documents'"
+            [class.border-teal-600]="activeTab === 'documents'"
+            [class.text-teal-600]="activeTab === 'documents'"
+            class="px-6 py-4 border-b-2 font-medium text-sm transition-colors">
+            Documents ({{ documents.length }})
+          </button>
+        </nav>
+      </div>
+
+      <!-- Details Tab -->
+      <div *ngIf="activeTab === 'details'" class="p-6 space-y-6">
+        <div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Motif de consultation</h3>
+          <p class="text-gray-700">{{ consultation.reason }}</p>
+        </div>
+
+        <div *ngIf="consultation.diagnosis">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Diagnostic</h3>
+          <p class="text-gray-700">{{ consultation.diagnosis }}</p>
+        </div>
+
+        <div *ngIf="consultation.notes">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Notes</h3>
+          <p class="text-gray-700 whitespace-pre-wrap">{{ consultation.notes }}</p>
+        </div>
+
+        <div *ngIf="consultation.recommendations">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Recommandations</h3>
+          <p class="text-gray-700 whitespace-pre-wrap">{{ consultation.recommendations }}</p>
+        </div>
+      </div>
+
+      <!-- Prescriptions Tab -->
+      <div *ngIf="activeTab === 'prescriptions'" class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Prescriptions</h3>
+          <button
+            *ngIf="isDoctor() && consultation.status === 'in-progress'"
+            (click)="createPrescription()"
+            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            + Nouvelle Prescription
+          </button>
+        </div>
+
+        <div *ngIf="prescriptions.length === 0" class="text-center py-8 text-gray-600">
+          Aucune prescription
+        </div>
+
+        <div class="space-y-4">
+          <div
+            *ngFor="let prescription of prescriptions"
+            (click)="viewPrescription(prescription._id)"
+            class="border border-gray-200 rounded-lg p-4 hover:border-teal-500 cursor-pointer transition-colors">
+            <div class="flex justify-between items-start">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-2xl">💊</span>
+                  <span [class]="'px-2 py-1 text-xs font-semibold rounded-full ' + (prescription.status === 'issued' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800')">
+                    {{ prescription.status }}
+                  </span>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">
+                  {{ prescription.medications.length }} médicament(s)
+                </p>
+                <div class="text-sm text-gray-700">
+                  <div *ngFor="let med of prescription.medications" class="mb-1">
+                    • {{ med.name }} - {{ med.dosage }} - {{ med.frequency }}
+                  </div>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-mono text-gray-600">{{ prescription.qrCode }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ formatDate(prescription.createdAt) }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Documents Tab -->
+      <div *ngIf="activeTab === 'documents'" class="p-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">Documents Médicaux</h3>
+          <button
+            (click)="uploadDocument()"
+            class="bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            + Upload Document
+          </button>
+        </div>
+
+        <div *ngIf="documents.length === 0" class="text-center py-8 text-gray-600">
+          Aucun document
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div
+            *ngFor="let doc of documents"
+            (click)="viewDocument(doc)"
+            class="border border-gray-200 rounded-lg p-4 hover:border-teal-500 cursor-pointer transition-colors">
+            <div class="flex items-start gap-3">
+              <span class="text-3xl">{{ getDocumentIcon(doc.type) }}</span>
+              <div class="flex-1">
+                <h4 class="font-medium text-gray-900">{{ doc.title }}</h4>
+                <p class="text-sm text-gray-600 mt-1">{{ doc.description }}</p>
+                <div class="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                  <span>{{ formatFileSize(doc.fileSize) }}</span>
+                  <span>{{ formatDate(doc.uploadedAt) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- End Consultation Modal -->
+  <div *ngIf="showEndForm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+      <h2 class="text-2xl font-bold text-gray-900 mb-4">Terminer la Consultation</h2>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Diagnostic *</label>
+          <textarea
+            [(ngModel)]="endDiagnosis"
+            rows="3"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            placeholder="Entrez le diagnostic..."></textarea>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Notes</label>
+          <textarea
+            [(ngModel)]="endNotes"
+            rows="5"
+            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+            placeholder="Notes additionnelles..."></textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button
+          (click)="closeEndForm()"
+          class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+          Annuler
+        </button>
+        <button
+          (click)="endConsultation()"
+          class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors">
+          Terminer la Consultation
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

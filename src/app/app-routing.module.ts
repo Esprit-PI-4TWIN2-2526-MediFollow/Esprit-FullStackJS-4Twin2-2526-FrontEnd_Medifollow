@@ -330,6 +330,13 @@ const routes: Routes = [
         data: { allowedRoles: ['DOCTOR'] }
       },
       {
+        path: 'telemedicine',
+        loadChildren: () => import('./telemedicine/telemedicine.module').then(m => m.TelemedicineModule),
+        canActivate: [RoleGuard],
+        data: { allowedRoles: ['DOCTOR', 'PATIENT', 'SUPERADMIN', 'ADMIN'] },
+        title: 'MediFollow - Télémédecine'
+      },
+      {
         path: 'super-admin',
         loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule),
         canActivate: [RoleGuard],
