@@ -105,6 +105,7 @@ describe('BuilderComponent', () => {
     expect(component.isEditMode).toBeFalse();
     expect(component.questions.length).toBe(9);
     expect(component.questions[0].order).toBe(0);
+    expect(component.questions[0].occurrencesPerDay).toBe(1);
     expect(component.questions.every((question, index) => question.order === index)).toBeTrue();
   });
 
@@ -132,6 +133,12 @@ describe('BuilderComponent', () => {
     component.updateOption(addedIndex, 1, '');
 
     expect(component.hasEnoughOptions(addedIndex)).toBeFalse();
+    expect(component.isFormValid()).toBeFalse();
+
+    component.updateOption(addedIndex, 1, 'No');
+    component.questions[addedIndex].occurrencesPerDay = 11;
+
+    expect(component.hasValidOccurrences(addedIndex)).toBeFalse();
     expect(component.isFormValid()).toBeFalse();
   });
 
@@ -164,17 +171,20 @@ describe('BuilderComponent', () => {
   });
 
   it('should track selected patients and block patients already assigned to another form', () => {
-    component.patientsWithForm = ['patient-1', 'patient-2'];
+    component.assignedPatients = [{ _id: { toString: () => 'patient-1' } }, 'patient-2'];
 
     component.togglePatient('patient-1');
     expect(component.selectedPatients).toEqual([]);
+    expect(component.isAssigned(patient)).toBeTrue();
 
-    component.patientsWithForm = [];
+    component.assignedPatients = [];
     component.togglePatient('patient-1');
     expect(component.selectedPatients).toEqual(['patient-1']);
 
     component.togglePatient('patient-1');
     expect(component.selectedPatients).toEqual([]);
+
+    expect(component.isAssigned({ ...patient, isAssigned: true })).toBeTrue();
   });
 
   it('should normalize generated AI questions before appending them', () => {
@@ -244,6 +254,7 @@ describe('BuilderComponent', () => {
     expect(payload.medicalService).toBe('Cardiology');
     expect(payload.patientIds).toEqual(['patient-1']);
     expect(payload.questions.length).toBe(9);
+    expect(payload.questions[0].occurrencesPerDay).toBe(1);
     expect(router.navigate).toHaveBeenCalledWith(['/symptoms']);
   });
 
