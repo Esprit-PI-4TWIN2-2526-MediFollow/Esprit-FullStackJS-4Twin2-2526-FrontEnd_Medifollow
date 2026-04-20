@@ -531,6 +531,8 @@ loadDepartments(): void {
         type:     q.type,
         required: q.required,
         occurrencesPerDay: Number(q.occurrencesPerDay),
+        measurementsPerDay: Number(q.occurrencesPerDay),
+        maxOccurrencesPerDay: Number(q.occurrencesPerDay),
         order:    q.order,
         category: q.category,
         ...(this.hasOptions(q.type)
@@ -608,7 +610,12 @@ loadDepartments(): void {
             ? (question.options || []).map((option) => option.trim()).filter(Boolean)
             : [],
           required: question.required ?? true,
-          occurrencesPerDay: this.normalizeOccurrenceCount(question.occurrencesPerDay, 1),
+          occurrencesPerDay: this.normalizeOccurrenceCount(
+            question.occurrencesPerDay ??
+            question.measurementsPerDay ??
+            question.maxOccurrencesPerDay,
+            1
+          ),
           order: index,
           category: question.category || 'vital_parameters',
         }));
