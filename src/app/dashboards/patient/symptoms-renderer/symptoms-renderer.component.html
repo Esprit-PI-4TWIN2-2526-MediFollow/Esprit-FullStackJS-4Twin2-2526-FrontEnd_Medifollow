@@ -483,7 +483,7 @@
                 <button *ngIf="currentStep < 3"
                   (click)="next()"
                   type="button"
-                  [disabled]="!canGoNext()"
+                  [disabled]="!isFormValid() || !canSubmitMore()"
                   class="inline-flex h-11 items-center justify-center rounded-xl bg-brand-500
                          px-6 text-sm font-medium text-white transition hover:bg-brand-600
                          disabled:cursor-not-allowed disabled:opacity-40">

@@ -79,7 +79,7 @@ export class SymptomsRendererComponent implements OnInit {
 
   canSubmitMore(): boolean {
     return this.questions.some((q) => {
-      const count = this.getTodayAnswersForQuestion(q._id ?? '');
+      const count = this.getTodayCount(q._id ?? '');
       const limit = q.measurementsPerDay ?? 1;
       console.log('Question:', q.label, 'count:', count, 'limit:', limit);
       return count < limit;
@@ -87,9 +87,18 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   isQuestionRequired(question: SymptomsQuestion): boolean {
-    const count = this.getTodayAnswersForQuestion(question._id ?? '');
+    const count = this.getTodayCount(question._id ?? '');
     const limit = question.measurementsPerDay ?? 1;
-    return count < limit;
+    const hasAtLeastOneAnswer = this.todayResponses.some((r) =>
+      this.normalizeAnswers(r.answers).some((a) => a.questionId === question._id)
+    );
+    const limitReached = count >= limit;
+
+    return !hasAtLeastOneAnswer || !limitReached;
+  }
+
+  getTodayCount(questionId: string): number {
+    return this.getTodayAnswersForQuestion(questionId);
   }
 
   getTodayAnswersForQuestion(questionId: string): number {
@@ -190,11 +199,29 @@ export class SymptomsRendererComponent implements OnInit {
     return Array.from({ length: max - min + 1 }, (_, index) => min + index);
   }
 
+  isFormValid(): boolean {
+    const checks = this.currentQuestions.map((q) => {
+      const required = this.isQuestionRequired(q);
+      const control = this.getControl(q);
+      const value = control?.value;
+
+      return {
+        label: q.label,
+        required,
+        value,
+        valid: !required || this.hasAnswerValue(q, value),
+      };
+    });
+
+    console.log('VALID CHECK:', checks.map(({ label, required, value }) => ({ label, required, value })));
+    return checks.every((item) => item.valid);
+  }
+
   canGoNext(): boolean {
     if (!this.canSubmitMore() || this.isHistoryMode) return false;
     const questions = this.currentQuestions;
     if (questions.length === 0) return true;
-    return questions.every((question) => this.getControl(question)?.valid);
+    return this.isFormValid();
   }
 
   next(): void {
@@ -920,6 +947,16 @@ export class SymptomsRendererComponent implements OnInit {
 
     const type = this.normalizeType(question.type);
     const value = control.value;
+
+    if (type === 'multiple_choice') {
+      return Array.isArray(value) && value.some(Boolean);
+    }
+
+    return value !== null && value !== undefined && value !== '';
+  }
+
+  private hasAnswerValue(question: SymptomsQuestion, value: unknown): boolean {
+    const type = this.normalizeType(question.type);
 
     if (type === 'multiple_choice') {
       return Array.isArray(value) && value.some(Boolean);
