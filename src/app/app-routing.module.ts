@@ -223,6 +223,7 @@ import { VideosComponent } from './pages/ui-elements/videos/videos.component';
 import { CalenderComponent } from './pages/calender/calender.component';
 import { AllProfilesComponent } from './users/all-profiles/all-profiles.component';
 import { RoleManageComponent } from './roles/role-manage/role-manage.component';
+import { NotificationsPageComponent } from './pages/notifications/notifications-page.component';
 
 // Auth pages
 import { SignInComponent } from './pages/auth-pages/sign-in/sign-in.component';
@@ -389,6 +390,13 @@ const routes: Routes = [
         path: 'profile',
         component: ProfileComponent,
         title: 'MediFollow - Profil'
+      },
+      {
+        path: 'notifications',
+        component: NotificationsPageComponent,
+        canActivate: [RoleGuard],
+        data: { allowedRoles: ['DOCTOR', 'PATIENT', 'SUPERADMIN', 'ADMIN'] },
+        title: 'MediFollow - Notifications'
       },
       {
         path: 'invoice',
