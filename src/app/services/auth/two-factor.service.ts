@@ -7,12 +7,13 @@ import {
   TwoFactorSetupResponse,
   TwoFactorStatusResponse,
 } from '../../models/two-factor';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TwoFactorService {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = `${environment.apiUrl}/api`;
 
   constructor(private http: HttpClient) {}
 

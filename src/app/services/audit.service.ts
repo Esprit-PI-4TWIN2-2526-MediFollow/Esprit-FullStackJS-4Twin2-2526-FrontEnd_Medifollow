@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, catchError, map, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export type AuditAction = 'CREATE' | 'UPDATE' | 'DELETE' | 'LOGIN' | string;
 
@@ -54,9 +55,9 @@ export interface AuditReport {
 
 @Injectable({ providedIn: 'root' })
 export class AuditService {
-  private readonly logsUrl = 'http://localhost:3000/api/audit/logs';
+  private readonly logsUrl = `${environment.apiUrl}/api/audit/logs`;
 
-  private readonly reportUrl = 'http://localhost:3000/api/audit/report';
+  private readonly reportUrl = `${environment.apiUrl}/api/audit/report`;
 
   constructor(private http: HttpClient) {}
 
