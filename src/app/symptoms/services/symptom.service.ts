@@ -23,6 +23,9 @@ export interface SymptomQuestion {
   type: SymptomQuestionType;
   options?: string[];
   required?: boolean;
+  occurrencesPerDay?: number;
+  measurementsPerDay?: number;
+  maxOccurrencesPerDay?: number;
   order?: number;
   category?: QuestionCategory;
 }
@@ -33,6 +36,7 @@ export interface SymptomForm {
   description?: string;
   medicalService?: string;
   patientId?: string;
+  patientIds?: string[];
   questions: SymptomQuestion[];
   status?: 'active' | 'inactive';
   responsesCount?: number;
@@ -55,6 +59,21 @@ export interface SymptomAiQuestion {
   category?: QuestionCategory;
 }
 
+export interface SymptomQuestionTodayStatus {
+  questionId?: string;
+  questionText?: string;
+  question?: string | { _id?: string };
+  required?: boolean;
+  isRequired?: boolean;
+  isBlocked?: boolean;
+  remainingRequired?: number;
+  remainingOptional?: number;
+  occurrencesPerDay?: number;
+  occurrencesToday?: number;
+  completedOccurrences?: number;
+  currentOccurrence?: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SymptomService {
   private readonly API = 'http://localhost:3000/symptoms';
@@ -62,23 +81,32 @@ export class SymptomService {
   constructor(private http: HttpClient) {}
 
   createForm(data: Partial<SymptomForm>): Observable<SymptomForm> {
-    return this.http.post<SymptomForm>(`${this.API}/form`, data);
+    return this.http
+      .post<SymptomForm>(`${this.API}/form`, this.normalizeFormPayload(data))
+      .pipe(map((form) => this.normalizeForm(form)));
   }
 
   updateForm(id: string, data: Partial<SymptomForm>): Observable<SymptomForm> {
-    return this.http.put<SymptomForm>(`${this.API}/form/${id}`, data);
+    return this.http
+      .put<SymptomForm>(`${this.API}/form/${id}`, this.normalizeFormPayload(data))
+      .pipe(map((form) => this.normalizeForm(form)));
   }
 
   getForms(): Observable<SymptomForm[]> {
-    return this.http.get<SymptomForm[]>(`${this.API}/form`);
+    return this.http
+      .get<SymptomForm[]>(`${this.API}/form`)
+      .pipe(map((forms) => forms.map((form) => this.normalizeForm(form))));
   }
 
   getLatestForm(): Observable<SymptomForm> {
-    return this.http.get<SymptomForm>(`${this.API}/form/latest`);
+    return this.http
+      .get<SymptomForm>(`${this.API}/form/latest`)
+      .pipe(map((form) => this.normalizeForm(form)));
   }
 
   getFormById(id: string): Observable<SymptomForm> {
     return this.http.get<SymptomForm>(`${this.API}/form/${id}`).pipe(
+      map((form) => this.normalizeForm(form)),
       catchError(() =>
         this.getForms().pipe(
           map((forms) => {
@@ -91,6 +119,20 @@ export class SymptomService {
           catchError((error) => throwError(() => error))
         )
       )
+    );
+  }
+
+  getTodayQuestionStatus(patientId: string): Observable<SymptomQuestionTodayStatus[]> {
+    return this.http.get<
+      SymptomQuestionTodayStatus[] | { questions?: SymptomQuestionTodayStatus[]; statuses?: SymptomQuestionTodayStatus[] }
+    >(`${this.API}/questions/status/today/${patientId}`).pipe(
+      map((response) => {
+        if (Array.isArray(response)) {
+          return response;
+        }
+
+        return response.questions ?? response.statuses ?? [];
+      })
     );
   }
 
@@ -118,5 +160,47 @@ export class SymptomService {
         ...(category ? { category } : {}),
       }
     );
+  }
+
+  private normalizeForm(form: SymptomForm): SymptomForm {
+    return {
+      ...form,
+      questions: (form.questions ?? []).map((question) => {
+        const measurementsPerDay =
+          question.measurementsPerDay ??
+          question.occurrencesPerDay ??
+          question.maxOccurrencesPerDay ??
+          1;
+        return {
+          ...question,
+          measurementsPerDay,
+          occurrencesPerDay: measurementsPerDay,
+          maxOccurrencesPerDay: measurementsPerDay,
+        };
+      }),
+    };
+  }
+
+  private normalizeFormPayload(data: Partial<SymptomForm>): Partial<SymptomForm> {
+    if (!Array.isArray(data.questions)) {
+      return data;
+    }
+
+    return {
+      ...data,
+      questions: data.questions.map((question) => {
+        const measurementsPerDay =
+          question.measurementsPerDay ??
+          question.occurrencesPerDay ??
+          question.maxOccurrencesPerDay ??
+          1;
+        return {
+          ...question,
+          measurementsPerDay,
+          occurrencesPerDay: measurementsPerDay,
+          maxOccurrencesPerDay: measurementsPerDay,
+        };
+      }),
+    };
   }
 }

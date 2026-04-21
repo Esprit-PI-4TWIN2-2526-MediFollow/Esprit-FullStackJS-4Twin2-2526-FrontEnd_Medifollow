@@ -20,6 +20,10 @@ export interface SymptomsQuestion {
   type: SymptomsQuestionType | string;
   options?: string[];
   required?: boolean;
+  todayAnswers?: number;
+  measurementsPerDay?: number;
+  occurrencesPerDay?: number;
+  maxOccurrencesPerDay?: number;
   order?: number;
   validation?: SymptomsQuestionValidation;
 }
