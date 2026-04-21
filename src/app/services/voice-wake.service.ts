@@ -76,12 +76,16 @@ export class VoiceWakeService {
   private readonly assistantActiveMs = 10000;
 
   private noSpeechCount = 0;
-  private readonly noSpeechFallbackThreshold = 5;
   private readonly primaryLanguage = 'en-US';
-  private readonly fallbackLanguage = 'fr-FR';
   private currentLanguage = this.primaryLanguage;
 
-  private readonly wakePatterns = [/\bskander\b/i, /\bscander\b/i, /\bskandar\b/i];
+  private readonly wakePatterns = [
+    /\bhey\s+skander\b/i,
+    /\bhi\s+skander\b/i,
+    /\bskander\b/i,
+    /\bscander\b/i,
+    /\bskandar\b/i,
+  ];
 
   readonly wakeDetected$: Observable<string> = this.wakeDetectedSubject.asObservable();
 
@@ -90,7 +94,7 @@ export class VoiceWakeService {
     private readonly actionDispatcher: ActionDispatcherService,
   ) {}
 
-  async startListening(language: 'en-US' | 'fr-FR' = 'en-US'): Promise<void> {
+  async startListening(language: 'en-US' = 'en-US'): Promise<void> {
     const ctor = this.getSpeechRecognitionCtor();
     if (!ctor) {
       console.error('[VoiceWake] SpeechRecognition API is not supported.');
@@ -182,13 +186,6 @@ export class VoiceWakeService {
 
       if (errorType === 'no-speech') {
         this.noSpeechCount += 1;
-        if (
-          this.noSpeechCount >= this.noSpeechFallbackThreshold &&
-          this.currentLanguage !== this.fallbackLanguage
-        ) {
-          this.currentLanguage = this.fallbackLanguage;
-          this.applyLanguage();
-        }
       } else if (errorType === 'audio-capture' || errorType === 'network') {
         this.noSpeechCount = 0;
       }
@@ -378,10 +375,20 @@ export class VoiceWakeService {
       return;
     }
 
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    const englishVoice =
+      voices.find((voice) => voice.lang.toLowerCase().includes('en-us')) ??
+      voices.find((voice) => voice.lang.toLowerCase().startsWith('en'));
+
     const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'en-US';
     utterance.rate = 1;
     utterance.pitch = 1;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    if (englishVoice) {
+      utterance.voice = englishVoice;
+    }
+    synth.cancel();
+    synth.speak(utterance);
   }
 }

@@ -38,7 +38,7 @@ export class ActionDispatcherService {
         await this.handleGetPatients();
         return;
       default:
-        this.speak('Unknown command.');
+        this.speak("Sorry, I didn't understand");
     }
   }
 
@@ -128,7 +128,7 @@ export class ActionDispatcherService {
 
     if (typeof form.requestSubmit === 'function') {
       form.requestSubmit();
-      this.speak('Form submitted');
+      this.speak('Form submitted successfully');
       return;
     }
 
@@ -138,7 +138,7 @@ export class ActionDispatcherService {
 
     if (submitButton) {
       submitButton.click();
-      this.speak('Form submitted');
+      this.speak('Form submitted successfully');
       return;
     }
 
@@ -189,11 +189,21 @@ export class ActionDispatcherService {
       return;
     }
 
+    const synth = window.speechSynthesis;
+    const voices = synth.getVoices();
+    const englishVoice =
+      voices.find((voice) => voice.lang.toLowerCase().includes('en-us')) ??
+      voices.find((voice) => voice.lang.toLowerCase().startsWith('en'));
+
     const utterance = new SpeechSynthesisUtterance(message);
+    utterance.lang = 'en-US';
     utterance.rate = 1;
     utterance.pitch = 1;
+    if (englishVoice) {
+      utterance.voice = englishVoice;
+    }
 
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    synth.cancel();
+    synth.speak(utterance);
   }
 }

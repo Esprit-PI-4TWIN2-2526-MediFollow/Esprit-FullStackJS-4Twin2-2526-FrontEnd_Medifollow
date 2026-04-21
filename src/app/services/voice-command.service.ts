@@ -21,6 +21,8 @@ interface VoiceIntentPayload {
 @Injectable({ providedIn: 'root' })
 export class VoiceCommandService {
   private readonly intentUrl = 'http://localhost:3000/voice/intent';
+  private readonly maxAttempts = 2;
+  private readonly retryDelayMs = 500;
 
   constructor(private readonly http: HttpClient) {}
 
@@ -35,14 +37,22 @@ export class VoiceCommandService {
       role: this.getCurrentUserRole(),
     };
 
-    try {
-      return await firstValueFrom(
-        this.http.post<VoiceIntentResponse>(this.intentUrl, payload),
-      );
-    } catch (error) {
-      console.error('[VoiceCommand] Backend intent call failed', error);
-      return null;
+    for (let attempt = 1; attempt <= this.maxAttempts; attempt += 1) {
+      try {
+        console.log(`[VoiceCommand] Calling backend... (attempt ${attempt})`);
+        return await firstValueFrom(
+          this.http.post<VoiceIntentResponse>(this.intentUrl, payload),
+        );
+      } catch (error) {
+        console.error('[VoiceCommand] Backend intent call failed', error);
+        if (attempt < this.maxAttempts) {
+          await this.delay(this.retryDelayMs);
+          continue;
+        }
+      }
     }
+
+    return null;
   }
 
   private getCurrentUserRole(): string {
@@ -73,5 +83,11 @@ export class VoiceCommandService {
     } catch {
       return 'UNKNOWN';
     }
+  }
+
+  private async delay(ms: number): Promise<void> {
+    await new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), ms);
+    });
   }
 }
