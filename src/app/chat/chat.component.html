@@ -120,7 +120,7 @@
                 style="width:100%;height:100%;object-fit:cover;border-radius:50%"
               />
               <span *ngIf="!msg.sender.avatarUrl && isFirstInGroup(msg, messages[i - 1])">
-                {{ msg.sender.firstName?.[0] }}{{ msg.sender.lastName?.[0] }}
+                {{ msg.sender.firstName[0] }}{{ msg.sender.lastName[0] }}
               </span>
             </div>
           </ng-container>
