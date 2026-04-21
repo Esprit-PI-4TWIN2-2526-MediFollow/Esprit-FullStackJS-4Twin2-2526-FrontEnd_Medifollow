@@ -36,6 +36,361 @@
     "SYMPTOMS_QUEUE": "File des symptômes",
     "SIGN_OUT": "Se déconnecter"
   },
+  "MANAGE_ROLES": {
+    "TITLE": "Gérer tous les rôles",
+    "ADD_NEW_ROLE": "Ajouter un rôle",
+    "EMPTY_STATE": "Aucun rôle trouvé. Cliquez sur \"Ajouter un nouveau rôle\" pour en créer un.",
+    "TABLE": {
+      "ROLE": "Rôle",
+      "IMAGE": "Image",
+      "ACTIONS": "Actions"
+    },
+    "FORM": {
+      "NAME": "Nom",
+      "PLACEHOLDER": "Saisir le nom du rôle"
+    },
+    "ACTIONS": {
+      "EDIT": "Modifier",
+      "DELETE": "Supprimer",
+      "CANCEL": "Annuler",
+      "ADD_ROLE": "Ajouter le rôle",
+      "ADDING": "Ajout...",
+      "UPDATE_ROLE": "Mettre à jour le rôle",
+      "UPDATING": "Mise à jour...",
+      "DELETE_ROLE": "Supprimer le rôle",
+      "DELETING": "Suppression..."
+    },
+    "MODALS": {
+      "ADD": {
+        "TITLE": "Ajouter un rôle",
+        "SUBTITLE": "Ajouter un nouveau rôle au système."
+      },
+      "EDIT": {
+        "TITLE": "Modifier le rôle",
+        "SUBTITLE": "Mettre à jour les informations du rôle."
+      },
+      "DELETE": {
+        "TITLE": "Supprimer le rôle",
+        "CONFIRM_PREFIX": "Voulez-vous vraiment supprimer",
+        "WARNING": "Cette action est irréversible. Les utilisateurs ayant ce rôle peuvent être affectés."
+      }
+    },
+    "ERRORS": {
+      "NAME_REQUIRED": "Le nom du rôle est requis.",
+      "ALREADY_EXISTS": "Le rôle existe déjà.",
+      "CREATE": "Erreur lors de la création du rôle.",
+      "UPDATE": "Erreur lors de la mise à jour du rôle.",
+      "DELETE": "Erreur lors de la suppression du rôle.",
+      "LOAD": "Erreur lors du chargement des rôles :"
+    }
+  },
+  "MANAGE_PROFILES": {
+    "TITLE": "Gérer tous les utilisateurs",
+    "FILTER_BY_ROLE": "Filtrer par rôle",
+    "SEARCH_PLACEHOLDER": "Rechercher...",
+    "DELETE_SELECTED": "Supprimer la sélection ({{count}})",
+    "ADD_NEW_USER": "Ajouter un nouvel utilisateur",
+    "FORM": {
+      "NAME": "Nom"
+    },
+    "TABLE": {
+      "SELECT_ALL_PAGE": "Sélectionner tous les utilisateurs de cette page",
+      "SELECT_USER": "Sélectionner l'utilisateur",
+      "NAME": "Nom",
+      "EMAIL": "Email",
+      "PHONE": "Téléphone",
+      "ROLE": "Rôle",
+      "STATUS": "Statut",
+      "ACTIONS": "Actions"
+    },
+    "STATUS": {
+      "ACTIVE": "Actif",
+      "INACTIVE": "Inactif"
+    },
+    "ACTIONS": {
+      "EDIT": "Modifier",
+      "DELETE": "Supprimer",
+      "DELETE_ALL": "Tout supprimer",
+      "DELETING": "Suppression...",
+      "CANCEL": "Annuler",
+      "CONTINUE": "Continuer",
+      "BACK": "Retour",
+      "BROWSE": "Parcourir",
+      "CREATE_ACCOUNT": "Créer le compte",
+      "SAVING": "Enregistrement...",
+      "ADD": "Ajouter"
+    },
+    "EXPORT": {
+      "BUTTON": "Exporter",
+      "EXPORTING": "Export {{format}}...",
+      "CSV": "Exporter en CSV",
+      "PDF": "Exporter en PDF"
+    },
+    "PAGINATION": {
+      "PREVIOUS": "Précédent",
+      "NEXT": "Suivant",
+      "PAGE_OF": "Page {{page}} sur {{total}}"
+    },
+    "EMPTY": {
+      "TITLE": "Aucun utilisateur trouvé",
+      "SUBTITLE": "Aucun résultat ne correspond à votre recherche."
+    },
+    "BULK_DELETE": {
+      "TITLE": "Supprimer les utilisateurs sélectionnés",
+      "CONFIRM": "Voulez-vous vraiment supprimer {{count}} utilisateur(s) sélectionné(s) ?"
+    },
+    "DELETE_MODAL": {
+      "TITLE": "Confirmer la suppression",
+      "CONFIRM_PREFIX": "Voulez-vous vraiment supprimer"
+    },
+    "CREATE_ACCOUNT": {
+      "TITLE": "Créer un compte",
+      "STEP1": "Sélectionnez un rôle et renseignez les informations communes.",
+      "STEP2_PREFIX": "Complétez les informations spécifiques au rôle pour",
+      "TERMS": "Conditions générales",
+      "AND": "et",
+      "PRIVACY": "Politique de confidentialité",
+      "SELECTED_ROLE": "Rôle sélectionné",
+      "PROFILE_IMAGE": "Image de profil",
+      "UPLOAD_IMAGE": "Téléverser une image de profil (JPG/PNG)",
+      "PRIMARY_DOCTOR": "Médecin principal",
+      "SELECT_PRIMARY_DOCTOR": "Sélectionner le médecin principal",
+      "DATE_OF_BIRTH": "Date de naissance",
+      "SELECT_DATE_OF_BIRTH": "Sélectionner la date de naissance",
+      "ASSIGNED_DEPARTMENT": "Service assigné",
+      "SELECT_DEPARTMENT": "Sélectionner le service",
+      "AUDIT_SCOPE": "Périmètre d'audit",
+      "SELECT_AUDIT_SCOPE": "Sélectionner le périmètre d'audit"
+    },
+    "ROLE_MODAL": {
+      "TITLE": "Ajouter un rôle",
+      "SUBTITLE": "Saisissez le nom du rôle.",
+      "PLACEHOLDER": "Nom du rôle"
+    },
+    "PASSWORD_STRENGTH": {
+      "LABEL": "Force du mot de passe",
+      "WEAK": "Faible",
+      "MEDIUM": "Moyenne",
+      "STRONG": "Forte"
+    },
+    "ALERTS": {
+      "UPDATED_TITLE": "Mis à jour",
+      "USER_UPDATED": "Utilisateur mis à jour avec succès.",
+      "ERROR_TITLE": "Erreur",
+      "DELETED_TITLE": "Supprimé",
+      "PARTIAL_SUCCESS_TITLE": "Succès partiel",
+      "ROLE_MISSING_TITLE": "Rôle manquant",
+      "FORM_INVALID_TITLE": "Formulaire invalide",
+      "EMAIL_EXISTS_TITLE": "Email existant",
+      "SUCCESS_TITLE": "Succès",
+      "ACCOUNT_CREATED": "Compte créé.",
+      "BULK_DELETE_SUCCESS": "{{count}} utilisateur(s) supprimé(s) avec succès.",
+      "BULK_DELETE_PARTIAL": "{{success}} supprimé(s), {{failed}} échec(s)."
+    },
+    "ERRORS": {
+      "LOAD_DEPARTMENTS": "Erreur lors du chargement des services :",
+      "AUTH_TOKEN": "Jeton d'authentification introuvable.",
+      "EXPORT_FAILED": "Échec de l'export des utilisateurs en {{format}}.",
+      "UPDATE_USER": "Échec de la mise à jour de l'utilisateur.",
+      "BULK_DELETE": "Échec de la suppression des utilisateurs sélectionnés.",
+      "SELECT_ROLE": "Veuillez sélectionner un rôle.",
+      "VERIFY_FIELDS": "Veuillez vérifier les champs obligatoires.",
+      "EMAIL_EXISTS": "Cet email existe déjà. Veuillez en utiliser un autre.",
+      "CREATE_ACCOUNT": "Échec de la création du compte.",
+      "ROLE_NAME_REQUIRED": "Le nom du rôle est requis.",
+      "ROLE_EXISTS": "Le rôle existe déjà.",
+      "ROLE_CREATE": "Erreur lors de la création du rôle.",
+      "ROLE_UPDATE": "Erreur lors de la mise à jour du rôle.",
+      "ROLE_DELETE": "Erreur lors de la suppression du rôle.",
+      "COMPLETE_COMMON_INFO": "Veuillez compléter correctement les informations communes.",
+      "EMPTY_EXPORT": "L'export a retourné un fichier vide."
+    },
+    "VALIDATION": {
+      "REQUIRED": "{{label}} est requis.",
+      "EMAIL": "Veuillez saisir une adresse email valide.",
+      "MIN_LENGTH": "{{label}} doit contenir au moins {{count}} caractères.",
+      "MAX_LENGTH": "{{label}} doit contenir au maximum {{count}} caractères.",
+      "MIN_EXPERIENCE": "La valeur minimale est 0.",
+      "MAX_VALUE": "La valeur est trop élevée.",
+      "PHONE": "Le format du numéro de téléphone est invalide.",
+      "INVALID": "{{label}} est invalide."
+    }
+  },
+  "MANAGE_SERVICES": {
+    "HEADER": {
+      "TITLE": "Services",
+      "SUBTITLE": "Gérez tous vos services médicaux",
+      "GENERATE_WITH_AI": "Générer avec l'IA",
+      "NEW_SERVICE": "Nouveau service"
+    },
+    "STATS": {
+      "TOTAL": "Total",
+      "ACTIVE": "Actif",
+      "INACTIVE": "Inactif",
+      "EMERGENCY": "Urgence"
+    },
+    "FILTERS": {
+      "SEARCH_PLACEHOLDER": "Rechercher par nom, type, localisation...",
+      "ALL": "Tous",
+      "ACTIVE": "Actifs",
+      "INACTIVE": "Inactifs"
+    },
+    "VIEW": {
+      "GRID": "Vue grille",
+      "LIST": "Vue liste"
+    },
+    "COMMON": {
+      "LOADING": "Chargement des services...",
+      "NOT_AVAILABLE": "N/A",
+      "BEDS": "lits",
+      "MINUTES_SHORT": "min"
+    },
+    "STATUS": {
+      "ACTIVE": "Actif",
+      "INACTIVE": "Inactif",
+      "EMERGENCY": "Urgence"
+    },
+    "TYPES": {
+      "MEDICAL": "Médical",
+      "EMERGENCY": "Urgence",
+      "CONSULTATION": "Consultation",
+      "SURGERY": "Chirurgie",
+      "LABORATORY": "Laboratoire",
+      "RADIOLOGY": "Radiologie",
+      "PHARMACY": "Pharmacie",
+      "ADMINISTRATIVE": "Administratif"
+    },
+    "EMPTY": {
+      "TITLE": "Aucun service trouvé",
+      "SUBTITLE": "Créez votre premier service ou laissez l'IA vous aider",
+      "CREATE_MANUALLY": "Créer manuellement"
+    },
+    "TABLE": {
+      "NAME": "Nom",
+      "TYPE": "Type",
+      "LOCATION": "Localisation",
+      "CAPACITY": "Capacité",
+      "AVG_WAIT": "Attente moy.",
+      "STATUS": "Statut",
+      "ACTIONS": "Actions"
+    },
+    "ACTIONS": {
+      "RETRY": "Réessayer",
+      "VIEW": "Voir",
+      "EDIT": "Modifier",
+      "ACTIVATE": "Activer",
+      "DEACTIVATE": "Désactiver",
+      "DELETE": "Supprimer",
+      "CANCEL": "Annuler",
+      "PREVIOUS": "Précédent",
+      "NEXT": "Suivant",
+      "CREATE_SERVICE": "Créer le service",
+      "SAVE_CHANGES": "Enregistrer les modifications",
+      "CLOSE": "Fermer"
+    },
+    "AI": {
+      "TITLE": "Générer avec l'IA",
+      "SUBTITLE": "Décrivez le service — l'IA remplit tout le formulaire",
+      "DESCRIPTION_LABEL": "Votre description",
+      "DESCRIPTION_PLACEHOLDER": "Ex : unité de neurologie au 4e étage, 15 lits, ouverte du lundi au vendredi...",
+      "DESCRIPTION_HINT": "Un seul mot suffit — l'IA complète le reste",
+      "FOOTER_TIP": "Vous pourrez modifier le formulaire avant l'enregistrement",
+      "GENERATING": "Génération...",
+      "GENERATE_FORM": "Générer le formulaire",
+      "STEPS": {
+        "DESCRIBE": "Décrire",
+        "REVIEW": "Relire",
+        "SAVE": "Enregistrer"
+      }
+    },
+    "MODAL": {
+      "NEW_TITLE": "Nouveau service",
+      "EDIT_TITLE": "Modifier le service",
+      "STEP_OF": "Étape {{step}} sur {{total}}",
+      "STEPS": {
+        "GENERAL_INFO": "Infos générales",
+        "CONTACT_CONFIG": "Contact et config",
+        "SCHEDULE": "Horaires"
+      }
+    },
+    "FORM": {
+      "SECTIONS": {
+        "GENERAL_INFORMATION": "Informations générales",
+        "CONTACT_CONFIGURATION": "Contact et configuration"
+      },
+      "NAME": "Nom du service",
+      "NAME_PLACEHOLDER": "Ex : Cardiologie, Urgences pédiatriques...",
+      "DESCRIPTION": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Description professionnelle du service...",
+      "TYPE": "Type de service",
+      "SELECT_TYPE": "Sélectionner un type...",
+      "LOCATION": "Localisation",
+      "LOCATION_PLACEHOLDER": "Ex : Bâtiment A - 2e étage",
+      "STATUS": "Statut",
+      "EMERGENCY_SERVICE": "Service d'urgence",
+      "PHONE": "Téléphone",
+      "EMAIL": "Email",
+      "CAPACITY": "Capacité (patients / lits)",
+      "AVERAGE_WAITING_TIME": "Temps d'attente moyen",
+      "MANAGER_ID": "ID du responsable",
+      "MANAGER_ID_PLACEHOLDER": "Identifiant du responsable du service",
+      "ERRORS": {
+        "NAME_REQUIRED": "Le nom du service est requis (min. 2 caractères)",
+        "INVALID_EMAIL": "Adresse email invalide"
+      }
+    },
+    "SCHEDULE": {
+      "TITLE": "Heures d'ouverture",
+      "APPLY_TEMPLATE": "Appliquer un modèle :",
+      "COUNT": "{{count}} horaire(s)",
+      "ADD_DAY": "+ Ajouter un jour",
+      "EMPTY": "Aucun horaire défini — utilisez un modèle ou ajoutez-les manuellement",
+      "PRESETS": {
+        "WEEKDAYS": "Lun–Ven 8h–17h",
+        "EXTENDED": "Lun–Sam 7h30–16h",
+        "ALL_DAY": "24/7",
+        "PHARMACY": "Tous les jours 8h–20h"
+      }
+    },
+    "VIEW_MODAL": {
+      "LOCATION": "Localisation",
+      "PHONE": "Téléphone",
+      "EMAIL": "Email",
+      "CAPACITY": "Capacité",
+      "AVG_WAIT": "Attente moy.",
+      "MANAGER": "Responsable",
+      "OPENING_HOURS": "Heures d'ouverture"
+    },
+    "DELETE_MODAL": {
+      "TITLE": "Supprimer ce service ?",
+      "SUBTITLE": "Cette action est irréversible."
+    },
+    "TOAST": {
+      "CREATED": "Service créé avec succès.",
+      "UPDATED": "Service mis à jour avec succès.",
+      "ACTIVATED": "Service activé avec succès.",
+      "DEACTIVATED": "Service désactivé avec succès.",
+      "DELETED": "Service supprimé avec succès.",
+      "AI_PREFILL": "Le formulaire a été prérempli avec l'IA."
+    },
+    "ERRORS": {
+      "LOAD": "Erreur lors du chargement des services.",
+      "CREATE": "Erreur lors de la création du service.",
+      "UPDATE": "Erreur lors de la mise à jour du service.",
+      "STATUS": "Erreur lors du changement de statut du service.",
+      "DELETE": "Erreur lors de la suppression du service.",
+      "AI": "Erreur lors de la génération IA du service."
+    },
+    "DAYS": {
+      "MONDAY": "Lundi",
+      "TUESDAY": "Mardi",
+      "WEDNESDAY": "Mercredi",
+      "THURSDAY": "Jeudi",
+      "FRIDAY": "Vendredi",
+      "SATURDAY": "Samedi",
+      "SUNDAY": "Dimanche"
+    }
+  },
   "SUPER_ADMIN_DASHBOARD": {
     "PAGE_TITLE": "Tableau de bord",
     "NEW_THIS_WEEK": "+{{count}} cette semaine",
@@ -66,5 +421,73 @@
     "INACTIVE_PATIENTS": "Patients inactifs",
     "INACTIVE_PATIENTS_SUBTITLE": "Aucune activité détectée récemment",
     "DAYS_INACTIVE": "{{count}} j inactif(s)"
+  },
+  "SYMPTOMS_REVIEW": {
+  "BACK": "Retour aux réponses",
+  "LOADING": "Chargement des détails de la réponse...",
+  "PATIENT": {
+    "UNKNOWN": "Patient inconnu",
+    "DEPARTMENT_MISSING": "Service non précisé",
+    "SUBMITTED": "Soumis"
+  },
+  "VALIDATED_BADGE": {
+    "PROBLEM_REPORTED": "Problème déjà signalé",
+    "ALREADY_VALIDATED": "Déjà validé"
+  },
+  "VITALS": {
+    "TITLE": "Aperçu des constantes",
+    "SUBTITLE": "Les couleurs de triage automatique indiquent les valeurs normales, en alerte ou critiques.",
+    "BLOOD_PRESSURE": "Pression artérielle",
+    "HEART_RATE": "Fréquence cardiaque",
+    "TEMPERATURE": "Température",
+    "WEIGHT": "Poids"
+  },
+  "ANSWERS": {
+    "TITLE": "Réponses soumises",
+    "SUBTITLE": "Examinez les réponses du patient avant d'agir.",
+    "EMPTY": "Aucun détail de réponse n'a été fourni pour cette soumission."
+  },
+  "NOTE": {
+    "TITLE": "Note de validation",
+    "SUBTITLE": "Ajoutez une courte note clinique avant de valider ou de signaler un problème.",
+    "PLACEHOLDER": "Documentez votre évaluation ou le problème à escalader...",
+    "TAB_ACCEPT": "accepter",
+    "ESC_DISMISS": "ignorer"
+  },
+  "ACTIONS": {
+    "VALIDATE": "Valider la réponse",
+    "SAVING": "Enregistrement...",
+    "SIGNAL_PROBLEM": "Signaler un problème",
+    "CANCEL": "Annuler"
+  },
+  "VALIDATION_SUMMARY": {
+    "TITLE": "Résumé de validation",
+    "STATUS": "Statut",
+    "STATUS_PROBLEM": "Problème signalé",
+    "STATUS_VALIDATED": "Validé",
+    "VALIDATED_BY": "Validé par",
+    "VALIDATED_AT": "Validé le",
+    "DEFAULT_NURSE": "Infirmier(ère) assigné(e)"
+  },
+  "DASHBOARD": {
+    "LABEL": "Tableau de validation",
+    "TITLE": "Valider les réponses",
+    "SUBTITLE": "Examinez les réponses aux symptômes des patients de votre service, validez les soumissions normales et escaladez rapidement les constantes préoccupantes.",
+    "PENDING": "En attente",
+    "TOTAL_VISIBLE": "Total visible",
+    "DEPARTMENT_FILTER_NOTE": "Les patients sont filtrés selon votre service assigné uniquement.",
+    "LOADING": "Chargement des réponses aux symptômes...",
+    "EMPTY_TITLE": "Aucune réponse trouvée",
+    "EMPTY_SUBTITLE": "Essayez un autre filtre ou revenez lorsque de nouvelles soumissions arrivent.",
+    "OPEN_READONLY": "Ouvrir les détails en lecture seule",
+    "OPEN_REVIEW": "Ouvrir la réponse et valider cette soumission",
+    "VIEW_DETAILS": "Voir les détails",
+    "REVIEW_RESPONSE": "Examiner la réponse"
+  }
+},
+  "ERRORS": {
+    "LOAD": "Erreur lors du chargement des données.",
+    "VALIDATE": "Erreur lors de la validation de la réponse.",
+    "SIGNAL": "Erreur lors du signalement du problème."
   }
 }

@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { finalize, firstValueFrom } from 'rxjs';
 import Swal from 'sweetalert2';
 import { Users } from '../../models/users';
@@ -160,8 +161,25 @@ departments: string[] = [];
     private fb: FormBuilder,
     private readonly http: HttpClient,
     private roleService: RoleService,
-  public speech: SpeechRecognitionService,
-private serviceManagementService:ServiceManagementService ){ }
+    private readonly translate: TranslateService,
+    public speech: SpeechRecognitionService,
+    private serviceManagementService: ServiceManagementService,
+  ) { }
+
+  get exportButtonLabel(): string {
+    if (this.exportingFormat) {
+      return this.translate.instant('MANAGE_PROFILES.EXPORT.EXPORTING', { format: this.exportingFormat.toUpperCase() });
+    }
+    return this.translate.instant('MANAGE_PROFILES.EXPORT.BUTTON');
+  }
+
+  get translatedPasswordStrengthLabel(): string {
+    return this.translate.instant(`MANAGE_PROFILES.PASSWORD_STRENGTH.${this.passwordStrengthLabel.toUpperCase()}`);
+  }
+
+  getStatusLabel(isActive: boolean): string {
+    return this.translate.instant(isActive ? 'MANAGE_PROFILES.STATUS.ACTIVE' : 'MANAGE_PROFILES.STATUS.INACTIVE');
+  }
 
   ngOnInit(): void {
     this.loadUsers();
@@ -219,7 +237,7 @@ loadDepartments(): void {
         .filter(s => s.statut === 'ACTIF')  // uniquement les services actifs
         .map(s => s.nom);
     },
-    error: (err) => console.error('Error loading departments:', err)
+    error: (err) => console.error(this.translate.instant('MANAGE_PROFILES.ERRORS.LOAD_DEPARTMENTS'), err)
   });
 }
 
@@ -268,7 +286,7 @@ loadDepartments(): void {
 
     const token = localStorage.getItem('accessToken');
     if (!token) {
-      this.exportError = 'Authentication token not found.';
+      this.exportError = this.translate.instant('MANAGE_PROFILES.ERRORS.AUTH_TOKEN');
       this.isExportMenuOpen = false;
       return;
     }
@@ -285,7 +303,7 @@ loadDepartments(): void {
           this.triggerDownload(response.body, filename);
         },
         error: (err) => {
-          this.exportError = err?.error?.message || `Failed to export users as ${format.toUpperCase()}.`;
+          this.exportError = err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.EXPORT_FAILED', { format: format.toUpperCase() });
         },
       });
   }
@@ -364,11 +382,21 @@ loadDepartments(): void {
         this.inlineAvatarFile = null;
         this.inlineAvatarName = '';
         this.loadUsers();
-        Swal.fire({ title: 'Updated', text: 'User updated successfully.', icon: 'success', timer: 1800, showConfirmButton: false });
+        Swal.fire({
+          title: this.translate.instant('MANAGE_PROFILES.ALERTS.UPDATED_TITLE'),
+          text: this.translate.instant('MANAGE_PROFILES.ALERTS.USER_UPDATED'),
+          icon: 'success',
+          timer: 1800,
+          showConfirmButton: false
+        });
       },
       error: (err) => {
         this.isSavingInline = false;
-        Swal.fire('Error', err?.error?.message || 'Failed to update user.', 'error');
+        Swal.fire(
+          this.translate.instant('MANAGE_PROFILES.ALERTS.ERROR_TITLE'),
+          err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.UPDATE_USER'),
+          'error'
+        );
       },
     });
   }
@@ -471,16 +499,28 @@ loadDepartments(): void {
     }
 
     if (failed === 0) {
-      Swal.fire('Deleted', `${success} user(s) deleted successfully.`, 'success');
+      Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.DELETED_TITLE'),
+        this.translate.instant('MANAGE_PROFILES.ALERTS.BULK_DELETE_SUCCESS', { count: success }),
+        'success'
+      );
       return;
     }
 
     if (success === 0) {
-      Swal.fire('Error', 'Failed to delete selected users.', 'error');
+      Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.ERROR_TITLE'),
+        this.translate.instant('MANAGE_PROFILES.ERRORS.BULK_DELETE'),
+        'error'
+      );
       return;
     }
 
-    Swal.fire('Partial success', `${success} deleted, ${failed} failed.`, 'warning');
+    Swal.fire(
+      this.translate.instant('MANAGE_PROFILES.ALERTS.PARTIAL_SUCCESS_TITLE'),
+      this.translate.instant('MANAGE_PROFILES.ALERTS.BULK_DELETE_PARTIAL', { success, failed }),
+      'warning'
+    );
   }
 
   private getUserId(user: Users): string {
@@ -523,21 +563,54 @@ loadDepartments(): void {
   }
 
   submitSignUp(): void {
-    if (!this.selectedRole) { Swal.fire('Role missing', 'Please select a role.', 'warning'); return; }
+    if (!this.selectedRole) {
+      Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.ROLE_MISSING_TITLE'),
+        this.translate.instant('MANAGE_PROFILES.ERRORS.SELECT_ROLE'),
+        'warning'
+      );
+      return;
+    }
     this.applyRoleSpecificValidators();
-    if (this.signupForm.invalid) { this.signupForm.markAllAsTouched(); Swal.fire('Form invalid', 'Please verify required fields.', 'error'); return; }
+    if (this.signupForm.invalid) {
+      this.signupForm.markAllAsTouched();
+      Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.FORM_INVALID_TITLE'),
+        this.translate.instant('MANAGE_PROFILES.ERRORS.VERIFY_FIELDS'),
+        'error'
+      );
+      return;
+    }
 
     const email = String(this.signupForm.get('email')?.value || '').trim().toLowerCase();
     if (email && this.users.some((u) => String(u.email || '').trim().toLowerCase() === email)) {
-      Swal.fire('Email exist', 'This Email already exist. Please use another one.', 'error');
+      Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.EMAIL_EXISTS_TITLE'),
+        this.translate.instant('MANAGE_PROFILES.ERRORS.EMAIL_EXISTS'),
+        'error'
+      );
       return;
     }
 
     const payload: any = { ...this.signupForm.value, role: this.selectedRole, acceptedPolicy: this.isChecked };
     if (!this.isSelectedRole('patient')) delete payload.dateOfBirth;
     this.usersService.createUser(payload, this.selectedAvatarFile || undefined).subscribe({
-      next: () => { Swal.fire({ title: 'Success', text: 'Account created.', icon: 'success', timer: 2000, showConfirmButton: true }); this.closeAddUserModal(); this.loadUsers(); },
-      error: (err) => Swal.fire('Error', err?.error?.message || 'Failed to create account.', 'error'),
+      next: () => {
+        Swal.fire({
+          title: this.translate.instant('MANAGE_PROFILES.ALERTS.SUCCESS_TITLE'),
+          text: this.translate.instant('MANAGE_PROFILES.ALERTS.ACCOUNT_CREATED'),
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: true
+        });
+        this.closeAddUserModal();
+        this.loadUsers();
+      },
+      error: (err) => Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.ERROR_TITLE'),
+        err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.CREATE_ACCOUNT'),
+        'error'
+      ),
     });
   }
 
@@ -562,8 +635,8 @@ loadDepartments(): void {
   submitAddRole(): void {
     const name = this.newRoleName.trim();
     this.addRoleError = '';
-    if (!name) { this.addRoleError = 'Role name is required.'; return; }
-    if (this.roles.some((r) => r.label.toLowerCase() === name.toLowerCase())) { this.addRoleError = 'Role already exists.'; return; }
+    if (!name) { this.addRoleError = this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_NAME_REQUIRED'); return; }
+    if (this.roles.some((r) => r.label.toLowerCase() === name.toLowerCase())) { this.addRoleError = this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_EXISTS'); return; }
     this.isAddingRole = true;
     this.http.post<{ data?: RoleApiItem }>(this.rolesApiUrl, { name }).subscribe({
       next: (res) => {
@@ -578,7 +651,7 @@ loadDepartments(): void {
         this.roles.push(newRole); this.selectedRole = newRole.key;
         this.isAddingRole = false; this.showAddRoleModal = false;
       },
-      error: (err) => { this.isAddingRole = false; this.addRoleError = err?.error?.message || 'Error creating role.'; },
+      error: (err) => { this.isAddingRole = false; this.addRoleError = err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_CREATE'); },
     });
   }
 //Affichage des rôles
@@ -620,9 +693,9 @@ loadRoles(): void {
   submitManageRoleAdd(): void {
     const name = this.manageRoleName.trim();
     this.manageRoleError = '';
-    if (!name) { this.manageRoleError = 'Role name is required.'; return; }
+    if (!name) { this.manageRoleError = this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_NAME_REQUIRED'); return; }
     if (this.roles.some((r) => r.label.toLowerCase() === name.toLowerCase())) {
-      this.manageRoleError = 'Role already exists.';
+      this.manageRoleError = this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_EXISTS');
       return;
     }
     this.isManageRoleSubmitting = true;
@@ -642,7 +715,7 @@ loadRoles(): void {
       },
       error: (err) => {
         this.isManageRoleSubmitting = false;
-        this.manageRoleError = err?.error?.message || 'Error creating role.';
+        this.manageRoleError = err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_CREATE');
       },
     });
   }
@@ -669,12 +742,12 @@ loadRoles(): void {
 
     const name = this.manageRoleName.trim();
     this.manageRoleError = '';
-    if (!name) { this.manageRoleError = 'Role name is required.'; return; }
+    if (!name) { this.manageRoleError = this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_NAME_REQUIRED'); return; }
 
     const duplicate = this.roles.some((r) =>
       r !== target && r.label.toLowerCase() === name.toLowerCase()
     );
-    if (duplicate) { this.manageRoleError = 'Role already exists.'; return; }
+    if (duplicate) { this.manageRoleError = this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_EXISTS'); return; }
 
     this.isManageRoleSubmitting = true;
 
@@ -697,7 +770,7 @@ loadRoles(): void {
       },
       error: (err) => {
         this.isManageRoleSubmitting = false;
-        this.manageRoleError = err?.error?.message || 'Error updating role.';
+        this.manageRoleError = err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_UPDATE');
       },
     });
   }
@@ -738,7 +811,7 @@ loadRoles(): void {
       next: () => removeLocal(),
       error: (err) => {
         this.isManageRoleSubmitting = false;
-        this.manageRoleError = err?.error?.message || 'Error deleting role.';
+        this.manageRoleError = err?.error?.message || this.translate.instant('MANAGE_PROFILES.ERRORS.ROLE_DELETE');
       },
     });
   }
@@ -774,7 +847,12 @@ loadRoles(): void {
     this.applyRoleSpecificValidators();
     this.markControlsAsTouched(this.stepOneControlNames);
     if (this.stepOneControlNames.some((c) => this.signupForm.get(c)?.invalid)) {
-      Swal.fire('Form invalid', 'Please complete valid common information.', 'error'); return;
+      Swal.fire(
+        this.translate.instant('MANAGE_PROFILES.ALERTS.FORM_INVALID_TITLE'),
+        this.translate.instant('MANAGE_PROFILES.ERRORS.COMPLETE_COMMON_INFO'),
+        'error'
+      );
+      return;
     }
     this.step = 2;
   }
@@ -889,14 +967,14 @@ loadRoles(): void {
   getFieldError(name: string, label: string): string {
     const e = this.signupForm.get(name)?.errors;
     if (!e) return '';
-    if (e['required']) return `${label} is required.`;
-    if (e['email']) return 'Please enter a valid email address.';
-    if (e['minlength']) return `${label} must be at least ${e['minlength'].requiredLength} characters.`;
-    if (e['maxlength']) return `${label} must be at most ${e['maxlength'].requiredLength} characters.`;
-    if (e['min'] && name === 'yearsOfExperience') return 'Must be at least 0.';
-    if (e['max'] && name === 'yearsOfExperience') return 'Value is too high.';
-    if (e['pattern'] && name === 'phoneNumber') return 'Phone number format is invalid.';
-    return `${label} is invalid.`;
+    if (e['required']) return this.translate.instant('MANAGE_PROFILES.VALIDATION.REQUIRED', { label });
+    if (e['email']) return this.translate.instant('MANAGE_PROFILES.VALIDATION.EMAIL');
+    if (e['minlength']) return this.translate.instant('MANAGE_PROFILES.VALIDATION.MIN_LENGTH', { label, count: e['minlength'].requiredLength });
+    if (e['maxlength']) return this.translate.instant('MANAGE_PROFILES.VALIDATION.MAX_LENGTH', { label, count: e['maxlength'].requiredLength });
+    if (e['min'] && name === 'yearsOfExperience') return this.translate.instant('MANAGE_PROFILES.VALIDATION.MIN_EXPERIENCE');
+    if (e['max'] && name === 'yearsOfExperience') return this.translate.instant('MANAGE_PROFILES.VALIDATION.MAX_VALUE');
+    if (e['pattern'] && name === 'phoneNumber') return this.translate.instant('MANAGE_PROFILES.VALIDATION.PHONE');
+    return this.translate.instant('MANAGE_PROFILES.VALIDATION.INVALID', { label });
   }
 
   private markControlsAsTouched(names: string[]): void {
@@ -984,7 +1062,7 @@ phoneNumber: [`${this.selectedDialCode} `, [Validators.required, Validators.patt
 
   private triggerDownload(blob: Blob | null, filename: string): void {
     if (!blob) {
-      this.exportError = 'Export returned an empty file.';
+      this.exportError = this.translate.instant('MANAGE_PROFILES.ERRORS.EMPTY_EXPORT');
       return;
     }
 

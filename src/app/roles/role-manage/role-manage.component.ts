@@ -1,6 +1,6 @@
 import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { RoleService, CarouselRole } from '../../services/role/role.service';
-
 
 @Component({
   selector: 'app-role-manage',
@@ -12,19 +12,20 @@ export class RoleManageComponent implements OnInit {
   @Output() rolesChange = new EventEmitter<CarouselRole[]>();
   @Output() roleSelected = new EventEmitter<string>();
 
-  // Modal states
   showAddRoleModal = false;
   showEditRoleModal = false;
   showDeleteRoleModal = false;
 
-  // Form data
   roleName = '';
   roleError = '';
   isSubmitting = false;
   roleToEdit: CarouselRole | null = null;
   roleToDelete: CarouselRole | null = null;
 
-  constructor(private readonly roleService: RoleService) { }
+  constructor(
+    private readonly roleService: RoleService,
+    private readonly translate: TranslateService,
+  ) {}
 
   ngOnInit(): void {
     if (this.roles.length === 0) {
@@ -32,12 +33,10 @@ export class RoleManageComponent implements OnInit {
     }
   }
 
-  // ── Image helpers ─────────────────────────────────────────────
   getRoleImageSrc(role: CarouselRole): string {
     return this.roleService.getRoleImageSrc(role);
   }
 
-  // ── Modal actions ────────────────────────────────────────────
   openAddModal(): void {
     this.roleName = '';
     this.roleError = '';
@@ -82,18 +81,17 @@ export class RoleManageComponent implements OnInit {
     this.isSubmitting = false;
   }
 
-  // ── CRUD operations ──────────────────────────────────────────
   submitAddRole(): void {
     const name = this.roleName.trim();
     this.roleError = '';
 
     if (!name) {
-      this.roleError = 'Role name is required.';
+      this.roleError = this.translate.instant('MANAGE_ROLES.ERRORS.NAME_REQUIRED');
       return;
     }
 
     if (this.roles.some(r => r.label.toLowerCase() === name.toLowerCase())) {
-      this.roleError = 'Role already exists.';
+      this.roleError = this.translate.instant('MANAGE_ROLES.ERRORS.ALREADY_EXISTS');
       return;
     }
 
@@ -102,13 +100,13 @@ export class RoleManageComponent implements OnInit {
       next: (newRole) => {
         this.roles = [...this.roles, newRole];
         this.rolesChange.emit(this.roles);
-        this.roleSelected.emit(newRole.key); // Optionnel : sélectionne le nouveau rôle
+        this.roleSelected.emit(newRole.key);
         this.isSubmitting = false;
         this.closeAddModal();
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.roleError = err?.error?.message || 'Error creating role.';
+        this.roleError = err?.error?.message || this.translate.instant('MANAGE_ROLES.ERRORS.CREATE');
       }
     });
   }
@@ -121,7 +119,7 @@ export class RoleManageComponent implements OnInit {
     this.roleError = '';
 
     if (!name) {
-      this.roleError = 'Role name is required.';
+      this.roleError = this.translate.instant('MANAGE_ROLES.ERRORS.NAME_REQUIRED');
       return;
     }
 
@@ -130,14 +128,13 @@ export class RoleManageComponent implements OnInit {
     );
 
     if (duplicate) {
-      this.roleError = 'Role already exists.';
+      this.roleError = this.translate.instant('MANAGE_ROLES.ERRORS.ALREADY_EXISTS');
       return;
     }
 
     this.isSubmitting = true;
 
     if (!target.id) {
-      // Local update only
       target.label = name;
       target.key = this.roleService.getStableRoleKey(name);
       target.imageKey = this.roleService.resolveImageKey(name);
@@ -147,7 +144,6 @@ export class RoleManageComponent implements OnInit {
       return;
     }
 
-    // API update
     this.roleService.updateRole(target.id, name).subscribe({
       next: (updatedRole) => {
         target.label = updatedRole.label;
@@ -159,7 +155,7 @@ export class RoleManageComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        this.roleError = err?.error?.message || 'Error updating role.';
+        this.roleError = err?.error?.message || this.translate.instant('MANAGE_ROLES.ERRORS.UPDATE');
       }
     });
   }
@@ -174,7 +170,7 @@ export class RoleManageComponent implements OnInit {
     const removeLocal = () => {
       this.roles = this.roles.filter(r => r !== target);
       this.rolesChange.emit(this.roles);
-      this.roleSelected.emit(''); // Clear selected role
+      this.roleSelected.emit('');
       this.isSubmitting = false;
       this.closeDeleteModal();
     };
@@ -188,12 +184,11 @@ export class RoleManageComponent implements OnInit {
       next: () => removeLocal(),
       error: (err) => {
         this.isSubmitting = false;
-        this.roleError = err?.error?.message || 'Error deleting role.';
+        this.roleError = err?.error?.message || this.translate.instant('MANAGE_ROLES.ERRORS.DELETE');
       }
     });
   }
 
-  // Méthode utilitaire pour charger les rôles depuis le service
   loadRolesFromService(): void {
     this.roleService.getAllRolesForCarousel().subscribe({
       next: (roles) => {
@@ -201,7 +196,7 @@ export class RoleManageComponent implements OnInit {
         this.rolesChange.emit(this.roles);
       },
       error: (err) => {
-        console.error('Error loading roles:', err);
+        console.error(this.translate.instant('MANAGE_ROLES.ERRORS.LOAD'), err);
       }
     });
   }

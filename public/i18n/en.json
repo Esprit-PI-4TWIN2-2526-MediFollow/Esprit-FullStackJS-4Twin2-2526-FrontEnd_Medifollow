@@ -36,6 +36,361 @@
     "SYMPTOMS_QUEUE": "Symptoms Queue",
     "SIGN_OUT": "Sign Out"
   },
+  "MANAGE_ROLES": {
+    "TITLE": "Manage All Roles",
+    "ADD_NEW_ROLE": "Add New Role",
+    "EMPTY_STATE": "No roles found. Click \"Add New Role\" to create one.",
+    "TABLE": {
+      "ROLE": "Role",
+      "IMAGE": "Image",
+      "ACTIONS": "Actions"
+    },
+    "FORM": {
+      "NAME": "Name",
+      "PLACEHOLDER": "Enter role name"
+    },
+    "ACTIONS": {
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "CANCEL": "Cancel",
+      "ADD_ROLE": "Add Role",
+      "ADDING": "Adding...",
+      "UPDATE_ROLE": "Update Role",
+      "UPDATING": "Updating...",
+      "DELETE_ROLE": "Delete Role",
+      "DELETING": "Deleting..."
+    },
+    "MODALS": {
+      "ADD": {
+        "TITLE": "Add Role",
+        "SUBTITLE": "Add a new role to the system."
+      },
+      "EDIT": {
+        "TITLE": "Edit Role",
+        "SUBTITLE": "Update role information."
+      },
+      "DELETE": {
+        "TITLE": "Delete Role",
+        "CONFIRM_PREFIX": "Are you sure you want to delete",
+        "WARNING": "This action cannot be undone. Users with this role may be affected."
+      }
+    },
+    "ERRORS": {
+      "NAME_REQUIRED": "Role name is required.",
+      "ALREADY_EXISTS": "Role already exists.",
+      "CREATE": "Error creating role.",
+      "UPDATE": "Error updating role.",
+      "DELETE": "Error deleting role.",
+      "LOAD": "Error loading roles:"
+    }
+  },
+  "MANAGE_PROFILES": {
+    "TITLE": "Manage All Users",
+    "FILTER_BY_ROLE": "Filter by Role",
+    "SEARCH_PLACEHOLDER": "Search...",
+    "DELETE_SELECTED": "Delete Selected ({{count}})",
+    "ADD_NEW_USER": "Add New User",
+    "FORM": {
+      "NAME": "Name"
+    },
+    "TABLE": {
+      "SELECT_ALL_PAGE": "Select all users on this page",
+      "SELECT_USER": "Select user",
+      "NAME": "Name",
+      "EMAIL": "Email",
+      "PHONE": "Phone Number",
+      "ROLE": "Role",
+      "STATUS": "Status",
+      "ACTIONS": "Actions"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "ACTIONS": {
+      "EDIT": "Edit",
+      "DELETE": "Delete",
+      "DELETE_ALL": "Delete All",
+      "DELETING": "Deleting...",
+      "CANCEL": "Cancel",
+      "CONTINUE": "Continue",
+      "BACK": "Back",
+      "BROWSE": "Browse",
+      "CREATE_ACCOUNT": "Create Account",
+      "SAVING": "Saving...",
+      "ADD": "Add"
+    },
+    "EXPORT": {
+      "BUTTON": "Export",
+      "EXPORTING": "Exporting {{format}}...",
+      "CSV": "Export as CSV",
+      "PDF": "Export as PDF"
+    },
+    "PAGINATION": {
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "PAGE_OF": "Page {{page}} of {{total}}"
+    },
+    "EMPTY": {
+      "TITLE": "No users found",
+      "SUBTITLE": "No result matches your search."
+    },
+    "BULK_DELETE": {
+      "TITLE": "Delete Selected Users",
+      "CONFIRM": "Are you sure you want to delete {{count}} selected user(s)?"
+    },
+    "DELETE_MODAL": {
+      "TITLE": "Confirm Deletion",
+      "CONFIRM_PREFIX": "Are you sure you want to delete"
+    },
+    "CREATE_ACCOUNT": {
+      "TITLE": "Create An Account",
+      "STEP1": "Select a role and fill common information.",
+      "STEP2_PREFIX": "Complete role-specific info for",
+      "TERMS": "Terms and Conditions",
+      "AND": "and",
+      "PRIVACY": "Privacy Policy",
+      "SELECTED_ROLE": "Selected role",
+      "PROFILE_IMAGE": "Profile Image",
+      "UPLOAD_IMAGE": "Upload profile image (JPG/PNG)",
+      "PRIMARY_DOCTOR": "Primary Doctor",
+      "SELECT_PRIMARY_DOCTOR": "Select primary doctor",
+      "DATE_OF_BIRTH": "Date of Birth",
+      "SELECT_DATE_OF_BIRTH": "Select date of birth",
+      "ASSIGNED_DEPARTMENT": "Assigned Department",
+      "SELECT_DEPARTMENT": "Select department",
+      "AUDIT_SCOPE": "Audit Scope",
+      "SELECT_AUDIT_SCOPE": "Select audit scope"
+    },
+    "ROLE_MODAL": {
+      "TITLE": "Add Role",
+      "SUBTITLE": "Enter role name.",
+      "PLACEHOLDER": "Role name"
+    },
+    "PASSWORD_STRENGTH": {
+      "LABEL": "Password strength",
+      "WEAK": "Weak",
+      "MEDIUM": "Medium",
+      "STRONG": "Strong"
+    },
+    "ALERTS": {
+      "UPDATED_TITLE": "Updated",
+      "USER_UPDATED": "User updated successfully.",
+      "ERROR_TITLE": "Error",
+      "DELETED_TITLE": "Deleted",
+      "PARTIAL_SUCCESS_TITLE": "Partial success",
+      "ROLE_MISSING_TITLE": "Role missing",
+      "FORM_INVALID_TITLE": "Form invalid",
+      "EMAIL_EXISTS_TITLE": "Email exists",
+      "SUCCESS_TITLE": "Success",
+      "ACCOUNT_CREATED": "Account created.",
+      "BULK_DELETE_SUCCESS": "{{count}} user(s) deleted successfully.",
+      "BULK_DELETE_PARTIAL": "{{success}} deleted, {{failed}} failed."
+    },
+    "ERRORS": {
+      "LOAD_DEPARTMENTS": "Error loading departments:",
+      "AUTH_TOKEN": "Authentication token not found.",
+      "EXPORT_FAILED": "Failed to export users as {{format}}.",
+      "UPDATE_USER": "Failed to update user.",
+      "BULK_DELETE": "Failed to delete selected users.",
+      "SELECT_ROLE": "Please select a role.",
+      "VERIFY_FIELDS": "Please verify required fields.",
+      "EMAIL_EXISTS": "This email already exists. Please use another one.",
+      "CREATE_ACCOUNT": "Failed to create account.",
+      "ROLE_NAME_REQUIRED": "Role name is required.",
+      "ROLE_EXISTS": "Role already exists.",
+      "ROLE_CREATE": "Error creating role.",
+      "ROLE_UPDATE": "Error updating role.",
+      "ROLE_DELETE": "Error deleting role.",
+      "COMPLETE_COMMON_INFO": "Please complete valid common information.",
+      "EMPTY_EXPORT": "Export returned an empty file."
+    },
+    "VALIDATION": {
+      "REQUIRED": "{{label}} is required.",
+      "EMAIL": "Please enter a valid email address.",
+      "MIN_LENGTH": "{{label}} must be at least {{count}} characters.",
+      "MAX_LENGTH": "{{label}} must be at most {{count}} characters.",
+      "MIN_EXPERIENCE": "Must be at least 0.",
+      "MAX_VALUE": "Value is too high.",
+      "PHONE": "Phone number format is invalid.",
+      "INVALID": "{{label}} is invalid."
+    }
+  },
+  "MANAGE_SERVICES": {
+    "HEADER": {
+      "TITLE": "Services",
+      "SUBTITLE": "Manage all your medical services",
+      "GENERATE_WITH_AI": "Generate with AI",
+      "NEW_SERVICE": "New Service"
+    },
+    "STATS": {
+      "TOTAL": "Total",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "EMERGENCY": "Emergency"
+    },
+    "FILTERS": {
+      "SEARCH_PLACEHOLDER": "Search by name, type, location...",
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "VIEW": {
+      "GRID": "Grid view",
+      "LIST": "List view"
+    },
+    "COMMON": {
+      "LOADING": "Loading services...",
+      "NOT_AVAILABLE": "N/A",
+      "BEDS": "beds",
+      "MINUTES_SHORT": "min"
+    },
+    "STATUS": {
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive",
+      "EMERGENCY": "Emergency"
+    },
+    "TYPES": {
+      "MEDICAL": "Medical",
+      "EMERGENCY": "Emergency",
+      "CONSULTATION": "Consultation",
+      "SURGERY": "Surgery",
+      "LABORATORY": "Laboratory",
+      "RADIOLOGY": "Radiology",
+      "PHARMACY": "Pharmacy",
+      "ADMINISTRATIVE": "Administrative"
+    },
+    "EMPTY": {
+      "TITLE": "No services found",
+      "SUBTITLE": "Create your first service or let the AI help you",
+      "CREATE_MANUALLY": "Create manually"
+    },
+    "TABLE": {
+      "NAME": "Name",
+      "TYPE": "Type",
+      "LOCATION": "Location",
+      "CAPACITY": "Capacity",
+      "AVG_WAIT": "Avg. Wait",
+      "STATUS": "Status",
+      "ACTIONS": "Actions"
+    },
+    "ACTIONS": {
+      "RETRY": "Retry",
+      "VIEW": "View",
+      "EDIT": "Edit",
+      "ACTIVATE": "Activate",
+      "DEACTIVATE": "Deactivate",
+      "DELETE": "Delete",
+      "CANCEL": "Cancel",
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "CREATE_SERVICE": "Create Service",
+      "SAVE_CHANGES": "Save Changes",
+      "CLOSE": "Close"
+    },
+    "AI": {
+      "TITLE": "Generate with AI",
+      "SUBTITLE": "Describe the service — AI fills the entire form",
+      "DESCRIPTION_LABEL": "Your description",
+      "DESCRIPTION_PLACEHOLDER": "Ex: Neurology unit on the 4th floor, 15 beds, open Monday to Friday...",
+      "DESCRIPTION_HINT": "One word is enough — AI fills the rest",
+      "FOOTER_TIP": "You can edit the form before saving",
+      "GENERATING": "Generating...",
+      "GENERATE_FORM": "Generate form",
+      "STEPS": {
+        "DESCRIBE": "Describe",
+        "REVIEW": "Review",
+        "SAVE": "Save"
+      }
+    },
+    "MODAL": {
+      "NEW_TITLE": "New Service",
+      "EDIT_TITLE": "Edit Service",
+      "STEP_OF": "Step {{step}} of {{total}}",
+      "STEPS": {
+        "GENERAL_INFO": "General Info",
+        "CONTACT_CONFIG": "Contact & Config",
+        "SCHEDULE": "Schedule"
+      }
+    },
+    "FORM": {
+      "SECTIONS": {
+        "GENERAL_INFORMATION": "General Information",
+        "CONTACT_CONFIGURATION": "Contact & Configuration"
+      },
+      "NAME": "Service name",
+      "NAME_PLACEHOLDER": "e.g. Cardiology, Pediatric Emergency...",
+      "DESCRIPTION": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Professional description of the service...",
+      "TYPE": "Service type",
+      "SELECT_TYPE": "Select a type...",
+      "LOCATION": "Location",
+      "LOCATION_PLACEHOLDER": "e.g. Building A - 2nd floor",
+      "STATUS": "Status",
+      "EMERGENCY_SERVICE": "Emergency service",
+      "PHONE": "Phone",
+      "EMAIL": "Email",
+      "CAPACITY": "Capacity (patients / beds)",
+      "AVERAGE_WAITING_TIME": "Average waiting time",
+      "MANAGER_ID": "Manager ID",
+      "MANAGER_ID_PLACEHOLDER": "Service manager identifier",
+      "ERRORS": {
+        "NAME_REQUIRED": "Service name is required (min. 2 characters)",
+        "INVALID_EMAIL": "Invalid email address"
+      }
+    },
+    "SCHEDULE": {
+      "TITLE": "Opening Hours",
+      "APPLY_TEMPLATE": "Apply a template:",
+      "COUNT": "{{count}} schedule(s)",
+      "ADD_DAY": "+ Add a day",
+      "EMPTY": "No schedule defined — use a template or add manually",
+      "PRESETS": {
+        "WEEKDAYS": "Mon–Fri 8am–5pm",
+        "EXTENDED": "Mon–Sat 7:30am–4pm",
+        "ALL_DAY": "24/7",
+        "PHARMACY": "Daily 8am–8pm"
+      }
+    },
+    "VIEW_MODAL": {
+      "LOCATION": "Location",
+      "PHONE": "Phone",
+      "EMAIL": "Email",
+      "CAPACITY": "Capacity",
+      "AVG_WAIT": "Avg. Wait",
+      "MANAGER": "Manager",
+      "OPENING_HOURS": "Opening Hours"
+    },
+    "DELETE_MODAL": {
+      "TITLE": "Delete this service?",
+      "SUBTITLE": "This action cannot be undone."
+    },
+    "TOAST": {
+      "CREATED": "Service created successfully.",
+      "UPDATED": "Service updated successfully.",
+      "ACTIVATED": "Service activated successfully.",
+      "DEACTIVATED": "Service deactivated successfully.",
+      "DELETED": "Service deleted successfully.",
+      "AI_PREFILL": "The form has been prefilled with AI."
+    },
+    "ERRORS": {
+      "LOAD": "Error loading services.",
+      "CREATE": "Error creating service.",
+      "UPDATE": "Error updating service.",
+      "STATUS": "Error changing service status.",
+      "DELETE": "Error deleting service.",
+      "AI": "Error generating service with AI."
+    },
+    "DAYS": {
+      "MONDAY": "Monday",
+      "TUESDAY": "Tuesday",
+      "WEDNESDAY": "Wednesday",
+      "THURSDAY": "Thursday",
+      "FRIDAY": "Friday",
+      "SATURDAY": "Saturday",
+      "SUNDAY": "Sunday"
+    }
+  },
   "SUPER_ADMIN_DASHBOARD": {
     "PAGE_TITLE": "Dashboard",
     "NEW_THIS_WEEK": "+{{count}} this week",
@@ -66,5 +421,106 @@
     "INACTIVE_PATIENTS": "Inactive Patients",
     "INACTIVE_PATIENTS_SUBTITLE": "No recent activity detected",
     "DAYS_INACTIVE": "{{count}}d inactive"
+  },
+  "SYMPTOMS_REVIEW": {
+  "BACK": "Back to responses",
+  "LOADING": "Loading symptoms response details...",
+  "PATIENT": {
+    "UNKNOWN": "Unknown patient",
+    "DEPARTMENT_MISSING": "Department not specified",
+    "SUBMITTED": "Submitted"
+  },
+  "VALIDATED_BADGE": {
+    "PROBLEM_REPORTED": "Problem already reported",
+    "ALREADY_VALIDATED": "Already validated"
+  },
+  "VITALS": {
+    "TITLE": "Vitals overview",
+    "SUBTITLE": "Automated triage colors highlight normal, warning, and alert values.",
+    "BLOOD_PRESSURE": "Blood pressure",
+    "HEART_RATE": "Heart rate",
+    "TEMPERATURE": "Temperature",
+    "WEIGHT": "Weight"
+  },
+  "ANSWERS": {
+    "TITLE": "Submitted answers",
+    "SUBTITLE": "Review the patient's answers before taking action.",
+    "EMPTY": "No answer details were provided for this response."
+  },
+  "NOTE": {
+    "TITLE": "Validation note",
+    "SUBTITLE": "Add a short clinical note before validating or reporting a problem.",
+    "PLACEHOLDER": "Document your assessment or the issue that should be escalated...",
+    "TAB_ACCEPT": "accept",
+    "ESC_DISMISS": "dismiss"
+  },
+  "ACTIONS": {
+    "VALIDATE": "Validate response",
+    "SAVING": "Saving...",
+    "SIGNAL_PROBLEM": "Signal problem",
+    "CANCEL": "Cancel"
+  },
+  "VALIDATION_SUMMARY": {
+    "TITLE": "Validation summary",
+    "STATUS": "Status",
+    "STATUS_PROBLEM": "Problem reported",
+    "STATUS_VALIDATED": "Validated",
+    "VALIDATED_BY": "Validated by",
+    "VALIDATED_AT": "Validated at",
+    "DEFAULT_NURSE": "Assigned nurse"
+  },
+  "DASHBOARD": {
+    "LABEL": "Validation Dashboard",
+    "TITLE": "Validate responses",
+    "SUBTITLE": "Review symptoms responses from patients in your department, validate normal submissions, and escalate concerning vitals quickly.",
+    "PENDING": "Pending",
+    "TOTAL_VISIBLE": "Total visible",
+    "DEPARTMENT_FILTER_NOTE": "Patients are filtered to your assigned department only.",
+    "LOADING": "Loading symptoms responses...",
+    "EMPTY_TITLE": "No responses found",
+    "EMPTY_SUBTITLE": "Try another filter or come back when new symptoms submissions arrive.",
+    "OPEN_READONLY": "Open read-only validation details",
+    "OPEN_REVIEW": "Open response and validate this submission",
+    "VIEW_DETAILS": "View details",
+    "REVIEW_RESPONSE": "Review response"
+  }
+},
+  "AUDIT_LOGS": {
+    "PAGE_TITLE": "Audit Logs",
+    "FILTERS": {
+      "SEARCH_PLACEHOLDER": "Search by user, action, or details...",
+      "ALL": "All",
+      "USER": "User",
+      "ACTION": "Action"
+    },
+    "TABLE": {
+      "TIMESTAMP": "Timestamp",
+      "USER": "User",
+      "ACTION": "Action",
+      "DETAILS": "Details"
+    },
+    "PAGINATION": {
+      "PREVIOUS": "Previous",
+      "NEXT": "Next",
+      "PAGE_OF": "Page {{page}} of {{total}}"
+    },
+    "EMPTY": {
+      "TITLE": "No audit logs found",
+      "SUBTITLE": "Try adjusting your filters or check back later."
+    },
+    "ERRORS": {
+      "LOAD": "Error loading audit logs."
+    },
+    "ACTIONS": {
+      "VIEW_DETAILS": "View details"
+    },
+    "DETAILS_MODAL": {
+      "TITLE": "Audit Log Details",
+      "USER": "User",
+      "ACTION": "Action",
+      "TIMESTAMP": "Timestamp",
+      "DETAILS": "Details",
+      "CLOSE": "Close"
+    }
   }
 }
