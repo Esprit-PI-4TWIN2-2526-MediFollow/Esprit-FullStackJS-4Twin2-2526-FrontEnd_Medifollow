@@ -285,41 +285,7 @@
         </button>
       </div>
 
-      <div class="card" *ngIf="inactivePatients.length > 0">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#6b7585">
-                <circle cx="12" cy="12" r="10"/>
-                <polyline points="12 6 12 12 16 14"/>
-              </svg>
-              Inactive Patients
-            </h2>
-            <p class="card-sub">No activity detected recently</p>
-          </div>
-          <span class="inactive-count-badge">{{ inactivePatients.length }}</span>
-        </div>
-        <div class="patient-list">
-          <div *ngFor="let p of visibleInactive; trackBy: trackById" class="patient-row">
-            <div class="patient-avatar patient-avatar--gray">{{ p.firstName[0] }}{{ p.lastName[0] }}</div>
-            <div class="patient-info">
-              <span class="patient-name">{{ p.firstName }} {{ p.lastName }}</span>
-              <span class="patient-dept">{{ p.assignedDepartment || '—' }}</span>
-            </div>
-            <div class="patient-right">
-              <span *ngIf="p.daysSinceActivity !== undefined" class="days-badge">
-                {{ p.daysSinceActivity }}d inactive
-              </span>
-              <span class="patient-last">{{ relativeDate(p.lastSeen) }}</span>
-            </div>
-          </div>
-        </div>
-        <button *ngIf="inactivePatients.length > 4" class="show-more-btn"
-                (click)="showAllInactive = !showAllInactive">
-          {{ showAllInactive ? '↑ Show less' : '↓ Show all ' + inactivePatients.length }}
-        </button>
-      </div>
-
+   
     </div>
 
 

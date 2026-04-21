@@ -284,8 +284,8 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     const role = (user?.role?.name ?? user?.role ?? '').toUpperCase();
 
     const chatRoutes: Record<string, string> = {
-      DOCTOR: '/doctor/contacts',
-      PATIENT: '/patient/contacts',
+      DOCTOR: '/doctor/chat',
+      PATIENT: '/patient/chat',
       NURSE: '/nurse/contacts',
     };
 
