@@ -8,12 +8,13 @@ import { SymptomsNurseService } from '../../../dashboards/nurse/symptoms/service
 
 type NavItem = {
   name: string;
+  labelKey?: string;
   icon: string;
   path?: string;
   new?: boolean;
   roles?: string[];
   badgeCount?: number;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: { name: string; labelKey?: string; path: string; pro?: boolean; new?: boolean }[];
   action?: () => void;
 };
 
@@ -39,13 +40,22 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
 
   private readonly BASE_NAV_ITEMS: NavItem[] = [
     {
+      icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 13h6M9 16h6M9 10h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+      name: 'Audit Logs',
+      labelKey: 'SIDEBAR.AUDIT_LOGS',
+      path: '/auditor/audit',
+      roles: ['AUDITOR'],
+    },
+    {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V9V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V9V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2ZM8 5.25H5.5C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H16H8ZM19.25 9.75H4.75V19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75Z" fill="currentColor"/></svg>`,
       name: 'Calendar',
+      labelKey: 'SIDEBAR.CALENDAR',
       path: '/calendar',
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       name: 'Télémédecine',
+      labelKey: 'SIDEBAR.TELEMEDICINE',
       path: '/telemedicine',
       roles: ['DOCTOR', 'PATIENT'],
       new: true,
@@ -53,30 +63,35 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.75 6.75A2 2 0 0 1 6.75 4.75H17.25A2 2 0 0 1 19.25 6.75V17.25A2 2 0 0 1 17.25 19.25H6.75A2 2 0 0 1 4.75 17.25V6.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8 9.25H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 12H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 14.75H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
       name: 'Follow-Up Protocol',
+      labelKey: 'SIDEBAR.FOLLOW_UP_PROTOCOL',
       path: '/coordinator/follow-up/protocol',
       roles: ['COORDINATOR'],
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 4.75H17C18.2426 4.75 19.25 5.75736 19.25 7V17C19.25 18.2426 18.2426 19.25 17 19.25H7C5.75736 19.25 4.75 18.2426 4.75 17V7C4.75 5.75736 5.75736 4.75 7 4.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8 9H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 12H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="15.5" cy="15.5" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M17.25 17.25L19 19" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
       name: 'Symptoms Review',
+      labelKey: 'SIDEBAR.SYMPTOMS_REVIEW',
       path: '/coordinator/symptoms-review',
       roles: ['COORDINATOR'],
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.25 3.5C4.00736 3.5 3 4.50736 3 5.75V11.25C3 12.4926 4.00736 13.5 5.25 13.5H10.75C11.9926 13.5 13 12.4926 13 11.25V5.75C13 4.50736 11.9926 3.5 10.75 3.5H5.25ZM4.5 5.75C4.5 5.33579 4.83579 5 5.25 5H10.75C11.1642 5 11.5 5.33579 11.5 5.75V11.25C11.5 11.6642 11.1642 12 10.75 12H5.25C4.83579 12 4.5 11.6642 4.5 11.25V5.75ZM13.25 10.5C13.25 9.25736 14.2574 8.25 15.5 8.25H18.5C19.7426 8.25 20.75 9.25736 20.75 10.5V18.25C20.75 19.4926 19.7426 20.5 18.5 20.5H5.5C4.25736 20.5 3.25 19.4926 3.25 18.25V15.5C3.25 14.2574 4.25736 13.25 5.5 13.25H13.25V10.5Z" fill="currentColor"/></svg>`,
       name: 'Manage Roles',
+      labelKey: 'SIDEBAR.MANAGE_ROLES',
       path: '/manage-roles',
       roles: ['SUPERADMIN'],
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75C9.1005 2.75 6.75 5.1005 6.75 8C6.75 10.8995 9.1005 13.25 12 13.25C14.8995 13.25 17.25 10.8995 17.25 8C17.25 5.1005 14.8995 2.75 12 2.75ZM8.25 8C8.25 5.92893 9.92893 4.25 12 4.25C14.0711 4.25 15.75 5.92893 15.75 8C15.75 10.0711 14.0711 11.75 12 11.75C9.92893 11.75 8.25 10.0711 8.25 8ZM5.25 15.5C4.00736 15.5 3 16.5074 3 17.75V19.5C3 20.7426 4.00736 21.75 5.25 21.75H18.75C19.9926 21.75 21 20.7426 21 19.5V17.75C21 16.5074 19.9926 15.5 18.75 15.5H5.25ZM4.5 17.75C4.5 17.3358 4.83579 17 5.25 17H18.75C19.1642 17 19.5 17.3358 19.5 17.75V19.5C19.5 19.9142 19.1642 20.25 18.75 20.25H5.25C4.83579 20.25 4.5 19.9142 4.5 19.5V17.75Z" fill="currentColor"/></svg>`,
       name: 'Manage Profiles',
+      labelKey: 'SIDEBAR.MANAGE_PROFILES',
       path: '/getAllUsers',
       roles: ['SUPERADMIN', 'ADMIN'],
     },
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3 3.75C3 2.50736 4.00736 1.5 5.25 1.5H18.75C19.9926 1.5 21 2.50736 21 3.75V22.5H16.5V18.75C16.5 17.5074 15.4926 16.5 14.25 16.5H9.75C8.50736 16.5 7.5 17.5074 7.5 18.75V22.5H3V3.75ZM4.5 3.75V21H6V18.75C6 16.6789 7.67893 15 9.75 15H14.25C16.3211 15 18 16.6789 18 18.75V21H19.5V3.75C19.5 3.33579 19.1642 3 18.75 3H5.25C4.83579 3 4.5 3.33579 4.5 3.75ZM9 18.75V21H15V18.75C15 18.3358 14.6642 18 14.25 18H9.75C9.33579 18 9 18.3358 9 18.75ZM11.25 6C11.25 5.58579 11.5858 5.25 12 5.25C12.4142 5.25 12.75 5.58579 12.75 6V7.5H14.25C14.6642 7.5 15 7.83579 15 8.25C15 8.66421 14.6642 9 14.25 9H12.75V10.5C12.75 10.9142 12.4142 11.25 12 11.25C11.5858 11.25 11.25 10.9142 11.25 10.5V9H9.75C9.33579 9 9 8.66421 9 8.25C9 7.83579 9.33579 7.5 9.75 7.5H11.25V6Z" fill="currentColor"/></svg>`,
       name: 'Manage Services',
+      labelKey: 'SIDEBAR.MANAGE_SERVICES',
       path: '/services',
       roles: ['SUPERADMIN'],
     },
@@ -86,6 +101,7 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     <path d="M8 8H16M8 12H16M8 16H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
   </svg>`,
       name: "Manage Symptomes",
+      labelKey: 'SIDEBAR.MANAGE_SYMPTOMS',
       path: "/symptoms",
       roles: ['SUPERADMIN', 'ADMIN'],
 
@@ -93,6 +109,7 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 3.75H16C17.7949 3.75 19.25 5.20507 19.25 7V17C19.25 18.7949 17.7949 20.25 16 20.25H8C6.20507 20.25 4.75 18.7949 4.75 17V7C4.75 5.20507 6.20507 3.75 8 3.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8 8.5H9.5V10H8V8.5Z" fill="currentColor"/><path d="M11 9.25H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.3 13.3L9 14L10.2 12.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 13.75H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8 16.5H9.5V18H8V16.5Z" fill="currentColor"/><path d="M11 17.25H16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`,
       name: 'Manage Questionnaires',
+      labelKey: 'SIDEBAR.MANAGE_QUESTIONNAIRES',
       path: '/questionnaire',
       roles: ['SUPERADMIN', 'ADMIN'],
     },
@@ -101,8 +118,8 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
       <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 13.8387 2.48697 15.5651 3.33788 17.0535L2.07071 21.9293L6.94648 20.6621C8.43491 21.513 10.1613 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM3.5 12C3.5 7.30558 7.30558 3.5 12 3.5C16.6944 3.5 20.5 7.30558 20.5 12C20.5 16.6944 16.6944 20.5 12 20.5C10.2929 20.5 8.70722 19.9804 7.39089 19.0921L7.05353 18.8713L4.42929 19.5707L5.12868 16.9465L4.90785 16.6091C4.01963 15.2928 3.5 13.7071 3.5 12ZM8.75 11.25C8.75 10.8358 9.08579 10.5 9.5 10.5H14.5C14.9142 10.5 15.25 10.8358 15.25 11.25C15.25 11.6642 14.9142 12 14.5 12H9.5C9.08579 12 8.75 11.6642 8.75 11.25ZM9.5 13.5C9.08579 13.5 8.75 13.8358 8.75 14.25C8.75 14.6642 9.08579 15 9.5 15H12C12.4142 15 12.75 14.6642 12.75 14.25C12.75 13.8358 12.4142 13.5 12 13.5H9.5Z" fill="currentColor"/>
     </svg>`,
       name: 'Messages',
-      action: () => this.navigateToChat(),
-       roles: ['DOCTOR', 'PATIENT', 'NURSE'],
+      labelKey: 'SIDEBAR.MESSAGES',
+      roles: ['DOCTOR', 'PATIENT', 'NURSE'],
     },
 
 
@@ -120,6 +137,7 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8 4.75H16C18.3472 4.75 19.25 5.65279 19.25 8V16C19.25 18.3472 18.3472 19.25 16 19.25H8C5.65279 19.25 4.75 18.3472 4.75 16V8C4.75 5.65279 5.65279 4.75 8 4.75Z" stroke="currentColor" stroke-width="1.5"/><path d="M8.75 9.25H15.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.75 12H12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M8.75 14.75H11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M15.5 12.5L16.75 13.75L19 11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       name: 'Symptoms Queue',
+      labelKey: 'SIDEBAR.SYMPTOMS_QUEUE',
       path: '/nurse/symptoms',
       roles: ['NURSE'],
       badgeCount: 0,
@@ -127,6 +145,7 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     {
       icon: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2.75C9.1005 2.75 6.75 5.1005 6.75 8C6.75 10.8995 9.1005 13.25 12 13.25C14.8995 13.25 17.25 10.8995 17.25 8C17.25 5.1005 14.8995 2.75 12 2.75ZM8.25 8C8.25 5.92893 9.92893 4.25 12 4.25C14.0711 4.25 15.75 5.92893 15.75 8C15.75 10.0711 14.0711 11.75 12 11.75C9.92893 11.75 8.25 10.0711 8.25 8ZM5.25 15.5C4.00736 15.5 3 16.5074 3 17.75V19.5C3 20.7426 4.00736 21.75 5.25 21.75H18.75C19.9926 21.75 21 20.7426 21 19.5V17.75C21 16.5074 19.9926 15.5 18.75 15.5H5.25ZM4.5 17.75C4.5 17.3358 4.83579 17 5.25 17H18.75C19.1642 17 19.5 17.3358 19.5 17.75V19.5C19.5 19.9142 19.1642 20.25 18.75 20.25H5.25C4.83579 20.25 4.5 19.9142 4.5 19.5V17.75Z" fill="currentColor"/></svg>`,
       name: 'Sign Out',
+      labelKey: 'SIDEBAR.SIGN_OUT',
       path: '/signin',
 
       action: () => this.signOut(),
@@ -191,10 +210,25 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
     const dashboardItem: NavItem = {
       icon: this.DASHBOARD_ICON,
       name: 'Dashboard',
+      labelKey: 'SIDEBAR.DASHBOARD',
       path: this.DASHBOARD_PATHS[role] ?? '/dashboard',
     };
 
-    this.navItems = [dashboardItem, ...this.BASE_NAV_ITEMS.filter(canSee)];
+    this.navItems = [
+      dashboardItem,
+      ...this.BASE_NAV_ITEMS
+        .filter(canSee)
+        .map((item) =>
+          item.name === 'Messages'
+            ? {
+                ...item,
+                path: this.getChatRoute(role),
+                action: undefined,
+              }
+            : item
+        )
+        .filter((item) => item.path || item.subItems || item.action)
+    ];
     this.othersItems = this.ALL_OTHERS_ITEMS.filter(canSee);
     if (role === 'NURSE') {
       this.loadNursePendingCount();
@@ -272,18 +306,13 @@ export class AppSidebarComponent implements OnInit, OnDestroy {
       if (isMobile) this.sidebarService.setMobileOpen(false);
     }).unsubscribe();
   }
-  navigateToChat(): void {
-    const stored = localStorage.getItem('user');
-    const user = stored ? JSON.parse(stored) : null;
-    const role = (user?.role?.name ?? user?.role ?? '').toUpperCase();
-
+  private getChatRoute(role: string): string | undefined {
     const chatRoutes: Record<string, string> = {
-      DOCTOR: '/doctor/contacts',
-      PATIENT: '/patient/contacts',
+      DOCTOR: '/doctor/chat',
+      PATIENT: '/patient/chat',
       NURSE: '/nurse/contacts',
     };
 
-    const route = chatRoutes[role];
-    if (route) this.router.navigate([route]);
+    return chatRoutes[role];
   }
 }

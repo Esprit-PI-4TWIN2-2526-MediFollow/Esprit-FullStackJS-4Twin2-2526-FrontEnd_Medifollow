@@ -17,20 +17,24 @@ module.exports = function (config) {
       subdir: '.',
       reporters: [
         { type: 'html' },
+        { type: 'lcovonly' },
         { type: 'text-summary' }
       ]
     },
     reporters: ['progress', 'kjhtml', 'coverage'],
 
     browsers: ['ChromeHeadlessNoSandbox'],
-
     customLaunchers: {
       ChromeHeadlessNoSandbox: {
         base: 'ChromeHeadless',
-        flags: ['--no-sandbox', '--disable-gpu']
+        flags: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-gpu'
+        ]
       }
     },
-
-    restartOnFileChange: true
+    singleRun: true
   });
 };

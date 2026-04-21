@@ -17,6 +17,7 @@ export class SymptomsResponseService {
 
   getAssignedForm(patientId: string): Observable<SymptomsAssignedForm | null> {
     return this.http.get<SymptomsAssignedForm>(`${this.apiUrl}/form/patient/${patientId}`).pipe(
+      map((form) => this.normalizeAssignedForm(form)),
       catchError((error) => {
         if (error.status === 404) {
           return of(null);
@@ -73,5 +74,24 @@ export class SymptomsResponseService {
     const month = `${parsedDate.getMonth() + 1}`.padStart(2, '0');
     const day = `${parsedDate.getDate()}`.padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  private normalizeAssignedForm(form: SymptomsAssignedForm): SymptomsAssignedForm {
+    return {
+      ...form,
+      questions: (form.questions ?? []).map((question) => {
+        const measurementsPerDay =
+          question.measurementsPerDay ??
+          question.occurrencesPerDay ??
+          question.maxOccurrencesPerDay ??
+          1;
+        return {
+          ...question,
+          measurementsPerDay,
+          occurrencesPerDay: measurementsPerDay,
+          maxOccurrencesPerDay: measurementsPerDay,
+        };
+      }),
+    };
   }
 }

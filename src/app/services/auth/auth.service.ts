@@ -7,6 +7,7 @@ import {
   FirstLoginChangePasswordResponse,
   SignInRequest,
   SignInResponse,
+  SignInSuccessResponse,
 } from '../../models/auth';
 import { Router } from '@angular/router';
 import { Role } from '../../models/roles';
@@ -26,6 +27,16 @@ export class AuthService {
 
   signIn(payload: SignInRequest): Observable<SignInResponse> {
     return this.http.post<SignInResponse>(`${this.API_URL}/signin`, payload);
+  }
+
+  verifyTwoFactor(payload: {
+    twoFactorToken: string;
+    code: string;
+  }): Observable<SignInSuccessResponse> {
+    return this.http.post<SignInSuccessResponse>(
+      `${this.API_URL}/auth/2fa/verify`,
+      payload
+    );
   }
 
   changePasswordOnFirstLogin(

@@ -72,44 +72,79 @@
       </div>
 
       <article class="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Coordinator action</h2>
-        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
-          Add a validation note and either validate the response or report an issue.
-        </p>
 
-        <textarea
-          rows="8"
-          [value]="note"
-          (input)="onNoteInput($event)"
-          placeholder="Write your validation note or issue details..."
-          class="mt-5 w-full rounded-2xl border border-gray-300 bg-white px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200"></textarea>
+  <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Coordinator action</h2>
+  <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+    Add a validation note and either validate the response or report an issue.
+  </p>
 
-        <div *ngIf="successMessage"
-             class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-300">
-          {{ successMessage }}
-        </div>
+  <!-- Badge déjà validé -->
+  <div *ngIf="isAlreadyValidated"
+       class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-300">
+    ✓ This response has already been validated by <strong>{{ response.validatedByName }}</strong>
+    <span *ngIf="response.validatedAt"> on {{ response.validatedAt | date:'medium' }}</span>.
+  </div>
 
-        <div *ngIf="errorMessage && response"
-             class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-900/20 dark:text-rose-300">
-          {{ errorMessage }}
-        </div>
+  <div class="relative mt-5">
 
-        <div class="mt-6 flex flex-col gap-3">
-          <button type="button"
-                  (click)="validateResponse()"
-                  [disabled]="isSubmitting"
-                  class="inline-flex h-11 items-center justify-center rounded-2xl bg-brand-500 px-5 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50">
-            {{ isSubmitting ? 'Saving...' : 'Validate response' }}
-          </button>
+    <!-- Ghost layer -->
+    <div aria-hidden="true"
+         class="pointer-events-none absolute inset-0 whitespace-pre-wrap break-words rounded-2xl px-4 py-3 text-sm"
+         style="font-family: inherit; line-height: 1.5rem;">
+      <span class="invisible">{{ note }}</span>
+      <span class="text-gray-400 dark:text-gray-500">{{ inlineSuggestion }}</span>
+    </div>
 
-          <button type="button"
-                  (click)="reportIssue()"
-                  [disabled]="isSubmitting"
-                  class="inline-flex h-11 items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 px-5 text-sm font-medium text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-300">
-            Report issue
-          </button>
-        </div>
-      </article>
+    <!-- Textarea — disabled si déjà validé -->
+    <textarea
+      rows="8"
+      [value]="note"
+      (input)="onNoteInput($event)"
+      (keydown)="onNoteKeydown($event)"
+      [disabled]="isAlreadyValidated"
+      placeholder="Write your validation note or issue details..."
+      class="relative w-full rounded-2xl border border-gray-300 bg-transparent px-4 py-3 text-sm text-gray-700 outline-none transition focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-700 dark:text-gray-200"
+      style="line-height: 1.5rem;">
+    </textarea>
+
+    <!-- Hint Tab/Esc -->
+    <div *ngIf="inlineSuggestion && !isAlreadyValidated"
+         class="absolute bottom-3 right-3 flex gap-2 text-xs text-gray-400">
+      <kbd class="rounded border border-gray-300 bg-white px-1.5 py-0.5 dark:border-gray-600 dark:bg-gray-800">Tab</kbd>
+      <span>accept</span>
+      <kbd class="rounded border border-gray-300 bg-white px-1.5 py-0.5 dark:border-gray-600 dark:bg-gray-800">Esc</kbd>
+      <span>dismiss</span>
+    </div>
+  </div>
+
+  <div *ngIf="successMessage"
+       class="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-900/20 dark:text-emerald-300">
+    {{ successMessage }}
+  </div>
+
+  <div *ngIf="errorMessage && response"
+       class="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-900/20 dark:text-rose-300">
+    {{ errorMessage }}
+  </div>
+
+  <div class="mt-6 flex flex-col gap-3">
+    <button type="button"
+            (click)="validateResponse()"
+            [disabled]="isSubmitting || isAlreadyValidated"
+            class="inline-flex h-11 items-center justify-center rounded-2xl bg-brand-500 px-5 text-sm font-medium text-white transition hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50">
+      <ng-container *ngIf="isAlreadyValidated">Already validated</ng-container>
+      <ng-container *ngIf="!isAlreadyValidated">{{ isSubmitting ? 'Saving...' : 'Validate response' }}</ng-container>
+    </button>
+
+    <button type="button"
+            (click)="reportIssue()"
+            [disabled]="isSubmitting || isAlreadyValidated"
+            class="inline-flex h-11 items-center justify-center rounded-2xl border border-amber-300 bg-amber-50 px-5 text-sm font-medium text-amber-700 transition hover:bg-amber-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-amber-900/60 dark:bg-amber-900/20 dark:text-amber-300">
+      Report issue
+    </button>
+  </div>
+
+</article>
     </section>
   </ng-container>
 </div>

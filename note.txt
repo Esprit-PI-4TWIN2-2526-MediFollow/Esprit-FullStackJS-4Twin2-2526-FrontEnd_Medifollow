@@ -10,3 +10,8 @@ npm install chart.js ng2-charts@5 --legacy-peer-deps
 npm install @mediapipe/hands --legacy-peer-deps
 
 npm install socket.io-client --legacy-peer-deps
+
+//commande pour les testes unitaire
+npm install --save-dev @types/jasmine --legacy-peer-deps
+
+hello my friend yahya karoui &éd sszzqsdqsdzzdfgsdfsf

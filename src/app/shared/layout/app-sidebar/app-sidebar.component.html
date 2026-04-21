@@ -49,7 +49,7 @@
 
         @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
           <div style="display:flex;align-items:center;gap:8px;padding:0 10px;margin-bottom:8px;">
-            <span style="font-size:9.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;">Menu principal</span>
+            <span style="font-size:9.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;">{{ 'SIDEBAR.MAIN_MENU' | translate }}</span>
             <div style="flex:1;height:1px;background:#f1f5f9;"></div>
           </div>
         } @else {
@@ -78,8 +78,8 @@
                     [innerHTML]="nav.icon | safeHtml">
                   </span>
                   @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
-                    <span class="lmenu-label">{{ nav.name }}</span>
-                    @if (nav.new) { <span class="lmenu-badge-new" style="margin-left:auto;margin-right:24px;">new</span> }
+                    <span class="lmenu-label">{{ (nav.labelKey || nav.name) | translate }}</span>
+                    @if (nav.new) { <span class="lmenu-badge-new" style="margin-left:auto;margin-right:24px;">{{ 'SIDEBAR.NEW' | translate }}</span> }
                     <svg [ngClass]="{'rotate-180': openSubmenu === 'main-' + i}"
                       style="margin-left:auto;color:#cbd5e1;transition:transform 0.2s;flex-shrink:0;"
                       width="14" height="14" viewBox="0 0 20 20" fill="none">
@@ -100,10 +100,10 @@
                           [class.lmenu-sub-active]="isActive(subItem.path)"
                           [class.lmenu-sub-inactive]="!isActive(subItem.path)">
                           <span style="width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;"></span>
-                          {{ subItem.name }}
+                          {{ (subItem.labelKey || subItem.name) | translate }}
                           <span style="display:flex;align-items:center;gap:4px;margin-left:auto;">
-                            @if (subItem.new) { <span class="lmenu-badge-new">new</span> }
-                            @if (subItem.pro) { <span class="lmenu-badge-pro">pro</span> }
+                            @if (subItem.new) { <span class="lmenu-badge-new">{{ 'SIDEBAR.NEW' | translate }}</span> }
+                            @if (subItem.pro) { <span class="lmenu-badge-pro">{{ 'SIDEBAR.PRO' | translate }}</span> }
                           </span>
                         </a>
                       </li>
@@ -128,7 +128,7 @@
                       [innerHTML]="nav.icon | safeHtml">
                     </span>
                     @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
-                      <span class="lmenu-label">{{ nav.name }}</span>
+                      <span class="lmenu-label">{{ (nav.labelKey || nav.name) | translate }}</span>
                       @if (nav.badgeCount !== undefined) {
                         <span style="margin-left:auto;display:inline-flex;min-width:22px;align-items:center;justify-content:center;border-radius:999px;background:#ecfeff;color:#0f766e;padding:2px 7px;font-size:11px;font-weight:700;border:1px solid #bae6fd;">
                           {{ nav.badgeCount }}
@@ -149,7 +149,7 @@
                       [innerHTML]="nav.icon | safeHtml">
                     </span>
                     @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
-                      <span class="lmenu-label">{{ nav.name }}</span>
+                      <span class="lmenu-label">{{ (nav.labelKey || nav.name) | translate }}</span>
                     }
                   </button>
                 }
@@ -166,7 +166,7 @@
       <div>
         @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
           <div style="display:flex;align-items:center;gap:8px;padding:0 10px;margin-bottom:8px;">
-            <span style="font-size:9.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;">Autres</span>
+            <span style="font-size:9.5px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:#94a3b8;">{{ 'SIDEBAR.OTHERS' | translate }}</span>
             <div style="flex:1;height:1px;background:#f1f5f9;"></div>
           </div>
         } @else {
@@ -195,8 +195,8 @@
                     [innerHTML]="nav.icon | safeHtml">
                   </span>
                   @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
-                    <span class="lmenu-label">{{ nav.name }}</span>
-                    @if (nav.new) { <span class="lmenu-badge-new" style="margin-left:auto;margin-right:24px;">new</span> }
+                    <span class="lmenu-label">{{ (nav.labelKey || nav.name) | translate }}</span>
+                    @if (nav.new) { <span class="lmenu-badge-new" style="margin-left:auto;margin-right:24px;">{{ 'SIDEBAR.NEW' | translate }}</span> }
                     <svg [ngClass]="{'rotate-180': openSubmenu === 'others-' + i}"
                       style="margin-left:auto;color:#cbd5e1;transition:transform 0.2s;flex-shrink:0;"
                       width="14" height="14" viewBox="0 0 20 20" fill="none">
@@ -217,10 +217,10 @@
                           [class.lmenu-sub-active]="isActive(subItem.path)"
                           [class.lmenu-sub-inactive]="!isActive(subItem.path)">
                           <span style="width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;"></span>
-                          {{ subItem.name }}
+                          {{ (subItem.labelKey || subItem.name) | translate }}
                           <span style="display:flex;align-items:center;gap:4px;margin-left:auto;">
-                            @if (subItem.new) { <span class="lmenu-badge-new">new</span> }
-                            @if (subItem.pro) { <span class="lmenu-badge-pro">pro</span> }
+                            @if (subItem.new) { <span class="lmenu-badge-new">{{ 'SIDEBAR.NEW' | translate }}</span> }
+                            @if (subItem.pro) { <span class="lmenu-badge-pro">{{ 'SIDEBAR.PRO' | translate }}</span> }
                           </span>
                         </a>
                       </li>
@@ -245,7 +245,7 @@
                       [innerHTML]="nav.icon | safeHtml">
                     </span>
                     @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
-                      <span class="lmenu-label">{{ nav.name }}</span>
+                      <span class="lmenu-label">{{ (nav.labelKey || nav.name) | translate }}</span>
                       @if (nav.badgeCount !== undefined) {
                         <span style="margin-left:auto;display:inline-flex;min-width:22px;align-items:center;justify-content:center;border-radius:999px;background:#ecfeff;color:#0f766e;padding:2px 7px;font-size:11px;font-weight:700;border:1px solid #bae6fd;">
                           {{ nav.badgeCount }}
@@ -266,7 +266,7 @@
                       [innerHTML]="nav.icon | safeHtml">
                     </span>
                     @if ((isExpanded$ | async) || (isHovered$ | async) || (isMobileOpen$ | async)) {
-                      <span class="lmenu-label">{{ nav.name }}</span>
+                      <span class="lmenu-label">{{ (nav.labelKey || nav.name) | translate }}</span>
                     }
                   </button>
                 }

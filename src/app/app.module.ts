@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -9,7 +10,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AlertComponent } from './shared/components/ui/alert/alert.component';
 import { AlertsComponent } from './pages/ui-elements/alerts/alerts.component';
 import { AppComponent } from './app.component';
-import { AppHeaderComponent } from './shared/layout/app-header/app-header.component';
 import { AppLayoutComponent } from './shared/layout/app-layout/app-layout.component';
 
 import { AuthPageLayoutComponent } from './shared/layout/auth-page-layout/auth-page-layout.component';
@@ -66,7 +66,7 @@ import { MonthlySalesChartComponent } from './shared/components/ecommerce/monthl
 import { MonthlyTargetComponent } from './shared/components/ecommerce/monthly-target/monthly-target.component';
 import { MultiSelectComponent } from './shared/components/form/multi-select/multi-select.component';
 import { NotFoundComponent } from './pages/other-page/not-found/not-found.component';
-import { NotificationDropdownComponent } from './shared/components/header/notification-dropdown/notification-dropdown.component';
+import { NotificationDropdownComponent } from './shared/components/notification-dropdown/notification-dropdown.component';
 import { OneIstoOneComponent } from './shared/components/ui/videos/one-isto-one/one-isto-one.component';
 import { PageBreadcrumbComponent } from './shared/components/common/page-breadcrumb/page-breadcrumb.component';
 import { PhoneInputComponent } from './shared/components/form/group-input/phone-input/phone-input.component';
@@ -75,7 +75,6 @@ import { RadioButtonsComponent } from './shared/components/form/form-elements/ra
 import { RadioComponent } from './shared/components/form/input/radio.component';
 import { RecentOrdersComponent } from './shared/components/ecommerce/recent-orders/recent-orders.component';
 import { ResponsiveImageComponent } from './shared/components/ui/images/responsive-image/responsive-image.component';
-import { SafeHtmlPipe } from './shared/pipe/safe-html.pipe';
 import { SelectComponent } from './shared/components/form/select/select.component';
 import { SelectInputsComponent } from './shared/components/form/form-elements/select-inputs/select-inputs.component';
 import { SignInComponent } from './pages/auth-pages/sign-in/sign-in.component';
@@ -100,9 +99,12 @@ import { UserDropdownComponent } from './shared/components/header/user-dropdown/
 import { UserInfoCardComponent } from './shared/components/user-profile/user-info-card/user-info-card.component';
 import { UserMetaCardComponent } from './shared/components/user-profile/user-meta-card/user-meta-card.component';
 import { SecuritySettingsCardComponent } from './shared/components/user-profile/security-settings-card/security-settings-card.component';
+import { TwoFactorAuthCardComponent } from './shared/components/user-profile/two-factor-auth-card/two-factor-auth-card.component';
 import { VideosComponent } from './pages/ui-elements/videos/videos.component';
+import { AppHeaderComponent } from './shared/layout/app-header/app-header.component';
 import { AppSidebarComponent } from './shared/layout/app-sidebar/app-sidebar.component';
 import { SidebarWidgetComponent } from './shared/layout/app-sidebar/app-sidebar-widget.component';
+import { SafeHtmlPipe } from './shared/pipe/safe-html.pipe';
 
 import { ForgotPasswordComponent } from './shared/components/auth/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './shared/components/auth/reset-password/reset-password.component';
@@ -118,9 +120,9 @@ import { authInterceptor } from './services/auth/auth.interceptor';
 import { GestureControlModule } from './gesture-control/gesture-control.module';
 import { ChatComponent } from './chat/chat.component';
 import { ContactsComponent } from './chat/contacts/contacts.component';
-
-
-
+import { NotificationsPageComponent } from './pages/notifications/notifications-page.component';
+import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
+import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 @NgModule({
   declarations: [
@@ -219,6 +221,7 @@ import { ContactsComponent } from './chat/contacts/contacts.component';
     UserInfoCardComponent,
     UserMetaCardComponent,
     SecuritySettingsCardComponent,
+    TwoFactorAuthCardComponent,
     VideosComponent,
     ForgotPasswordComponent,
     ResetPasswordComponent,
@@ -228,18 +231,28 @@ import { ContactsComponent } from './chat/contacts/contacts.component';
     RoleManageComponent,
     ManageServiceComponent,
     UnauthorizedComponent,
+    NotificationsPageComponent,
 
 
 
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     NgApexchartsModule,
     FullCalendarModule,
-GestureControlModule.forRoot({
+    TranslateModule,
+    TranslateModule.forRoot({
+      defaultLanguage: 'fr',
+      loader: {
+        provide: TranslateLoader,
+        useClass: TranslateHttpLoader,
+      },
+    }),
+    GestureControlModule.forRoot({
       cooldownMs: 800,
       pinchHoldMs: 600,
       audioFeedback: true,
@@ -248,7 +261,14 @@ GestureControlModule.forRoot({
 
   ],
   providers: [
-    provideHttpClient(withInterceptors([authInterceptor]))
+    provideHttpClient(withInterceptors([authInterceptor])),
+    {
+      provide: TRANSLATE_HTTP_LOADER_CONFIG,
+      useValue: {
+        prefix: './i18n/',
+        suffix: '.json',
+      },
+    },
   ],
   bootstrap: [AppComponent]
 })

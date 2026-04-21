@@ -17,6 +17,7 @@ interface SymptomQuestion {
   type: SymptomQuestionType;
   options: string[];
   required: boolean;
+  occurrencesPerDay: number;
   order: number;
   category: QuestionCategory;
 }
@@ -45,7 +46,7 @@ export class BuilderComponent implements OnInit {
   selectedPatients: string[] = [];
   searchTerm = '';
   showPatientModal = false;
-  patientsWithForm: string[] = [];
+  assignedPatients: unknown[] = [];
   questions: SymptomQuestion[] = [];
   patients: Users[] = [];
   currentStep = 0;
@@ -97,15 +98,15 @@ medicalServices: string[] = [];
 
   // ── Default static questions added on form creation ──────
   private readonly defaultQuestions: Omit<SymptomQuestion, 'order'>[] = [
-    { label: 'What is your body temperature (°C)?', type: 'number', options: [], required: true, category: 'vital_parameters' },
-    { label: 'What is your heart rate (bpm)?', type: 'number', options: [], required: true, category: 'vital_parameters' },
-    { label: 'What is your blood pressure (e.g. 120/80)?', type: 'text', options: [], required: true, category: 'vital_parameters' },
-    { label: 'What is your oxygen level (SpO2 %)?', type: 'number', options: [], required: true, category: 'vital_parameters' },
-    { label: 'What is your pain level?', type: 'scale', options: [], required: true, category: 'subjective_symptoms' },
-    { label: 'What is your level of consciousness?', type: 'scale', options: [], required: true, category: 'subjective_symptoms' },
-    { label: 'Have you changed your dressing?', type: 'boolean', options: [], required: true, category: 'subjective_symptoms' },
-    { label: 'Is your urine output normal?', type: 'boolean', options: [], required: true, category: 'patient_context' },
-    { label: 'What is your blood sugar level (mg/dL)?', type: 'number', options: [], required: true, category: 'clinical_data' },
+    { label: 'What is your body temperature (°C)?', type: 'number', options: [], required: true, occurrencesPerDay: 1, category: 'vital_parameters' },
+    { label: 'What is your heart rate (bpm)?', type: 'number', options: [], required: true, occurrencesPerDay: 1, category: 'vital_parameters' },
+    { label: 'What is your blood pressure (e.g. 120/80)?', type: 'text', options: [], required: true, occurrencesPerDay: 1, category: 'vital_parameters' },
+    { label: 'What is your oxygen level (SpO2 %)?', type: 'number', options: [], required: true, occurrencesPerDay: 1, category: 'vital_parameters' },
+    { label: 'What is your pain level?', type: 'scale', options: [], required: true, occurrencesPerDay: 1, category: 'subjective_symptoms' },
+    { label: 'What is your level of consciousness?', type: 'scale', options: [], required: true, occurrencesPerDay: 1, category: 'subjective_symptoms' },
+    { label: 'Have you changed your dressing?', type: 'boolean', options: [], required: true, occurrencesPerDay: 1, category: 'subjective_symptoms' },
+    { label: 'Is your urine output normal?', type: 'boolean', options: [], required: true, occurrencesPerDay: 1, category: 'patient_context' },
+    { label: 'What is your blood sugar level (mg/dL)?', type: 'number', options: [], required: true, occurrencesPerDay: 1, category: 'clinical_data' },
   ];
 
   constructor(
@@ -168,7 +169,21 @@ loadDepartments(): void {
   }
 
   isQuestionValid(index: number): boolean {
-    return this.isQuestionLabelValid(index) && this.hasEnoughOptions(index);
+    return this.isQuestionLabelValid(index) && this.hasEnoughOptions(index) && this.hasValidOccurrences(index);
+  }
+
+  hasValidOccurrences(index: number): boolean {
+    const question = this.questions[index];
+    if (!question) return false;
+
+    const requiredPerDay = Number(question.occurrencesPerDay);
+    return Number.isInteger(requiredPerDay)
+      && requiredPerDay >= 1
+      && requiredPerDay <= 10;
+  }
+
+  getOccurrenceRange(count: number): number[] {
+    return Array.from({ length: count }, (_, i) => i);
   }
 
   get currentStepCategory(): QuestionCategory {
@@ -286,6 +301,7 @@ loadDepartments(): void {
         type: 'text',
         options: [],
         required: true,
+        occurrencesPerDay: 1,
         order: this.questions.length,
         category: this.currentStepCategory,
       },
@@ -337,21 +353,21 @@ loadDepartments(): void {
   loadPatientsWithForms(): void {
     this.symptomService.getForms().subscribe({
       next: (forms) => {
-        this.patientsWithForm = Array.from(new Set(forms
+        this.assignedPatients = forms
           .filter((form) => form._id !== this.formId)
           .flatMap((form) => {
-            const maybeForm = form as SymptomForm & { patientIds?: string[] };
+            const maybeForm = form as SymptomForm & { patientIds?: unknown[]; patientId?: unknown };
             if (Array.isArray(maybeForm.patientIds) && maybeForm.patientIds.length > 0) {
               return maybeForm.patientIds;
             }
 
             return form.patientId ? [form.patientId] : [];
           })
-          .filter((patientId): patientId is string => typeof patientId === 'string' && patientId.trim() !== '')));
+          .filter((patientId) => this.getComparableId(patientId) !== '');
       },
       error: (err) => {
         console.error('Failed to load patients with forms', err);
-        this.patientsWithForm = [];
+        this.assignedPatients = [];
       },
     });
   }
@@ -366,7 +382,8 @@ loadDepartments(): void {
   }
 
   togglePatient(id: string): void {
-    if (!id || this.isPatientDisabled(id)) return;
+    const patient = this.patients.find((item) => this.idsMatch(item, id));
+    if (!id || (patient && this.isAssigned(patient))) return;
 
     if (this.selectedPatients.includes(id)) {
       this.selectedPatients = this.selectedPatients.filter((patientId) => patientId !== id);
@@ -380,8 +397,19 @@ loadDepartments(): void {
     this.selectedPatients = [];
   }
 
-  isPatientDisabled(id: string): boolean {
-    return this.patientsWithForm.includes(id) && !this.selectedPatients.includes(id);
+  isAssigned(patient: Users & { isAssigned?: boolean }): boolean {
+    console.log(patient, this.assignedPatients);
+
+    if (typeof patient.isAssigned === 'boolean') {
+      return patient.isAssigned && !this.isSelectedPatient(patient);
+    }
+
+    return this.assignedPatients.some((assignedPatient) => this.idsMatch(assignedPatient, patient))
+      && !this.isSelectedPatient(patient);
+  }
+
+  isSelectedPatient(patient: Users): boolean {
+    return this.selectedPatients.some((patientId) => this.idsMatch(patientId, patient));
   }
 
   get filteredPatients(): Users[] {
@@ -400,7 +428,7 @@ loadDepartments(): void {
       return 'No patients selected';
     }
 
-    const selected = this.patients.filter((patient) => this.selectedPatients.includes(patient._id || ''));
+    const selected = this.patients.filter((patient) => this.isSelectedPatient(patient));
     const names = selected
       .map((patient) => `${patient.firstName || ''} ${patient.lastName || ''}`.trim())
       .filter(Boolean);
@@ -414,6 +442,35 @@ loadDepartments(): void {
     }
 
     return `${names.slice(0, 2).join(', ')} +${names.length - 2} more`;
+  }
+
+  private idsMatch(first: unknown, second: unknown): boolean {
+    const firstId = this.getComparableId(first);
+    const secondId = this.getComparableId(second);
+    return firstId !== '' && secondId !== '' && firstId === secondId;
+  }
+
+  private getComparableId(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+
+    if (typeof value === 'string' || typeof value === 'number') {
+      return String(value).trim();
+    }
+
+    if (typeof value === 'object') {
+      const maybeEntity = value as { _id?: unknown; id?: unknown; toString?: () => string };
+      const nestedId = maybeEntity._id ?? maybeEntity.id;
+      if (nestedId !== undefined && nestedId !== null) {
+        return this.getComparableId(nestedId);
+      }
+
+      const stringValue = maybeEntity.toString?.();
+      return stringValue && stringValue !== '[object Object]' ? stringValue.trim() : '';
+    }
+
+    return '';
   }
 
   // ── AI Generation ────────────────────────────────────────
@@ -439,6 +496,7 @@ loadDepartments(): void {
           const normalized = result.questions.map((q, i) => ({
             ...this.normalizeAiQuestion(q),
             required: true,
+            occurrencesPerDay: 1,
             order: this.questions.length + i,
             category: q.category || this.currentStepCategory,
           }));
@@ -472,6 +530,9 @@ loadDepartments(): void {
         label:    q.label.trim(),
         type:     q.type,
         required: q.required,
+        occurrencesPerDay: Number(q.occurrencesPerDay),
+        measurementsPerDay: Number(q.occurrencesPerDay),
+        maxOccurrencesPerDay: Number(q.occurrencesPerDay),
         order:    q.order,
         category: q.category,
         ...(this.hasOptions(q.type)
@@ -548,7 +609,13 @@ loadDepartments(): void {
           options: this.hasOptions(this.normalizeType(question.type))
             ? (question.options || []).map((option) => option.trim()).filter(Boolean)
             : [],
-          required: true,
+          required: question.required ?? true,
+          occurrencesPerDay: this.normalizeOccurrenceCount(
+            question.occurrencesPerDay ??
+            question.measurementsPerDay ??
+            question.maxOccurrencesPerDay,
+            1
+          ),
           order: index,
           category: question.category || 'vital_parameters',
         }));
@@ -611,5 +678,10 @@ loadDepartments(): void {
       case 'multiple': return 'multiple_choice';
       default:         return 'text';
     }
+  }
+
+  private normalizeOccurrenceCount(value: number | undefined, fallback: number): number {
+    const count = Number(value);
+    return Number.isInteger(count) && count >= 1 && count <= 10 ? count : fallback;
   }
 }

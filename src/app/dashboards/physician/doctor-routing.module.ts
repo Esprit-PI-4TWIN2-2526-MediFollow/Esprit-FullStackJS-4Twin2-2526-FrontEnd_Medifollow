@@ -6,7 +6,6 @@ import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionna
 import { DoctorViewSymptomsComponent } from './doctor-view-symptoms.component';
 import { ViewAlertComponent } from './view-alert/view-alert.component';
 import { ChatComponent } from '../../chat/chat.component';
-import { ContactsComponent } from '../../chat/contacts/contacts.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
@@ -16,7 +15,8 @@ const routes: Routes = [
   { path: 'viewQu/:id', component: ViewQuestionnaireComponent },
   { path: 'alert/patient/:patientId', component: ViewAlertComponent },
   { path: 'alert/:id', component: ViewAlertComponent },
-  { path: 'contacts', component: ContactsComponent },
+  { path: 'contacts', redirectTo: 'chat', pathMatch: 'full' },
+  { path: 'chat', component: ChatComponent },
   { path: 'chat/:targetUserId', component: ChatComponent }
 ];
 
