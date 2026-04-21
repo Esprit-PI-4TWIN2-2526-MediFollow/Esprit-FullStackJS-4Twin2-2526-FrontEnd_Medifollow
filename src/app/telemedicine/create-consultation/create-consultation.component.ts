@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ConsultationService } from '../services/consultation.service';
 import { CreateConsultationDto } from '../models/consultation.model';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-create-consultation',
@@ -42,7 +43,7 @@ export class CreateConsultationComponent implements OnInit {
   }
 
   loadPatients(): void {
-    this.http.get<any[]>('http://localhost:3000/api/users/patients').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/api/users/patients`).subscribe({
       next: (data) => {
         this.patients = data;
       },

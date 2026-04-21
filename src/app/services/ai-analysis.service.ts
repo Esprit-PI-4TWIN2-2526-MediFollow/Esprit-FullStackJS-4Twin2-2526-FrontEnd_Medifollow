@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AiAnalysis } from '../models/ai-analysis';
+import { environment } from '../../environments/environment';
 
 
 
@@ -10,7 +11,7 @@ import { AiAnalysis } from '../models/ai-analysis';
 })
 export class AiAnalysisService {
 
-  private readonly apiUrl = 'http://localhost:3000/ai-analysis';
+  private readonly apiUrl = `${environment.apiUrl}/ai-analysis`;
 
   constructor(private http: HttpClient) {}
 

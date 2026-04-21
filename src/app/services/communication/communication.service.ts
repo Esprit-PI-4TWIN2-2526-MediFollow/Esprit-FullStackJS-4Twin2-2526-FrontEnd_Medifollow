@@ -1,15 +1,16 @@
-// src/app/services/communication/communication.service.ts
+
 import { Injectable, OnDestroy } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Message } from '../../models/message';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class CommunicationService implements OnDestroy {
   private socket!: Socket;
-  private readonly SERVER_URL = 'http://localhost:3000';
+  private readonly SERVER_URL = environment.apiUrl;
   private currentUser = JSON.parse(localStorage.getItem('user') ?? '{}');
 
   // Streams réactifs pour les composants

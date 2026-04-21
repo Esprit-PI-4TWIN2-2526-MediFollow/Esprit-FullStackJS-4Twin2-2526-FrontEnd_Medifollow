@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-contacts',
@@ -232,7 +233,7 @@ export class ContactsComponent implements OnInit {
     const currentUserRole = this.getRoleName(currentUser).toUpperCase();
     const currentUserId = currentUser._id;
 
-    this.http.get<any[]>('http://localhost:3000/api/users/all').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/api/users/all`).subscribe({
       next: (data) => {
         let filtered = [];
 

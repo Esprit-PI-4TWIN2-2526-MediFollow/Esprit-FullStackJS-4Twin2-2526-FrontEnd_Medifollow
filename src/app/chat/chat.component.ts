@@ -10,6 +10,7 @@ import { Message } from '../models/message';
 import { CommunicationService } from '../services/communication/communication.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-chat',
@@ -101,7 +102,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     const currentUserRole = this.getRoleFromUser(this.currentUser).toUpperCase();
     const currentUserId = this.currentUser._id;
 
-    this.http.get<any[]>('http://localhost:3000/api/users/all').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/api/users/all`).subscribe({
       next: (data) => {
         let filtered: any[] = [];
 
@@ -173,7 +174,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       };
     } else {
       // Fetch si pas encore dans la liste
-      this.http.get<any>(`http://localhost:3000/api/users/${userId}`).subscribe({
+      this.http.get<any>(`${environment.apiUrl}/api/users/${userId}`).subscribe({
         next: (user) => {
           this.recipient = {
             firstName: user.firstName,
