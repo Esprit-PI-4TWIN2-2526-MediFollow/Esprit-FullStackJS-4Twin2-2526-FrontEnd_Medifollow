@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom, Observable, Subject } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
+import { ActionDispatcherService } from './action-dispatcher.service';
+import { VoiceCommandService } from './voice-command.service';
 
 type SpeechRecognitionErrorCode =
   | 'no-speech'
@@ -50,27 +51,16 @@ interface SpeechRecognitionLike {
 
 type SpeechRecognitionCtor = new () => SpeechRecognitionLike;
 
-interface VoiceSessionResponse {
-  token?: string;
-  [key: string]: unknown;
-}
-
 @Injectable({ providedIn: 'root' })
 export class VoiceWakeService {
   private recognition: SpeechRecognitionLike | null = null;
   private readonly wakeDetectedSubject = new Subject<string>();
-  private readonly sessionStartedSubject = new Subject<VoiceSessionResponse>();
 
   private isActive = false;
   private isStarting = false;
   private isRecognitionRunning = false;
   private restartTimer: ReturnType<typeof setTimeout> | null = null;
-
-  private isSessionCallInFlight = false;
-  private isVoiceSessionActive = false;
-  private lastSessionStartAt = 0;
-  private readonly sessionCooldownMs = 2800;
-  private sessionResponse: VoiceSessionResponse | null = null;
+  private commandInFlight = false;
 
   private restartAttempts = 0;
   private restartWindowStart = 0;
@@ -82,6 +72,8 @@ export class VoiceWakeService {
 
   private lastWakeTriggerAt = 0;
   private readonly wakeDebounceMs = 2200;
+  private assistantActiveUntil = 0;
+  private readonly assistantActiveMs = 10000;
 
   private noSpeechCount = 0;
   private readonly noSpeechFallbackThreshold = 5;
@@ -89,18 +81,14 @@ export class VoiceWakeService {
   private readonly fallbackLanguage = 'fr-FR';
   private currentLanguage = this.primaryLanguage;
 
-  private readonly wakePatterns = [
-    /\bskander\b/i,
-    /\bhey\s+skander\b/i,
-    /\bhi\s+skander\b/i,
-    /\bskandar\b/i,
-  ];
+  private readonly wakePatterns = [/\bskander\b/i, /\bscander\b/i, /\bskandar\b/i];
 
   readonly wakeDetected$: Observable<string> = this.wakeDetectedSubject.asObservable();
-  readonly sessionStarted$: Observable<VoiceSessionResponse> =
-    this.sessionStartedSubject.asObservable();
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly voiceCommandService: VoiceCommandService,
+    private readonly actionDispatcher: ActionDispatcherService,
+  ) {}
 
   async startListening(language: 'en-US' | 'fr-FR' = 'en-US'): Promise<void> {
     const ctor = this.getSpeechRecognitionCtor();
@@ -124,6 +112,7 @@ export class VoiceWakeService {
     this.noSpeechCount = 0;
     this.restartAttempts = 0;
     this.restartWindowStart = Date.now();
+    this.assistantActiveUntil = 0;
 
     if (!this.recognition) {
       this.recognition = new ctor();
@@ -140,6 +129,7 @@ export class VoiceWakeService {
   stopListening(): void {
     this.isActive = false;
     this.isStarting = false;
+    this.assistantActiveUntil = 0;
     this.clearRestartTimer();
 
     if (!this.recognition) {
@@ -157,50 +147,6 @@ export class VoiceWakeService {
     return this.wakeDetected$;
   }
 
-  onSessionStarted(): Observable<VoiceSessionResponse> {
-    return this.sessionStarted$;
-  }
-
-  async startVoiceSession(): Promise<VoiceSessionResponse | null> {
-    const now = Date.now();
-
-    if (this.isSessionCallInFlight) {
-      return this.sessionResponse;
-    }
-
-    if (this.isVoiceSessionActive && now - this.lastSessionStartAt < this.sessionCooldownMs) {
-      return this.sessionResponse;
-    }
-
-    if (now - this.lastSessionStartAt < this.sessionCooldownMs) {
-      return this.sessionResponse;
-    }
-
-    this.isSessionCallInFlight = true;
-    this.lastSessionStartAt = now;
-
-    console.log('[VoiceWake] Calling backend...');
-
-    try {
-      const session = await firstValueFrom(
-        this.http.post<VoiceSessionResponse>('http://localhost:3000/voice/session', {}),
-      );
-
-      this.sessionResponse = session;
-      this.isVoiceSessionActive = true;
-      this.sessionStartedSubject.next(session);
-      this.speak('Yes, how can I help you?');
-      console.log('[VoiceWake] Session started');
-      return session;
-    } catch (error) {
-      this.isVoiceSessionActive = false;
-      console.error('[VoiceWake] Failed to start session', error);
-      return null;
-    } finally {
-      this.isSessionCallInFlight = false;
-    }
-  }
-
   private bindRecognitionHandlers(recognition: SpeechRecognitionLike): void {
     recognition.onstart = () => {
       this.isStarting = false;
@@ -210,25 +156,21 @@ export class VoiceWakeService {
     };
 
     recognition.onresult = (event: SpeechRecognitionEventLike) => {
-      let transcript = '';
-
       for (let i = event.resultIndex; i < event.results.length; i += 1) {
-        const alt = event.results[i]?.[0]?.transcript ?? '';
-        transcript += `${alt} `;
-      }
+        const raw = event.results[i]?.[0]?.transcript ?? '';
+        const normalized = this.normalizeTranscript(raw);
+        if (!this.isValidTranscript(normalized)) {
+          continue;
+        }
 
-      const normalized = this.normalizeTranscript(transcript);
-      if (!this.isValidTranscript(normalized)) {
-        return;
-      }
+        console.log(`[VoiceWake] Transcript: "${normalized}"`);
+        const isFinal = !!event.results[i]?.isFinal;
 
-      console.log(`[VoiceWake] Transcript: "${normalized}"`);
+        if (!isFinal) {
+          continue;
+        }
 
-      if (this.isWakePhrase(normalized) && this.canTriggerWake()) {
-        this.lastWakeTriggerAt = Date.now();
-        console.log('[VoiceWake] Skander activated');
-        this.wakeDetectedSubject.next(normalized);
-        void this.startVoiceSession();
+        void this.handleTranscript(normalized);
       }
     };
 
@@ -269,6 +211,56 @@ export class VoiceWakeService {
       console.log('[VoiceWake] Recognition ended, restarting...');
       this.scheduleRestart('onend');
     };
+  }
+
+  private async handleTranscript(transcript: string): Promise<void> {
+    if (this.commandInFlight) {
+      return;
+    }
+
+    const wakeFound = this.containsWakeWord(transcript);
+    let commandText = transcript;
+
+    if (wakeFound && this.canTriggerWake()) {
+      this.lastWakeTriggerAt = Date.now();
+      this.assistantActiveUntil = Date.now() + this.assistantActiveMs;
+      this.wakeDetectedSubject.next(transcript);
+      this.speak('Yes, how can I help you?');
+      commandText = this.removeWakeWord(transcript);
+    } else if (!wakeFound && !this.isAssistantActive()) {
+      return;
+    }
+
+    if (!commandText.trim()) {
+      return;
+    }
+
+    this.commandInFlight = true;
+    try {
+      const intent = await this.voiceCommandService.processCommand(commandText);
+      await this.actionDispatcher.dispatch(intent);
+    } catch (error) {
+      console.error('[VoiceWake] Command pipeline failed', error);
+      this.speak('Sorry, I could not process that.');
+    } finally {
+      this.commandInFlight = false;
+    }
+  }
+
+  private containsWakeWord(transcript: string): boolean {
+    return this.wakePatterns.some((pattern) => pattern.test(transcript));
+  }
+
+  private removeWakeWord(transcript: string): string {
+    let result = transcript;
+    for (const pattern of this.wakePatterns) {
+      result = result.replace(pattern, ' ');
+    }
+    return result.replace(/\s+/g, ' ').trim();
+  }
+
+  private isAssistantActive(): boolean {
+    return Date.now() < this.assistantActiveUntil;
   }
 
   private scheduleRestart(reason: string): void {
@@ -342,17 +334,10 @@ export class VoiceWakeService {
   }
 
   private isValidTranscript(value: string): boolean {
-    if (!value) {
-      return false;
-    }
-    if (value.length < 3) {
+    if (!value || value.length < 3) {
       return false;
     }
     return /[a-z]/i.test(value);
-  }
-
-  private isWakePhrase(transcript: string): boolean {
-    return this.wakePatterns.some((pattern) => pattern.test(transcript));
   }
 
   private canTriggerWake(): boolean {
@@ -396,7 +381,6 @@ export class VoiceWakeService {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.rate = 1;
     utterance.pitch = 1;
-
     window.speechSynthesis.cancel();
     window.speechSynthesis.speak(utterance);
   }
