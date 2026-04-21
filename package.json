@@ -27,6 +27,8 @@
     "@fullcalendar/interaction": "^6.1.20",
     "@fullcalendar/timegrid": "^6.1.20",
     "@mediapipe/hands": "^0.4.1675469240",
+    "@ngx-translate/core": "^17.0.0",
+    "@ngx-translate/http-loader": "^17.0.0",
     "@popperjs/core": "^2.11.8",
     "@simplewebauthn/browser": "^13.2.2",
     "apexcharts": "^4.7.0",

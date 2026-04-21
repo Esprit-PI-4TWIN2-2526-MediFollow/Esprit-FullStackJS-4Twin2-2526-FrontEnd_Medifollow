@@ -2,6 +2,7 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { SidebarService } from '../../services/sidebar.service';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { LanguageService } from '../../../services/i18n/language.service';
 
 @Component({
   selector: 'app-header',
@@ -13,8 +14,15 @@ export class AppHeaderComponent {
 
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
 
-  constructor(public sidebarService: SidebarService) {
+  constructor(
+    public sidebarService: SidebarService,
+    public languageService: LanguageService,
+  ) {
     this.isMobileOpen$ = this.sidebarService.isMobileOpen$;
+  }
+
+  get currentLanguage(): string {
+    return this.languageService.currentLanguage;
   }
 
   handleToggle() {
@@ -27,6 +35,10 @@ export class AppHeaderComponent {
 
   toggleApplicationMenu() {
     this.isApplicationMenuOpen = !this.isApplicationMenuOpen;
+  }
+
+  changeLanguage(language: string) {
+    this.languageService.use(language);
   }
 
   ngAfterViewInit() {

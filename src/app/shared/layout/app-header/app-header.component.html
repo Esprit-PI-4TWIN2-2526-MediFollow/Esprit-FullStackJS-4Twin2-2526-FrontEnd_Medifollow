@@ -22,7 +22,7 @@
 
     <button
       (click)="handleToggle()"
-      aria-label="Toggle Sidebar"
+      [attr.aria-label]="'HEADER.TOGGLE_SIDEBAR' | translate"
       style="width:40px;height:40px;border-radius:12px;background:#f0fafa;border:1.5px solid #cceceb;color:#0d9488;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;flex-shrink:0;"
       onmouseover="this.style.background='#d8f5f3';this.style.borderColor='#0d9488'"
       onmouseout="this.style.background='#f0fafa';this.style.borderColor='#cceceb'"
@@ -40,9 +40,9 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="color:#0d9488;flex-shrink:0;">
           <path d="M3 12h4l2-7 4 14 2-7h6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span style="font-size:11px;font-weight:700;color:#0d9488;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;">Post-Hospitalisation</span>
+        <span style="font-size:11px;font-weight:700;color:#0d9488;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;">{{ 'HEADER.SECTION' | translate }}</span>
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" style="color:#9ecfca;"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
-        <span style="font-size:12px;color:#64748b;font-weight:500;white-space:nowrap;">Dashboard</span>
+        <span style="font-size:12px;color:#64748b;font-weight:500;white-space:nowrap;">{{ 'HEADER.PAGE' | translate }}</span>
       </div>
     </div>
   </div>
@@ -55,7 +55,7 @@
       </span>
       <input
         #searchInput type="text"
-        placeholder="Patient, Physician, service..."
+        [placeholder]="'HEADER.SEARCH_PLACEHOLDER' | translate"
         style="width:100%;height:40px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:0 80px 0 38px;font-size:13px;color:#1e293b;outline:none;transition:all 0.2s;"
         onfocus="this.style.borderColor='#0d9488';this.style.background='#fff';this.style.boxShadow='0 0 0 3px rgba(13,148,136,0.1)'"
         onblur="this.style.borderColor='#e2e8f0';this.style.background='#f8fafc';this.style.boxShadow='none'"
@@ -74,11 +74,34 @@
 
       <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:10px;background:#fef2f2;border:1px solid #fca5a5;">
         <span style="width:6px;height:6px;border-radius:50%;background:#ef4444;animation:hpulse 1.5s infinite;flex-shrink:0;"></span>
-        <span style="font-size:11px;font-weight:700;color:#ef4444;white-space:nowrap;">3 alertes</span>
+        <span style="font-size:11px;font-weight:700;color:#ef4444;white-space:nowrap;">{{ 'HEADER.ALERTS' | translate:{ count: 3 } }}</span>
       </div>
     </div>
 
     <div class="hidden xl:block" style="width:1px;height:26px;background:#e2e8f0;"></div>
+
+    <div class="hidden xl:flex" style="align-items:center;gap:4px;padding:4px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
+      <button
+        type="button"
+        (click)="changeLanguage('fr')"
+        [attr.aria-pressed]="currentLanguage === 'fr'"
+        [attr.aria-label]="'HEADER.SWITCH_TO_FRENCH' | translate"
+        [style.background]="currentLanguage === 'fr' ? '#0d9488' : 'transparent'"
+        [style.color]="currentLanguage === 'fr' ? '#ffffff' : '#475569'"
+        style="border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+        FR
+      </button>
+      <button
+        type="button"
+        (click)="changeLanguage('en')"
+        [attr.aria-pressed]="currentLanguage === 'en'"
+        [attr.aria-label]="'HEADER.SWITCH_TO_ENGLISH' | translate"
+        [style.background]="currentLanguage === 'en' ? '#0d9488' : 'transparent'"
+        [style.color]="currentLanguage === 'en' ? '#ffffff' : '#475569'"
+        style="border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;transition:all 0.2s;">
+        EN
+      </button>
+    </div>
 
     <app-theme-toggle-button />
     <app-notification-dropdown />
@@ -88,10 +111,30 @@
   <!-- Mobile expanded -->
   <div [ngClass]="isApplicationMenuOpen ? 'block' : 'hidden'"
     style="position:absolute;top:66px;left:0;right:0;padding:14px 16px;background:#fff;border-bottom:2px solid #e8f4f3;box-shadow:0 8px 20px rgba(0,0,0,0.08);z-index:10;">
-    <input type="text" placeholder="Rechercher..."
+    <input type="text" [placeholder]="'HEADER.SEARCH_MOBILE_PLACEHOLDER' | translate"
       style="width:100%;height:40px;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:0 14px;font-size:13px;color:#1e293b;outline:none;margin-bottom:10px;display:block;"/>
     <div style="display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;gap:8px;"><app-theme-toggle-button /><app-notification-dropdown /></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="display:flex;align-items:center;gap:4px;padding:4px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0;">
+          <button
+            type="button"
+            (click)="changeLanguage('fr')"
+            [style.background]="currentLanguage === 'fr' ? '#0d9488' : 'transparent'"
+            [style.color]="currentLanguage === 'fr' ? '#ffffff' : '#475569'"
+            style="border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;">
+            FR
+          </button>
+          <button
+            type="button"
+            (click)="changeLanguage('en')"
+            [style.background]="currentLanguage === 'en' ? '#0d9488' : 'transparent'"
+            [style.color]="currentLanguage === 'en' ? '#ffffff' : '#475569'"
+            style="border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:700;cursor:pointer;">
+            EN
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;"><app-theme-toggle-button /><app-notification-dropdown /></div>
+      </div>
       <app-user-dropdown />
     </div>
   </div>
