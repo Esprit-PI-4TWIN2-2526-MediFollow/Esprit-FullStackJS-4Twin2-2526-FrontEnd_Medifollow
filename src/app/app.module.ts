@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -66,7 +67,7 @@ import { MonthlySalesChartComponent } from './shared/components/ecommerce/monthl
 import { MonthlyTargetComponent } from './shared/components/ecommerce/monthly-target/monthly-target.component';
 import { MultiSelectComponent } from './shared/components/form/multi-select/multi-select.component';
 import { NotFoundComponent } from './pages/other-page/not-found/not-found.component';
-import { NotificationDropdownComponent } from './shared/components/header/notification-dropdown/notification-dropdown.component';
+import { NotificationDropdownComponent } from './shared/components/notification-dropdown/notification-dropdown.component';
 import { OneIstoOneComponent } from './shared/components/ui/videos/one-isto-one/one-isto-one.component';
 import { PageBreadcrumbComponent } from './shared/components/common/page-breadcrumb/page-breadcrumb.component';
 import { PhoneInputComponent } from './shared/components/form/group-input/phone-input/phone-input.component';
@@ -119,6 +120,7 @@ import { authInterceptor } from './services/auth/auth.interceptor';
 import { GestureControlModule } from './gesture-control/gesture-control.module';
 import { ChatComponent } from './chat/chat.component';
 import { ContactsComponent } from './chat/contacts/contacts.component';
+import { NotificationsPageComponent } from './pages/notifications/notifications-page.component';
 
 
 
@@ -230,12 +232,14 @@ import { ContactsComponent } from './chat/contacts/contacts.component';
     RoleManageComponent,
     ManageServiceComponent,
     UnauthorizedComponent,
+    NotificationsPageComponent,
 
 
 
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,

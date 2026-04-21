@@ -1,0 +1,292 @@
+<div class="space-y-6">
+  <div class="rounded-[28px] border border-brand-100 bg-gradient-to-br from-white via-brand-50/50 to-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] dark:border-white/[0.06] dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div class="max-w-2xl">
+        <div class="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-600 shadow-sm backdrop-blur dark:border-brand-500/20 dark:bg-white/5 dark:text-brand-300">
+          <span class="h-2 w-2 rounded-full bg-brand-500"></span>
+          Audit trail
+        </div>
+        <h3 class="mt-3 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Audit Logs
+        </h3>
+        <p class="mt-2 max-w-xl text-sm leading-6 text-slate-600 dark:text-slate-300">
+          Browse security and data change events with a softer, friendlier interface.
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          (click)="refreshAll()"
+          class="inline-flex h-11 items-center justify-center rounded-2xl border border-brand-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-brand-300 hover:text-brand-700 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/90"
+        >
+          Refresh
+        </button>
+        <button
+          type="button"
+          (click)="clearFilters()"
+          class="inline-flex h-11 items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-50 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/90"
+        >
+          Clear
+        </button>
+      </div>
+    </div>
+
+    <div class="mt-6 rounded-[24px] border border-white/60 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-white/[0.06] dark:bg-white/[0.04]">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-6">
+        <div class="xl:col-span-1">
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">Username</label>
+          <input
+            [(ngModel)]="filters.userName"
+            (keyup.enter)="applyFilters()"
+            class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:ring-4 focus:ring-brand-500/10 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-500/10"
+            type="text"
+            placeholder="Name or email"
+          />
+        </div>
+
+        <div class="xl:col-span-1">
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">Service</label>
+          <select
+            [(ngModel)]="filters.service"
+            (change)="applyFilters()"
+            class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-brand-300 focus:ring-4 focus:ring-brand-500/10 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-500/10"
+          >
+            <option value="">All services</option>
+            <option *ngFor="let service of services; trackBy: trackByValue" [value]="service">{{ service }}</option>
+          </select>
+        </div>
+
+        <div class="xl:col-span-1">
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">Action</label>
+          <select
+            [(ngModel)]="filters.action"
+            (change)="applyFilters()"
+            class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition focus:border-brand-300 focus:ring-4 focus:ring-brand-500/10 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-500/10"
+          >
+            <option value="">All actions</option>
+            <option *ngFor="let a of actionOptions; trackBy: trackByIndex" [value]="a">{{ a }}</option>
+          </select>
+        </div>
+
+        <div class="xl:col-span-1">
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">Entity</label>
+          <input
+            [(ngModel)]="filters.entity"
+            (keyup.enter)="applyFilters()"
+            class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:ring-4 focus:ring-brand-500/10 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-500/10"
+            type="text"
+            placeholder="Entity name"
+          />
+        </div>
+
+        <div class="xl:col-span-1">
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">From</label>
+          <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-brand-500 dark:text-brand-300">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="4"></rect>
+                <path d="M16 2v4M8 2v4M3 10h18"></path>
+              </svg>
+            </span>
+            <input
+              #fromDateInput
+              [value]="filters.from"
+              class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pl-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:ring-4 focus:ring-brand-500/10 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-500/10"
+              type="text"
+              placeholder="Select start date"
+              readonly
+            />
+          </div>
+        </div>
+
+        <div class="xl:col-span-1">
+          <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-200">To</label>
+          <div class="relative">
+            <span class="pointer-events-none absolute inset-y-0 left-4 flex items-center text-brand-500 dark:text-brand-300">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="4"></rect>
+                <path d="M16 2v4M8 2v4M3 10h18"></path>
+              </svg>
+            </span>
+            <input
+              #toDateInput
+              [value]="filters.to"
+              class="h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pl-11 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-300 focus:ring-4 focus:ring-brand-500/10 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white dark:focus:border-brand-400 dark:focus:ring-brand-500/10"
+              type="text"
+              placeholder="Select end date"
+              readonly
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center justify-end">
+        <button
+          type="button"
+          (click)="applyFilters()"
+          class="inline-flex h-11 items-center justify-center rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 px-5 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition hover:-translate-y-0.5 hover:from-brand-600 hover:to-brand-700 disabled:cursor-not-allowed disabled:opacity-60"
+          [disabled]="isLoadingLogs"
+        >
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 gap-4">
+    <div class="rounded-[28px] border border-brand-100 bg-white p-5 shadow-[0_16px_40px_rgba(15,23,42,0.06)] dark:border-white/[0.05] dark:bg-white/[0.03]">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h4 class="text-sm font-semibold uppercase tracking-[0.16em] text-brand-600 dark:text-brand-300">Logs</h4>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Latest audit events from the system.</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+          <div class="rounded-2xl bg-slate-50 px-3 py-2 dark:bg-white/[0.04]">
+            Total: <span class="font-semibold text-slate-900 dark:text-white">{{ total }}</span>
+          </div>
+          <div class="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-white/[0.04]">
+            <span>Limit</span>
+            <select
+              [ngModel]="limit"
+              (ngModelChange)="onLimitChange($event)"
+              class="h-9 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-300 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white"
+            >
+              <option *ngFor="let l of limitOptions; trackBy: trackByIndex" [value]="l">{{ l }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 dark:bg-white/[0.04]">
+            <span>Page</span>
+            <input
+              [ngModel]="page"
+              (ngModelChange)="goToPage($event)"
+              class="h-9 w-20 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-800 outline-none focus:border-brand-300 dark:border-white/[0.08] dark:bg-slate-950/40 dark:text-white"
+              type="number"
+              min="1"
+            />
+            <span class="text-slate-400">/ {{ totalPages }}</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              (click)="goToPage(page - 1)"
+              [disabled]="page <= 1 || isLoadingLogs"
+              class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/90"
+            >
+              Prev
+            </button>
+            <button
+              type="button"
+              (click)="goToPage(page + 1)"
+              [disabled]="page >= totalPages || isLoadingLogs"
+              class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/[0.08] dark:bg-white/[0.04] dark:text-white/90"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <div *ngIf="isLoadingLogs" class="text-sm text-slate-500 dark:text-slate-400">Loading logs...</div>
+        <div *ngIf="logsError" class="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-200">
+          {{ logsError }}
+        </div>
+
+        <div class="overflow-x-auto" *ngIf="!isLoadingLogs && !logsError">
+          <table class="min-w-full table-auto border-separate border-spacing-y-2">
+            <thead>
+              <tr class="text-left text-xs font-bold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+                <th class="px-3 py-2">Timestamp</th>
+                <th class="px-3 py-2">Action</th>
+                <th class="px-3 py-2">User</th>
+                <th class="px-3 py-2">Service</th>
+                <th class="px-3 py-2">Method</th>
+                <th class="px-3 py-2">Endpoint</th>
+                <th class="px-3 py-2">Entity</th>
+                <th class="px-3 py-2">Changes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let log of logs; trackBy: trackByIndex"
+                class="rounded-2xl border border-slate-100 bg-slate-50/80 text-sm text-slate-700 shadow-sm dark:border-white/[0.06] dark:bg-white/[0.03] dark:text-slate-200"
+              >
+                <td class="whitespace-nowrap px-3 py-4 text-xs text-slate-600 dark:text-slate-300">
+                  {{ resolveTimestamp(log) | date:'yyyy-MM-dd HH:mm:ss' }}
+                </td>
+                <td class="px-3 py-4">
+                  <span
+                    class="inline-flex rounded-full px-3 py-1 text-xs font-bold ring-1 ring-inset"
+                    [ngClass]="getActionBadgeClass(log.action)"
+                  >
+                    {{ log.action }}
+                  </span>
+                </td>
+                <td class="px-3 py-4">
+                  <div class="flex flex-col">
+                    <span class="font-semibold text-slate-900 dark:text-white">{{ log.userName || '-' }}</span>
+                    <span class="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{{ log.userRole || '-' }}</span>
+                  </div>
+                </td>
+                <td class="px-3 py-4">{{ log.departement }}</td>
+                <td class="px-3 py-4">
+                  <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-500/10 dark:text-brand-200">
+                    {{ log.method }}
+                  </span>
+                </td>
+                <td class="px-3 py-4">
+                  <span class="text-xs text-slate-600 dark:text-slate-300">{{ log.endpoint }}</span>
+                </td>
+                <td class="px-3 py-4">{{ log.entity }}</td>
+                <td class="px-3 py-4">
+                  <details class="group">
+                    <summary class="cursor-pointer select-none text-xs font-semibold text-brand-600 hover:underline dark:text-brand-300">
+                      View
+                    </summary>
+                    <div class="mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-white/[0.08] dark:bg-slate-950/50">
+                      <ng-container *ngIf="hasStructuredChanges(log.changes); else rawChangesFallback">
+                        <div class="overflow-x-auto">
+                          <table class="min-w-full table-auto">
+                            <thead class="bg-brand-50/70 dark:bg-brand-500/10">
+                              <tr class="text-left text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500 dark:text-slate-300">
+                                <th class="px-3 py-2">Field</th>
+                                <th class="px-3 py-2">Old Value</th>
+                                <th class="px-3 py-2">New Value</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr
+                                *ngFor="let row of getChangeRows(log.changes); trackBy: trackByField"
+                                class="border-t border-slate-100 text-xs text-slate-700 dark:border-white/[0.06] dark:text-slate-200"
+                              >
+                                <td class="px-3 py-2 font-semibold text-slate-900 dark:text-white">{{ row.field }}</td>
+                                <td class="px-3 py-2 align-top text-slate-600 dark:text-slate-300">{{ row.from }}</td>
+                                <td class="px-3 py-2 align-top text-slate-600 dark:text-slate-300">{{ row.to }}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </ng-container>
+
+                      <ng-template #rawChangesFallback>
+                        <pre class="max-h-48 overflow-auto p-3 text-xs text-slate-700 dark:text-slate-200">{{ formatChanges(log.changes) }}</pre>
+                      </ng-template>
+                    </div>
+                  </details>
+                </td>
+              </tr>
+
+              <tr *ngIf="logs.length === 0">
+                <td colspan="8" class="px-3 py-8 text-center text-sm text-slate-500 dark:text-slate-400">
+                  No logs found.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

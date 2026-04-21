@@ -123,6 +123,34 @@ describe('SymptomService', () => {
     request.flush({ saved: true });
   });
 
+  it("should load today's per-question status for a symptoms form", () => {
+    service.getTodayQuestionStatus('patient-1').subscribe((statuses) => {
+      expect(statuses).toEqual([
+        {
+          questionId: 'question-1',
+          required: true,
+          isBlocked: false,
+          occurrencesPerDay: 1,
+          occurrencesToday: 0,
+        },
+      ]);
+    });
+
+    const request = httpMock.expectOne(`${apiUrl}/questions/status/today/patient-1`);
+    expect(request.request.method).toBe('GET');
+    request.flush({
+      statuses: [
+        {
+          questionId: 'question-1',
+          required: true,
+          isBlocked: false,
+          occurrencesPerDay: 1,
+          occurrencesToday: 0,
+        },
+      ],
+    });
+  });
+
   it('should request AI-generated symptoms questions with the selected category', () => {
     service
       .generateQuestionsWithAI('Post surgery', 'Daily monitoring', 3, 'subjective_symptoms')

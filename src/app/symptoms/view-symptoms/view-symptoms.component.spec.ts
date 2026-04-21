@@ -20,6 +20,7 @@ describe('ViewSymptomsComponent', () => {
     _id: 'form-1',
     title: 'Daily symptoms',
     medicalService: 'Cardiology',
+    patientId: 'patient-1',
     questions: [
       { _id: 'question-1', label: 'Temperature', type: 'number', required: true },
       { _id: 'question-2', label: 'Changed dressing', type: 'boolean', required: true },
@@ -34,13 +35,23 @@ describe('ViewSymptomsComponent', () => {
     ],
   };
 
+  const todayStatuses = [
+    { questionId: 'question-1', required: true, isBlocked: false, occurrencesPerDay: 1, occurrencesToday: 0 },
+    { questionId: 'question-2', required: true, isBlocked: false, occurrencesPerDay: 1, occurrencesToday: 0 },
+    { questionId: 'question-3', required: true, isBlocked: false, occurrencesPerDay: 1, occurrencesToday: 0 },
+    { questionId: 'question-4', required: false, isBlocked: false, occurrencesPerDay: 1, occurrencesToday: 0 },
+  ];
+
   beforeEach(async () => {
     routeId = 'form-1';
+    localStorage.removeItem('user');
     symptomService = jasmine.createSpyObj<SymptomService>('SymptomService', [
       'getFormById',
+      'getTodayQuestionStatus',
       'submitResponse',
     ]);
     symptomService.getFormById.and.returnValue(of(symptomForm));
+    symptomService.getTodayQuestionStatus.and.returnValue(of(todayStatuses));
     symptomService.submitResponse.and.returnValue(of({ saved: true }));
 
     await TestBed.configureTestingModule({
@@ -74,7 +85,9 @@ describe('ViewSymptomsComponent', () => {
   it('should create and load the selected symptoms form', () => {
     expect(component).toBeTruthy();
     expect(symptomService.getFormById).toHaveBeenCalledWith('form-1');
+    expect(symptomService.getTodayQuestionStatus).toHaveBeenCalledWith('patient-1');
     expect(component.symptomForm).toEqual(symptomForm);
+    expect(component.visibleQuestions.length).toBe(4);
     expect(component.isLoading).toBeFalse();
   });
 
@@ -87,6 +100,24 @@ describe('ViewSymptomsComponent', () => {
     expect(component.responseForm.get('question_0')?.valid).toBeFalse();
     expect(component.responseForm.get('question_2')?.valid).toBeFalse();
     expect(component.responseForm.get('question_3')?.valid).toBeTrue();
+  });
+
+  it('should use today question status for required labels, progress and blocked questions', () => {
+    component['applyTodayQuestionStatus']([
+      { questionId: 'question-1', required: true, isBlocked: false, occurrencesPerDay: 2, occurrencesToday: 1 },
+      { questionId: 'question-2', required: false, isBlocked: false, occurrencesPerDay: 1, occurrencesToday: 0 },
+      { questionId: 'question-3', required: true, isBlocked: true, occurrencesPerDay: 1, occurrencesToday: 1 },
+      { questionId: 'question-4', required: false, isBlocked: false, occurrencesPerDay: 1, occurrencesToday: 0 },
+    ]);
+
+    expect(component.visibleQuestions.map((question) => question._id)).toEqual([
+      'question-1',
+      'question-2',
+      'question-4',
+    ]);
+    expect(component.isQuestionRequired(symptomForm.questions[1])).toBeFalse();
+    expect(component.responseForm.get('question_1')?.valid).toBeTrue();
+    expect(component.getMeasurementProgress(symptomForm.questions[0])).toBe('Measurement 2 / 2');
   });
 
   it('should toggle multiple choice answers without duplicates', () => {
@@ -129,6 +160,7 @@ describe('ViewSymptomsComponent', () => {
       ...symptomForm,
       questions: [{ label: 'Question without id', type: 'text', required: false }],
     };
+    component.visibleQuestions = component.symptomForm.questions;
     component.responseForm = component['fb'].group({ question_0: ['ok'] });
 
     component.submit();

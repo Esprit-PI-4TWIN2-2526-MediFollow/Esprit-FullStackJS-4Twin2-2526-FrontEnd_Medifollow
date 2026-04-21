@@ -35,7 +35,6 @@ export class SymptomsRendererComponent implements OnInit {
   isLoading = true;
   isSubmitting = false;
   isSubmitted = false;
-  hasSubmittedToday = false;
   errorMessage = '';
   submissionMessage = '';
   noData = false;
@@ -78,8 +77,36 @@ export class SymptomsRendererComponent implements OnInit {
     return this.historyDate.trim() !== '';
   }
 
-  get hasReachedDailyLimit(): boolean {
-    return this.todayResponses.length >= 3;
+  canSubmitMore(): boolean {
+    return this.questions.some((q) => {
+      const count = this.getTodayCount(q._id ?? '');
+      const limit = q.measurementsPerDay ?? 1;
+      console.log('Question:', q.label, 'count:', count, 'limit:', limit);
+      return count < limit;
+    });
+  }
+
+  isQuestionRequired(question: SymptomsQuestion): boolean {
+    const count = this.getTodayCount(question._id ?? '');
+    const limit = question.measurementsPerDay ?? 1;
+    const hasAtLeastOneAnswer = this.todayResponses.some((r) =>
+      this.normalizeAnswers(r.answers).some((a) => a.questionId === question._id)
+    );
+    const limitReached = count >= limit;
+
+    return !hasAtLeastOneAnswer || !limitReached;
+  }
+
+  getTodayCount(questionId: string): number {
+    return this.getTodayAnswersForQuestion(questionId);
+  }
+
+  getTodayAnswersForQuestion(questionId: string): number {
+    if (!questionId) return 0;
+
+    return this.todayResponses.filter((r) =>
+      this.normalizeAnswers(r.answers).some((a) => a.questionId === questionId)
+    ).length;
   }
 
   get activeResponses(): SymptomsTodayResponse[] {
@@ -172,11 +199,29 @@ export class SymptomsRendererComponent implements OnInit {
     return Array.from({ length: max - min + 1 }, (_, index) => min + index);
   }
 
+  isFormValid(): boolean {
+    const checks = this.currentQuestions.map((q) => {
+      const required = this.isQuestionRequired(q);
+      const control = this.getControl(q);
+      const value = control?.value;
+
+      return {
+        label: q.label,
+        required,
+        value,
+        valid: !required || this.hasAnswerValue(q, value),
+      };
+    });
+
+    console.log('VALID CHECK:', checks.map(({ label, required, value }) => ({ label, required, value })));
+    return checks.every((item) => item.valid);
+  }
+
   canGoNext(): boolean {
-    if (this.hasReachedDailyLimit || this.isHistoryMode) return false;
+    if (!this.canSubmitMore() || this.isHistoryMode) return false;
     const questions = this.currentQuestions;
     if (questions.length === 0) return true;
-    return questions.every((question) => this.getControl(question)?.valid);
+    return this.isFormValid();
   }
 
   next(): void {
@@ -212,7 +257,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   submit(): void {
-    if (this.hasReachedDailyLimit || this.isHistoryMode) return;
+    if (!this.canSubmitMore() || this.isHistoryMode) return;
 
     this.markAllTouched();
 
@@ -717,8 +762,8 @@ export class SymptomsRendererComponent implements OnInit {
             form: this.symptomsResponseService.getAssignedForm(this.patientId),
           }).subscribe({
             next: ({ form }) => {
-              this.hasSubmittedToday = this.todayResponses.length > 0;
               this.form = form ? this.normalizeForm(form) : null;
+              console.log('Renderer Questions:', this.questions);
 
               if (this.isHistoryMode) {
                 this.loadSymptomsForDate(this.historyDate);
@@ -766,12 +811,11 @@ export class SymptomsRendererComponent implements OnInit {
     this.symptomsResponseService.getResponsesByDate(this.patientId, today).subscribe({
       next: (responses) => {
         this.todayResponses = responses;
-        this.hasSubmittedToday = responses.length > 0;
 
         if (!this.isHistoryMode) {
           this.selectedResponse = this.orderedResponses[0] || null;
-          this.submissionMessage = this.hasReachedDailyLimit
-            ? 'You have reached the maximum of 3 submissions today'
+          this.submissionMessage = !this.canSubmitMore()
+            ? 'You have completed all required measurements for today'
             : (responses.length > 0 ? 'You can review today\'s submissions below.' : '');
         }
       },
@@ -822,7 +866,7 @@ export class SymptomsRendererComponent implements OnInit {
     const type = this.normalizeType(question.type);
     const validators: ValidatorFn[] = [];
 
-    if (question.required) {
+    if (this.isQuestionRequired(question)) {
       if (type === 'multiple_choice') {
         validators.push(this.requireAtLeastOneSelectionValidator);
       } else {
@@ -911,6 +955,16 @@ export class SymptomsRendererComponent implements OnInit {
     return value !== null && value !== undefined && value !== '';
   }
 
+  private hasAnswerValue(question: SymptomsQuestion, value: unknown): boolean {
+    const type = this.normalizeType(question.type);
+
+    if (type === 'multiple_choice') {
+      return Array.isArray(value) && value.some(Boolean);
+    }
+
+    return value !== null && value !== undefined && value !== '';
+  }
+
   private markCurrentStepTouched(): void {
     for (const question of this.currentQuestions) {
       this.getControl(question)?.markAsTouched();
@@ -935,6 +989,11 @@ export class SymptomsRendererComponent implements OnInit {
       questions: [...(form.questions ?? [])]
         .map((question) => ({
           ...question,
+          measurementsPerDay:
+            question.measurementsPerDay ??
+            question.occurrencesPerDay ??
+            question.maxOccurrencesPerDay ??
+            1,
           type: this.normalizeType(question.type),
         }))
         .sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
