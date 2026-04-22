@@ -1,0 +1,108 @@
+:host {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.voice-assistant-shell {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.voice-assistant-button {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #1f6feb, #174ea6);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.25);
+}
+
+.voice-assistant-button--listening {
+  background: linear-gradient(180deg, #059669, #047857);
+}
+
+.voice-assistant-button--speaking {
+  background: linear-gradient(180deg, #ea580c, #c2410c);
+}
+
+.voice-assistant-icon {
+  position: relative;
+  z-index: 2;
+  font-size: 1.25rem;
+}
+
+.voice-assistant-pulse {
+  position: absolute;
+  inset: -0.35rem;
+  border: 2px solid rgba(16, 185, 129, 0.4);
+  border-radius: 999px;
+  animation: voice-pulse 1.2s ease-out infinite;
+}
+
+.voice-assistant-panel {
+  min-width: 220px;
+  max-width: 320px;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.65rem 0.75rem;
+  box-shadow: 0 12px 20px rgba(2, 6, 23, 0.25);
+}
+
+.voice-assistant-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #93c5fd;
+}
+
+.voice-assistant-message {
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.2rem;
+}
+
+.voice-assistant-heard {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+@keyframes voice-pulse {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.8;
+  }
+  70% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  :host {
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .voice-assistant-panel {
+    min-width: 180px;
+    max-width: 240px;
+  }
+}

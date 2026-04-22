@@ -31,6 +31,7 @@
     "@ngx-translate/http-loader": "^17.0.0",
     "@popperjs/core": "^2.11.8",
     "@simplewebauthn/browser": "^13.2.2",
+    "@vapi-ai/web": "^2.5.2",
     "apexcharts": "^4.7.0",
     "chart.js": "^3.9.1",
     "face-api.js": "^0.22.2",
