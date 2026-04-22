@@ -26,6 +26,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   contacts: any[] = [];
   loading = false;
   activeContactId: string | null = null;
+  searchQuery = '';
+  filteredContacts: any[] = [];
 
   // ── Chat (colonne 2) ───────────────────────────────────────────────────────
   messages: Message[] = [];
@@ -33,6 +35,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   typingInfo: { name: string; isTyping: boolean } | null = null;
   currentRoomId: string | null = null;
   isConnected = false;
+
+  // ── Attachments ────────────────────────────────────────────────────────────
+  pendingAttachment: { type: string; file: File; previewUrl: string; name: string } | null = null;
+  uploadError: string | null = null;
+  isPreparingAttachment = false;
+  isRecording = false;
 
   // ── Fiche patient (colonne 3) ──────────────────────────────────────────────
   recipient: { firstName: string; lastName: string; avatarUrl?: string; isOnline?: boolean } | null = null;
@@ -90,6 +98,9 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.communicationService.isConnected()
       .pipe(takeUntil(this.destroy$))
       .subscribe(c => this.isConnected = c);
+
+    // Initialize filtered contacts
+    this.filteredContacts = this.contacts;
   }
 
   ngAfterViewChecked(): void {
@@ -128,6 +139,7 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
             isOnline: u.isOnline || false,
           }));
 
+        this.filteredContacts = this.contacts;
         this.loading = false;
       },
       error: (err) => {
@@ -239,6 +251,86 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     if (user?.role?.name) return user.role.name;
     if (typeof user?.role === 'string') return user.role;
     return '';
+  }
+
+  getContactPreview(contact: any): string {
+    return contact.lastMessage || 'No messages yet';
+  }
+
+  getMessageAttachments(message: Message, type: string): any[] {
+    if (!message.attachments) return [];
+    return message.attachments.filter((att: any) => att.type === type);
+  }
+
+  // ── Attachment Methods ─────────────────────────────────────────────────────
+  openImagePicker(): void {
+    const input = document.getElementById('imageInput') as HTMLInputElement;
+    if (input) input.click();
+  }
+
+  onImageSelected(event: any): void {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    this.uploadError = null;
+    this.isPreparingAttachment = true;
+
+    // Validate file type
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+      this.uploadError = 'Please select a valid image file (JPEG, PNG, GIF, or WebP)';
+      this.isPreparingAttachment = false;
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.uploadError = 'Image size must be less than 5MB';
+      this.isPreparingAttachment = false;
+      return;
+    }
+
+    // Create preview
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.pendingAttachment = {
+        type: 'image',
+        file: file,
+        previewUrl: e.target.result,
+        name: file.name
+      };
+      this.isPreparingAttachment = false;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removePendingAttachment(): void {
+    this.pendingAttachment = null;
+    this.uploadError = null;
+  }
+
+  toggleVoiceRecording(): void {
+    if (this.isRecording) {
+      this.stopRecording();
+    } else {
+      this.startRecording();
+    }
+  }
+
+  private startRecording(): void {
+    this.isRecording = true;
+    // TODO: Implement actual voice recording logic
+    console.log('Starting voice recording...');
+  }
+
+  private stopRecording(): void {
+    this.isRecording = false;
+    // TODO: Implement actual voice recording stop logic
+    console.log('Stopping voice recording...');
+  }
+
+  canSendMessage(): boolean {
+    return !!(this.activeContactId && this.isConnected && (this.newMessage.trim() || this.pendingAttachment));
   }
 
   private getRoleFromUser(user: any): string {
