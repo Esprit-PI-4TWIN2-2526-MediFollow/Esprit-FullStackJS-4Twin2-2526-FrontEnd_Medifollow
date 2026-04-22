@@ -1,4 +1,3 @@
-// src/app/communication/contacts/contacts.component.ts
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -10,132 +9,211 @@ import { HttpClient } from '@angular/common/http';
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   template: `
-    <div class="contacts-wrap">
+    <div class="contacts-page">
+      
 
-      <div class="contacts-header">
-        <h2>Messages</h2>
-        <span class="contacts-count">{{ filteredContacts.length }} contacts</span>
+      <div class="toolbar">
+        <div class="search-shell">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input
+            class="search-bar"
+            type="text"
+            [placeholder]="searchPlaceholder"
+            [(ngModel)]="searchQuery"
+            (ngModelChange)="onSearch()"
+          />
+        </div>
       </div>
 
-      <input
-        class="search-bar"
-        type="text"
-        placeholder="Search contact..."
-        [(ngModel)]="searchQuery"
-        (ngModelChange)="onSearch()"
-      />
+      <div *ngIf="loading" class="state-card">Chargement des contacts...</div>
 
-      <div *ngIf="loading" class="loading">Chargement des contacts...</div>
-
-      <div class="grid" *ngIf="!loading">
-        <div
+      <div *ngIf="!loading" class="contacts-grid">
+        <button
           *ngFor="let contact of filteredContacts"
-          class="card"
+          type="button"
+          class="contact-card"
           (click)="openChat(contact._id)"
         >
-          <div class="avatar" [ngClass]="getAvatarClass(contact)">
-            <img
-              *ngIf="contact.avatarUrl"
-              [src]="contact.avatarUrl"
-              [alt]="contact.firstName"
-              class="avatar-img"
-            />
-            <span *ngIf="!contact.avatarUrl">{{ getInitials(contact) }}</span>
+          <div class="contact-top">
+            <div class="avatar" [ngClass]="getAvatarClass(contact)">
+              <img
+                *ngIf="contact.avatarUrl"
+                [src]="contact.avatarUrl"
+                [alt]="contact.firstName"
+                class="avatar-img"
+              />
+              <span *ngIf="!contact.avatarUrl">{{ getInitials(contact) }}</span>
+            </div>
+
+            <span class="status-pill" [ngClass]="getBadgeClass(contact)">
+              {{ getRoleLabel(contact) }}
+            </span>
           </div>
 
-          <div class="card-name">{{ contact.firstName }} {{ contact.lastName }}</div>
+          <div class="contact-body">
+            <div class="contact-name">{{ contact.firstName }} {{ contact.lastName }}</div>
+            <div class="contact-subtitle">{{ getContactSubtitle(contact) }}</div>
+          </div>
 
-          <span class="badge" [ngClass]="getBadgeClass(contact)">
-            {{ getRoleName(contact) }}
-          </span>
-        </div>
+          <div class="contact-footer">
+            <span class="relationship-label">{{ getRelationshipLabel(contact) }}</span>
+            <span class="chat-link">Open chat</span>
+          </div>
+        </button>
 
-        <div *ngIf="filteredContacts.length === 0" class="empty">
-          Aucun contact trouvé
+        <div *ngIf="filteredContacts.length === 0" class="state-card">
+          Aucun contact correspondant n'a ete trouve.
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .contacts-wrap {
-      padding: 0px;
-      max-width: 1000px;
-      margin: 0 auto;
+    :host {
+      display: block;
+      min-height: calc(100vh - 120px);
     }
 
-    .contacts-header {
+    .contacts-page {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-height: 100%;
+    }
+
+    .hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 24px;
+      border-radius: 28px;
+      background: linear-gradient(135deg, #f7fbff 0%, #edf6ff 52%, #f8fbff 100%);
+      border: 1px solid rgba(24, 95, 165, 0.10);
+      box-shadow: 0 18px 40px rgba(17, 24, 39, 0.06);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #6b7280;
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.1;
+      color: #111827;
+      font-weight: 800;
+    }
+
+    .hero-copy {
+      margin: 10px 0 0;
+      max-width: 620px;
+      color: #4b5563;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .hero-count {
+      min-width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      display: grid;
+      place-items: center;
+      background: #185fa5;
+      color: #fff;
+      font-size: 26px;
+      font-weight: 800;
+      box-shadow: 0 14px 28px rgba(24, 95, 165, 0.24);
+    }
+
+    .toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      gap: 12px;
     }
 
-    h2 {
-      font-size: 20px;
-      font-weight: 500;
-      margin: 0;
+    .search-shell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      max-width: 420px;
+      padding: 0 14px;
+      border-radius: 16px;
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      background: #fff;
+      box-shadow: 0 8px 24px rgba(17, 24, 39, 0.04);
     }
 
-    .contacts-count {
-      font-size: 13px;
-      color: #888;
-      background: #f5f5f5;
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid #eee;
+    .search-shell svg {
+      width: 16px;
+      height: 16px;
+      color: #9ca3af;
+      flex-shrink: 0;
     }
 
     .search-bar {
       width: 100%;
-      padding: 9px 14px;
-      border-radius: 8px;
-      border: 1px solid #ddd;
-      font-size: 14px;
-      box-sizing: border-box;
-      margin-bottom: 20px;
+      height: 48px;
+      border: none;
       outline: none;
-      transition: border-color 0.2s;
+      font-size: 14px;
+      color: #111827;
+      background: transparent;
     }
 
-    .search-bar:focus {
-      border-color: #999;
-    }
-
-    .grid {
+    .contacts-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px;
+      align-items: stretch;
+    }
+
+    .contact-card {
+      border: 1px solid rgba(17, 24, 39, 0.08);
+      border-radius: 24px;
+      background: #fff;
+      padding: 18px;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      box-shadow: 0 12px 28px rgba(17, 24, 39, 0.05);
+    }
+
+    .contact-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(24, 95, 165, 0.24);
+      box-shadow: 0 20px 36px rgba(17, 24, 39, 0.10);
+    }
+
+    .contact-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
       gap: 12px;
     }
 
-    .card {
-      background: #fff;
-      border: 1px solid #eee;
-      border-radius: 12px;
-      padding: 20px 12px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .card:hover {
-      border-color: #ccc;
-      background: #fafafa;
-    }
-
     .avatar {
-      width: 52px;
-      height: 52px;
-      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 17px;
-      font-weight: 500;
-      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: 700;
       overflow: hidden;
+      flex-shrink: 0;
     }
 
     .avatar-img {
@@ -144,50 +222,146 @@ import { HttpClient } from '@angular/common/http';
       object-fit: cover;
     }
 
-    .av-blue   { background: #E6F1FB; color: #0C447C; }
-    .av-teal   { background: #E1F5EE; color: #085041; }
-    .av-coral  { background: #FAECE7; color: #712B13; }
-    .av-purple { background: #EEEDFE; color: #3C3489; }
-    .av-amber  { background: #FAEEDA; color: #633806; }
+    .av-blue { background: #e6f1fb; color: #0c447c; }
+    .av-teal { background: #e1f5ee; color: #085041; }
+    .av-purple { background: #eeedfe; color: #3c3489; }
+    .av-amber { background: #faeeda; color: #633806; }
+    .av-coral { background: #faece7; color: #712b13; }
 
-    .card-name {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 8px;
-    }
-
-    .badge {
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 30px;
+      padding: 0 12px;
+      border-radius: 999px;
       font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-weight: 500;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
-    .badge-doctor  { background: #E6F1FB; color: #185FA5; }
-    .badge-patient { background: #E1F5EE; color: #0F6E56; }
-    .badge-nurse   { background: #EEEDFE; color: #534AB7; }
-    .badge-default { background: #f5f5f5; color: #555; }
+    .badge-doctor { background: #e6f1fb; color: #185fa5; }
+    .badge-patient { background: #e1f5ee; color: #0f6e56; }
+    .badge-nurse { background: #eeedfe; color: #534ab7; }
+    .badge-default { background: #f3f4f6; color: #4b5563; }
 
-    .loading, .empty {
+    .contact-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .contact-name {
+      font-size: 17px;
+      font-weight: 700;
+      color: #111827;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .contact-subtitle {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.5;
+      min-height: 40px;
+    }
+
+    .contact-footer {
+      margin-top: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(17, 24, 39, 0.07);
+    }
+
+    .relationship-label {
+      font-size: 12px;
+      color: #4b5563;
+      font-weight: 600;
+    }
+
+    .chat-link {
+      font-size: 12px;
+      color: #185fa5;
+      font-weight: 700;
+    }
+
+    .state-card {
+      display: grid;
+      place-items: center;
+      min-height: 180px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1px dashed rgba(17, 24, 39, 0.14);
+      color: #6b7280;
+      font-size: 14px;
       text-align: center;
-      color: #aaa;
-      padding: 48px 0;
-      grid-column: 1 / -1;
+      padding: 20px;
+    }
+
+    @media (max-width: 768px) {
+      :host {
+        min-height: auto;
+      }
+
+      .hero {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .hero-count {
+        min-width: 100%;
+        height: 56px;
+        border-radius: 18px;
+      }
+
+      .contacts-grid {
+        grid-template-columns: 1fr;
+      }
     }
   `]
 })
 export class ContactsComponent implements OnInit {
   contacts: any[] = [];
   filteredContacts: any[] = [];
-  searchQuery: string = '';
-  loading: boolean = false;
+  searchQuery = '';
+  loading = false;
 
   private avatarClasses = ['av-blue', 'av-teal', 'av-coral', 'av-purple', 'av-amber'];
+  private currentUser = JSON.parse(localStorage.getItem('user') ?? '{}');
 
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.loadContacts();
+  }
+
+  get pageEyebrow(): string {
+    return this.isDoctor() ? 'Doctor workspace' : this.isPatient() ? 'Patient workspace' : 'Contacts';
+  }
+
+  get pageTitle(): string {
+    return this.isDoctor() ? 'Your patients' : this.isPatient() ? 'Your doctors' : 'Your contacts';
+  }
+
+  get pageDescription(): string {
+    if (this.isDoctor()) {
+      return 'Only the patients attached to your profile appear here, so you can start the right conversation quickly.';
+    }
+
+    if (this.isPatient()) {
+      return 'Only the doctors linked to your profile appear here, for a cleaner and safer messaging experience.';
+    }
+
+    return 'Open a conversation with the people assigned to your role.';
+  }
+
+  get searchPlaceholder(): string {
+    return this.isDoctor() ? 'Search a patient...' : this.isPatient() ? 'Search a doctor...' : 'Search a contact...';
   }
 
   getInitials(user: any): string {
@@ -207,62 +381,148 @@ export class ContactsComponent implements OnInit {
 
   getBadgeClass(user: any): string {
     const role = this.getRoleName(user).toUpperCase();
-    if (role === 'DOCTOR') return 'badge badge-doctor';
-    if (role === 'PATIENT') return 'badge badge-patient';
-    if (role === 'NURSE') return 'badge badge-nurse';
-    return 'badge badge-default';
+    if (role === 'DOCTOR') return 'badge-doctor';
+    if (role === 'PATIENT') return 'badge-patient';
+    if (role === 'NURSE') return 'badge-nurse';
+    return 'badge-default';
+  }
+
+  getRoleLabel(user: any): string {
+    const role = this.getRoleName(user).toUpperCase();
+    if (role === 'DOCTOR') return 'Doctor';
+    if (role === 'PATIENT') return 'Patient';
+    if (role === 'NURSE') return 'Nurse';
+    return role || 'Contact';
+  }
+
+  getContactSubtitle(user: any): string {
+    if (this.isDoctor()) {
+      return user.email || user.assignedDepartment || 'Patient linked to your follow-up.';
+    }
+
+    if (this.isPatient()) {
+      return user.specialization || user.email || 'Doctor linked to your profile.';
+    }
+
+    return user.email || 'Messaging contact';
+  }
+
+  getRelationshipLabel(user: any): string {
+    if (this.isDoctor()) return 'Assigned patient';
+    if (this.isPatient()) return 'Assigned doctor';
+    return this.getRoleLabel(user);
   }
 
   onSearch(): void {
-    const q = this.searchQuery.toLowerCase();
-    this.filteredContacts = this.contacts.filter(c =>
-      `${c.firstName} ${c.lastName}`.toLowerCase().includes(q)
+    const query = this.searchQuery.trim().toLowerCase();
+    if (!query) {
+      this.filteredContacts = [...this.contacts];
+      return;
+    }
+
+    this.filteredContacts = this.contacts.filter(contact =>
+      `${contact.firstName} ${contact.lastName}`.toLowerCase().includes(query)
+      || String(contact.email ?? '').toLowerCase().includes(query)
+      || String(contact.specialization ?? '').toLowerCase().includes(query)
     );
   }
 
-  public getRoleName(user: any): string {
-    if (user.role?.name) return user.role.name;
-    if (typeof user.role === 'string') return user.role;
-    return 'Inconnu';
+  getRoleName(user: any): string {
+    if (user?.role?.name) return user.role.name;
+    if (typeof user?.role === 'string') return user.role;
+    return 'UNKNOWN';
   }
 
   loadContacts(): void {
     this.loading = true;
-    const currentUser = JSON.parse(localStorage.getItem('user') ?? '{}');
-    const currentUserRole = this.getRoleName(currentUser).toUpperCase();
-    const currentUserId = currentUser._id;
+    const currentUserRole = this.getRoleName(this.currentUser).toUpperCase();
+    const currentUserId = this.currentUser._id;
 
     this.http.get<any[]>('http://localhost:3000/api/users/all').subscribe({
-      next: (data) => {
-        let filtered = [];
+      next: data => {
+        let filtered: any[] = [];
 
         if (currentUserRole === 'DOCTOR') {
-          filtered = data.filter(u => this.getRoleName(u).toUpperCase() === 'PATIENT');
+          filtered = data.filter(user =>
+            this.getRoleName(user).toUpperCase() === 'PATIENT'
+            && this.matchesPrimaryDoctor(user, this.currentUser)
+          );
         } else if (currentUserRole === 'PATIENT') {
-          filtered = data.filter(u => this.getRoleName(u).toUpperCase() === 'DOCTOR');
+          filtered = data.filter(user =>
+            this.getRoleName(user).toUpperCase() === 'DOCTOR'
+            && this.matchesDoctorForPatient(this.currentUser, user)
+          );
         } else if (currentUserRole === 'NURSE') {
-          filtered = data.filter(u => ['DOCTOR', 'PATIENT'].includes(this.getRoleName(u).toUpperCase()));
+          filtered = data.filter(user =>
+            ['DOCTOR', 'PATIENT'].includes(this.getRoleName(user).toUpperCase())
+          );
         } else {
-          filtered = data.filter(u => u._id !== currentUserId);
+          filtered = data.filter(user => user._id !== currentUserId);
         }
 
-        this.contacts = filtered.filter(u => u._id !== currentUserId);
+        this.contacts = filtered.filter(user => user._id !== currentUserId);
         this.filteredContacts = [...this.contacts];
         this.loading = false;
       },
-      error: () => { this.loading = false; }
+      error: () => {
+        this.loading = false;
+      }
     });
   }
 
   openChat(targetUserId: string): void {
-    const currentUser = JSON.parse(localStorage.getItem('user') ?? '{}');
-    const role = this.getRoleName(currentUser).toUpperCase();
+    const role = this.getRoleName(this.currentUser).toUpperCase();
     const routes: Record<string, string> = {
       DOCTOR: '/doctor/chat',
       PATIENT: '/patient/chat',
       NURSE: '/nurse/chat',
     };
     const route = routes[role];
-    if (route) this.router.navigate([route, targetUserId]);
+    if (route) {
+      this.router.navigate([route, targetUserId]);
+    }
+  }
+
+  private isDoctor(): boolean {
+    return this.getRoleName(this.currentUser).toUpperCase() === 'DOCTOR';
+  }
+
+  private isPatient(): boolean {
+    return this.getRoleName(this.currentUser).toUpperCase() === 'PATIENT';
+  }
+
+  private matchesPrimaryDoctor(patient: any, doctor: any): boolean {
+    const primaryDoctor = this.normalizePersonName(patient?.primaryDoctor);
+    if (!primaryDoctor) return false;
+
+    return this.getDoctorNameCandidates(doctor).some(candidate => candidate === primaryDoctor);
+  }
+
+  private matchesDoctorForPatient(patient: any, doctor: any): boolean {
+    const primaryDoctor = this.normalizePersonName(patient?.primaryDoctor);
+    if (!primaryDoctor) return false;
+
+    return this.getDoctorNameCandidates(doctor).some(candidate => candidate === primaryDoctor);
+  }
+
+  private getDoctorNameCandidates(user: any): string[] {
+    const fullName = `${user?.firstName ?? ''} ${user?.lastName ?? ''}`.trim();
+    const candidates = [
+      fullName,
+      `Dr ${fullName}`.trim(),
+      `Doctor ${fullName}`.trim(),
+    ]
+      .map(name => this.normalizePersonName(name))
+      .filter(Boolean);
+
+    return Array.from(new Set(candidates));
+  }
+
+  private normalizePersonName(value: string | undefined | null): string {
+    return (value ?? '')
+      .toLowerCase()
+      .replace(/\b(dr|doctor)\.?\s+/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
   }
 }

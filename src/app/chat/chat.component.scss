@@ -1,7 +1,9 @@
 // ── Host fix — CRITIQUE pour que height:100% fonctionne ─────────────────────
 :host {
   display: block;
-  height: 100%;
+  height: calc(100vh - 120px);
+  min-height: calc(100vh - 120px);
+  max-height: calc(100vh - 120px);
   overflow: hidden;
 }
 
@@ -22,10 +24,13 @@ $radius: 12px;
 .chat-layout {
   display: grid;
   grid-template-columns: 280px 1fr 300px;
+  width: 100%;
   height: 100%;          // prend toute la hauteur du parent (router-outlet)
+  max-height: 100%;
   min-height: 0;
   background: $bg-page;
   overflow: hidden;
+  align-items: stretch;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -203,6 +208,7 @@ $radius: 12px;
 .chat-panel {
   display: flex;
   flex-direction: column;
+  min-width: 0;
   overflow: hidden;       // CRITIQUE — contient le scroll interne
   min-height: 0;          // CRITIQUE — permet la compression flex
   height: 100%;
@@ -319,6 +325,18 @@ $radius: 12px;
   }
 }
 
+.chat-empty-state {
+  display: grid;
+  place-items: center;
+  flex: 1;
+  min-height: 0;
+  padding: 24px;
+  background: $bg-white;
+  color: $text-muted;
+  text-align: center;
+  font-size: 14px;
+}
+
 .date-separator {
   display: flex;
   align-items: center;
@@ -373,6 +391,7 @@ $radius: 12px;
   flex-direction: column;
   gap: 2px;
   max-width: 65%;
+  min-width: 0;
 
   .mine & { align-items: flex-end; }
 }
@@ -422,6 +441,100 @@ $radius: 12px;
   color: $text-primary;
 
   .mine & { color: #fff; }
+}
+
+.message-attachments,
+.message-audio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.audio-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: min(320px, 70vw);
+  max-width: min(360px, 100%);
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  backdrop-filter: none;
+
+  .mine & {
+    background: transparent;
+    border: none;
+  }
+}
+
+.contacts-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 16px 8px;
+  padding: 0 12px;
+  min-height: 42px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  background: #fff;
+  flex-shrink: 0;
+
+  svg {
+    width: 16px;
+    height: 16px;
+    color: $text-muted;
+    flex-shrink: 0;
+  }
+
+  input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 13px;
+    color: $text-primary;
+  }
+}
+
+.audio-badge {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  flex-shrink: 0;
+
+  .mine & {
+    color: #fff;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.message-image {
+  width: 100%;
+  max-width: 280px;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: #fff;
+}
+
+.message-audio {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  border-radius: 999px;
+  filter: saturate(1.02);
 }
 
 .message-meta {
@@ -497,6 +610,66 @@ $radius: 12px;
   gap: 2px;
 }
 
+.pending-attachments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pending-attachment {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 14px;
+  background: #f8fafc;
+
+  img {
+    width: 68px;
+    height: 68px;
+    object-fit: cover;
+    border-radius: 10px;
+    flex-shrink: 0;
+  }
+
+  audio {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.pending-audio-card {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+
+.pending-attachment-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  span {
+    font-size: 12px;
+    color: $text-primary;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  button {
+    width: fit-content;
+    border: none;
+    background: transparent;
+    color: $blue;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+  }
+}
+
 .tool-btn {
   width: 28px;
   height: 28px;
@@ -513,6 +686,11 @@ $radius: 12px;
   svg { width: 14px; height: 14px; }
 
   &:hover { background: $bg-page; color: $text-secondary; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+  &.recording {
+    color: #c0392b;
+    background: #fdecea;
+  }
 }
 
 .input-row {
@@ -685,6 +863,12 @@ $radius: 12px;
   }
 }
 
+.upload-error {
+  margin-top: 8px;
+  color: #c0392b;
+  font-size: 12px;
+}
+
 // Actions rapides
 .quick-actions {
   display: flex;
@@ -712,4 +896,94 @@ $radius: 12px;
   &:hover { background: $bg-page; }
 
   svg { width: 15px; height: 15px; color: $text-secondary; flex-shrink: 0; }
+}
+
+.contacts-panel {
+  height: 100%;
+}
+
+.patient-panel {
+  height: 100%;
+}
+
+@media (max-width: 1200px) {
+  :host {
+    height: calc(100vh - 120px);
+    min-height: calc(100vh - 120px);
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
+  }
+
+  .chat-layout {
+    grid-template-columns: 260px 1fr;
+    height: 100%;
+    max-height: 100%;
+  }
+
+  .patient-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 820px) {
+  :host {
+    height: calc(100vh - 120px);
+    min-height: calc(100vh - 120px);
+    max-height: calc(100vh - 120px);
+    overflow: hidden;
+  }
+
+  .chat-layout {
+    grid-template-columns: 1fr;
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    min-width: 0;
+  }
+
+  .contacts-panel {
+    display: none;
+  }
+
+  .chat-panel {
+    height: 100%;
+    min-height: 0;
+  }
+
+  .chat-header {
+    padding: 12px 14px;
+  }
+
+  .messages-list {
+    padding: 14px 12px 8px;
+  }
+
+  .message-group {
+    max-width: 82%;
+  }
+
+  .message-image {
+    max-width: 100%;
+    max-height: 220px;
+  }
+
+  .audio-card {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .message-audio {
+    width: 100%;
+    height: 38px;
+  }
+
+  .chat-empty-state {
+    padding: 18px 12px;
+  }
+
+  .chat-input-area {
+    padding: 10px 12px 12px;
+  }
 }

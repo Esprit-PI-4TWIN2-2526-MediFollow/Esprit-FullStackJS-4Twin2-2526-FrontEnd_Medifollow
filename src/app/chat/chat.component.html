@@ -14,9 +14,21 @@
       </button>
     </div>
 
+    <div class="contacts-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        placeholder="Rechercher une conversation..."
+      />
+    </div>
+
     <div class="contacts-list">
       <div
-        *ngFor="let contact of contacts"
+        *ngFor="let contact of filteredContacts"
         class="contact-item"
         [class.active]="contact._id === activeContactId"
         (click)="openChat(contact._id)"
@@ -41,13 +53,13 @@
             <span class="contact-time">{{ contact.lastMessageTime || '' }}</span>
           </div>
           <div class="contact-bottom">
-            <span class="last-message">{{ contact.lastMessage || getRoleName(contact) }}</span>
+            <span class="last-message">{{ getContactPreview(contact) }}</span>
             <span *ngIf="contact.unreadCount" class="unread-badge">{{ contact.unreadCount }}</span>
           </div>
         </div>
       </div>
 
-      <div *ngIf="!loading && contacts.length === 0" style="padding: 32px 16px; text-align: center; color: #aaa; font-size: 13px;">
+      <div *ngIf="!loading && filteredContacts.length === 0" style="padding: 32px 16px; text-align: center; color: #aaa; font-size: 13px;">
         Aucun contact disponible
       </div>
     </div>
@@ -94,7 +106,7 @@
     </div>
 
     <!-- Messages -->
-    <div class="messages-list">
+    <div *ngIf="activeContactId" #messagesContainer class="messages-list">
       <ng-container *ngFor="let msg of messages; let i = index">
 
         <div *ngIf="isNewDay(msg, messages[i - 1])" class="date-separator">
@@ -132,7 +144,33 @@
             </div>
 
             <div class="message-bubble">
-              <p class="message-content">{{ msg.content }}</p>
+              <div *ngIf="msg.content" class="message-content">{{ msg.content }}</div>
+
+              <div *ngIf="getMessageAttachments(msg, 'image').length" class="message-attachments">
+                <img
+                  *ngFor="let attachment of getMessageAttachments(msg, 'image')"
+                  class="message-image"
+                  [src]="attachment.url"
+                  [alt]="attachment.name || 'Image partagee'"
+                />
+              </div>
+
+              <div *ngIf="getMessageAttachments(msg, 'audio').length" class="message-audio-list">
+                <div
+                  *ngFor="let attachment of getMessageAttachments(msg, 'audio')"
+                  class="audio-card"
+                >
+                
+
+                  <audio
+                    class="message-audio"
+                    controls
+                    preload="metadata"
+                    [src]="attachment.url"
+                  ></audio>
+                </div>
+              </div>
+
               <div class="message-meta">
                 <span class="message-time">{{ msg.createdAt | date:'HH:mm' }}</span>
                 <span *ngIf="isMyMessage(msg)" class="read-status" [class.read]="msg.read">
@@ -156,9 +194,89 @@
       <div #messagesEnd></div>
     </div>
 
+    <div *ngIf="!activeContactId" class="chat-empty-state">
+      Choisissez une conversation dans la liste pour commencer a discuter.
+    </div>
+
     <!-- Input -->
     <div class="chat-input-area">
+      <input
+        #imageInput
+        type="file"
+        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+        hidden
+        (change)="onImageSelected($event)"
+      />
 
+      <div *ngIf="pendingAttachment" class="pending-attachments">
+        <div
+          class="pending-attachment"
+        >
+          <img
+            *ngIf="pendingAttachment.type === 'image'"
+            [src]="pendingAttachment.previewUrl"
+            [alt]="pendingAttachment.name || 'Image en attente'"
+          />
+
+          <div *ngIf="pendingAttachment.type === 'audio'" class="audio-card pending-audio-card">
+            <div class="audio-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 1 1-6 0V4a3 3 0 0 1 3-3z"></path>
+                <path d="M19 10a7 7 0 0 1-14 0"></path>
+                <line x1="12" y1="19" x2="12" y2="23"></line>
+                <line x1="8" y1="23" x2="16" y2="23"></line>
+              </svg>
+            </div>
+
+            <audio
+              controls
+              preload="metadata"
+              [src]="pendingAttachment.previewUrl"
+            ></audio>
+          </div>
+
+          <div class="pending-attachment-meta">
+            <span>{{ pendingAttachment.name || (pendingAttachment.type === 'audio' ? 'Message vocal' : 'Image') }}</span>
+            <button type="button" (click)="removePendingAttachment()">Retirer</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="uploadError" class="upload-error">
+        {{ uploadError }}
+      </div>
+
+      <div class="input-toolbar">
+        <button
+          type="button"
+          class="tool-btn"
+          title="Envoyer une image"
+          [disabled]="!activeContactId || isPreparingAttachment || !!pendingAttachment"
+          (click)="openImagePicker()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <path d="M21 15l-5-5L5 21"></path>
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          class="tool-btn"
+          [class.recording]="isRecording"
+          [disabled]="!activeContactId || !!pendingAttachment"
+          [title]="isRecording ? 'Arreter l enregistrement' : 'Enregistrer un vocal'"
+          (click)="toggleVoiceRecording()"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 1a3 3 0 0 1 3 3v8a3 3 0 1 1-6 0V4a3 3 0 0 1 3-3z"></path>
+            <path d="M19 10a7 7 0 0 1-14 0"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        </button>
+      </div>
 
       <div class="input-row">
         <div class="textarea-wrap">
@@ -168,13 +286,13 @@
             (keydown)="onKeyDown($event)"
             placeholder="Write a message..."
             rows="1"
-            [disabled]="!isConnected"
+            [disabled]="!activeContactId || !isConnected || isPreparingAttachment"
           ></textarea>
         </div>
         <button
           class="send-btn"
           (click)="sendMessage()"
-          [disabled]="!newMessage.trim() || !isConnected"
+          [disabled]="!canSendMessage()"
         >
           <svg viewBox="0 0 24 24">
             <line x1="22" y1="2" x2="11" y2="13"/>

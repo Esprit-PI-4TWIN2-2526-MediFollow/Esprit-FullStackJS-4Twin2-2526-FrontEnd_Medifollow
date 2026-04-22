@@ -4,6 +4,8 @@ import {
   NurseSymptomsResponse,
   SymptomsNurseService,
 } from '../services/symptoms-nurse.service';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { SuggestionsService } from '../../../../services/suggestion/suggestion.service';
 
 @Component({
   selector: 'app-symptoms-details',
@@ -18,15 +20,63 @@ export class SymptomsDetailsComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
+inlineSuggestion = '';
 
+  private destroy$ = new Subject<void>();
+  private noteInput$ = new Subject<string>();
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private symptomsNurseService: SymptomsNurseService
+    private symptomsNurseService: SymptomsNurseService,
+    private suggestionsService: SuggestionsService
   ) {}
 
   ngOnInit(): void {
     this.responseId = this.route.snapshot.paramMap.get('responseId') || '';
+    // ── Connexion WebSocket pour les suggestions ──────────────
+    const token = localStorage.getItem('accessToken') || '';
+    let userId = '';
+    let department = '';
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        userId = payload.sub || payload._id || payload.id || '';
+        department = payload.assignedDepartment || payload.department || '';
+      } catch (e) {
+        console.error('JWT decode error:', e);
+      }
+    }
+
+    if (!userId || !department) {
+      const raw = localStorage.getItem('user');
+      const user = raw ? JSON.parse(raw) : null;
+      userId = userId || user?._id || '';
+      department = department || user?.assignedDepartment || user?.department || '';
+    }
+
+    if (userId && department) {
+      this.suggestionsService.connect(userId, department);
+    }
+
+    this.suggestionsService.onRealTimeSuggestions()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(data => {
+        const first = data.suggestions.completions?.[0]
+                   || data.suggestions.medicalTerms?.[0]
+                   || '';
+        this.inlineSuggestion = first;
+      });
+
+    this.noteInput$
+      .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe(note => {
+        if (note.length >= 3) {
+          this.suggestionsService.getRealTimeSuggestions(note, this.responseId);
+        } else {
+          this.inlineSuggestion = '';
+        }
+      });
     this.loadResponseDetails();
   }
 
@@ -47,10 +97,10 @@ export class SymptomsDetailsComponent implements OnInit {
     this.router.navigate(['/nurse/symptoms']);
   }
 
-  onNoteInput(event: Event): void {
-    const target = event.target as HTMLTextAreaElement | null;
-    this.validationNote = target?.value || '';
-  }
+  // onNoteInput(event: Event): void {
+  //   const target = event.target as HTMLTextAreaElement | null;
+  //   this.validationNote = target?.value || '';
+  // }
 
   validateResponse(): void {
     if (!this.responseId || this.isReadOnly || this.isSubmitting) {
@@ -254,4 +304,32 @@ export class SymptomsDetailsComponent implements OnInit {
     return Number.isNaN(parsed) ? null : parsed;
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.suggestionsService.disconnect();
+  }
+
+  // ── Remplace l'ancienne méthode onNoteInput ───────────────
+  onNoteInput(event: Event): void {
+    const target = event.target as HTMLTextAreaElement | null;
+    this.validationNote = target?.value || '';
+    this.inlineSuggestion = '';          // reset pendant la frappe
+    this.noteInput$.next(this.validationNote);
+  }
+
+  onNoteKeydown(event: KeyboardEvent): void {
+    if (!this.inlineSuggestion) return;
+
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      this.validationNote = this.validationNote + this.inlineSuggestion + ' ';
+      this.inlineSuggestion = '';
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.inlineSuggestion = '';
+    }
+  }
 }

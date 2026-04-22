@@ -4,6 +4,8 @@ import {
   CoordinatorSymptomsResponse,
   CoordinatorSymptomsService
 } from '../../services/coordinator-symptoms.service';
+import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
+import { SuggestionsService } from '../../services/suggestion/suggestion.service';
 
 @Component({
   selector: 'app-coordinator-symptoms-details',
@@ -19,24 +21,93 @@ export class CoordinatorSymptomsDetailsComponent implements OnInit {
   errorMessage = '';
   successMessage = '';
 
+    inlineSuggestion = ''; // texte grisé après le curseur
+
+  suggestions: string[] = [];
+  isSuggestionsLoading = false;
+  showSuggestions = false;
+  realTimeCompletions: string[] = [];
+  medicalTerms: string[] = [];
+
+   private destroy$ = new Subject<void>();
+  private noteInput$ = new Subject<string>();
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private coordinatorSymptomsService: CoordinatorSymptomsService
+    private coordinatorSymptomsService: CoordinatorSymptomsService,
+        private suggestionsService: SuggestionsService
+
   ) {}
 
-  ngOnInit(): void {
-    this.responseId = this.route.snapshot.paramMap.get('responseId') || '';
-    this.loadDetails();
+
+ngOnInit(): void {
+  this.responseId = this.route.snapshot.paramMap.get('responseId') || '';
+
+  // Décoder le JWT directement (pas besoin de librairie)
+  const token = localStorage.getItem('accessToken') || '';
+  let userId = '';
+  let department = '';
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      console.log('🎫 JWT payload:', payload);
+      userId = payload.sub || payload._id || payload.id || '';
+      department = payload.assignedDepartment || payload.department || '';
+    } catch (e) {
+      console.error('JWT decode error:', e);
+    }
   }
+
+  // Fallback sur localStorage user
+  if (!userId || !department) {
+    const raw = localStorage.getItem('user');
+    const user = raw ? JSON.parse(raw) : null;
+    console.log('👤 User from localStorage:', user);
+    userId = userId || user?._id || '';
+    department = department || user?.assignedDepartment || user?.department || '';
+  }
+
+  console.log('🔌 Final connect:', { userId, department });
+
+  if (userId && department) {
+    this.suggestionsService.connect(userId, department);
+  } else {
+    console.error('❌ Cannot connect: missing userId or department');
+  }
+
+  this.suggestionsService.onRealTimeSuggestions()
+    .pipe(takeUntil(this.destroy$))
+    .subscribe(data => {
+      console.log('📥 Suggestions:', data);
+      const first = data.suggestions.completions?.[0]
+                 || data.suggestions.medicalTerms?.[0]
+                 || '';
+      this.inlineSuggestion = first;
+    });
+
+  this.noteInput$
+    .pipe(debounceTime(250), distinctUntilChanged(), takeUntil(this.destroy$))
+    .subscribe(note => {
+      console.log('📤 Emitting for:', note);
+      if (note.length >= 3) {
+        this.suggestionsService.getRealTimeSuggestions(note, this.responseId);
+      } else {
+        this.inlineSuggestion = '';
+      }
+    });
+
+  this.loadDetails();
+}
 
   goBack(): void {
     this.router.navigate(['/coordinator/symptoms-review']);
   }
 
-  onNoteInput(event: Event): void {
-    this.note = (event.target as HTMLTextAreaElement).value;
-  }
+  // onNoteInput(event: Event): void {
+  //   this.note = (event.target as HTMLTextAreaElement).value;
+  // }
 
   validateResponse(): void {
     if (!this.responseId || this.isSubmitting) {
@@ -113,5 +184,34 @@ export class CoordinatorSymptomsDetailsComponent implements OnInit {
       .replace(/[_-]+/g, ' ')
       .replace(/^\w/, (letter) => letter.toUpperCase());
   }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.suggestionsService.disconnect();
+  }
+
+  onNoteInput(event: Event): void {
+    this.note = (event.target as HTMLTextAreaElement).value;
+    this.inlineSuggestion = ''; // reset pendant la frappe
+    this.noteInput$.next(this.note);
+  }
+
+  onNoteKeydown(event: KeyboardEvent): void {
+    if (!this.inlineSuggestion) return;
+
+    if (event.key === 'Tab') {
+      event.preventDefault();
+      this.note = this.note + this.inlineSuggestion + ' ';
+      this.inlineSuggestion = '';
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.inlineSuggestion = '';
+    }
+  }
+  get isAlreadyValidated(): boolean {
+  return this.response?.validated === true;
+}
 }
 
