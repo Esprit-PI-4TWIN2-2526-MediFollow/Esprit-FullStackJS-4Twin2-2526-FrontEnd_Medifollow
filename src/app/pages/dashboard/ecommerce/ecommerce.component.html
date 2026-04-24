@@ -1,31 +1,3 @@
-<div class="mb-4 rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03]">
-  <div class="flex flex-wrap items-center gap-3">
-    <button
-      type="button"
-      class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-      (click)="start()"
-      [disabled]="isVoiceRunning"
-    >
-      Talk to Skander
-    </button>
-
-    <button
-      type="button"
-      class="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
-      (click)="stop()"
-      [disabled]="!isVoiceRunning"
-    >
-      Stop
-    </button>
-
-    <span class="text-sm font-medium text-gray-600 dark:text-gray-300">{{ voiceStatus }}</span>
-  </div>
-
-  <p class="mt-2 text-xs text-gray-500 dark:text-gray-400" *ngIf="lastVoiceMessage">
-    Last message: {{ lastVoiceMessage }}
-  </p>
-</div>
-
 <div class="grid grid-cols-12 gap-4 md:gap-6">
   <div class="col-span-12 space-y-6 xl:col-span-7">
     <div><app-ecommerce-metrics /></div>
