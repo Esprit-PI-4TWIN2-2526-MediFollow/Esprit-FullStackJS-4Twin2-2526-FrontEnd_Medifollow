@@ -1,23 +1,13 @@
-<div class="w-full max-w-md pt-10 mx-auto">
-  <a
-    routerLink="/"
-    class="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 20 20" fill="none" class="size-5">
-      <path d="M12.7083 5L7.5 10.2083L12.7083 15.4167" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-    </svg>
-    Back to dashboard
-  </a>
-</div>
+
 
 <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
   <div>
     <div class="mb-5 sm:mb-8">
       <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-        Connexion
+        Sign In
       </h1>
       <p class="text-sm text-gray-500 dark:text-gray-400">
-        Entrez vos identifiants pour accéder à votre espace.
+        Enter your credentials to access your account.
       </p>
     </div>
 
@@ -44,15 +34,15 @@
         />
         <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
              class="text-sm text-red-500 mt-1">
-          <p *ngIf="loginForm.get('email')?.errors?.['required']">Email obligatoire.</p>
-          <p *ngIf="loginForm.get('email')?.errors?.['email']">Format email invalide.</p>
-          <p *ngIf="loginForm.get('email')?.errors?.['maxlength']">100 caractères max.</p>
+          <p *ngIf="loginForm.get('email')?.errors?.['required']">Email is required.</p>
+          <p *ngIf="loginForm.get('email')?.errors?.['email']">Invalid email format.</p>
+          <p *ngIf="loginForm.get('email')?.errors?.['maxlength']">Maximum 100 characters.</p>
         </div>
       </div>
 
       <!-- PASSWORD -->
       <div>
-        <label class="block mb-1">Mot de passe <span class="text-error-500">*</span></label>
+        <label class="block mb-1">Password <span class="text-error-500">*</span></label>
         <div class="relative">
           <input
             [type]="showPassword ? 'text' : 'password'"
@@ -94,7 +84,7 @@
         </div>
         <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
              class="text-sm text-red-500 mt-1">
-          <p *ngIf="loginForm.get('password')?.errors?.['required']">Mot de passe obligatoire.</p>
+          <p *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</p>
 
 
         </div>
@@ -103,13 +93,13 @@
       <div class="flex items-center justify-between">
         <label class="flex items-center space-x-2">
           <input type="checkbox"  />
-          <span>Rester connecté</span>
+          <span>Stay logged in</span>
         </label>
         <a
           routerLink="/forgot-password"
           class="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
         >
-          Mot de passe oublié ?
+          Forgot password?
         </a>
       </div>
 
@@ -118,7 +108,7 @@
         [disabled]="loginForm.invalid || isLoading"
         class="w-full bg-brand-500 text-white rounded p-2 hover:bg-brand-600 disabled:opacity-50"
       >
-        {{ isLoading ? 'Connexion en cours...' : 'Se connecter' }}
+        {{ isLoading ? 'Logging in...' : 'Sign in' }}
       </button>
 
       <!-- Face ID Login Button -->
@@ -206,16 +196,6 @@
       </div>
     </form>
 
-    <!-- <div class="mt-5">
-      <p class="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-        Don't have an account?
-        <a
-          routerLink="/signup"
-          class="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-        >
-          Sign Up
-        </a>
-      </p>
-    </div> -->
+
   </div>
 </div>
