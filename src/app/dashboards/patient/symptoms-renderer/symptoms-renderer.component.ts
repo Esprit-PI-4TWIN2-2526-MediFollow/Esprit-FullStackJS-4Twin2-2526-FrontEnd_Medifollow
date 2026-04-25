@@ -91,9 +91,11 @@ export class SymptomsRendererComponent implements OnInit {
     const startDate = this.getFormStartDate(form);
     if (!startDate) return duration;
 
+    const endDate = this.getFormEndDate(startDate, duration);
+    if (!endDate) return duration;
+
     const today = this.toDateOnly(new Date());
-    const daysElapsed = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-    return duration - daysElapsed;
+    return Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   }
 
   get isFormExpired(): boolean {
@@ -1216,7 +1218,8 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   private getFormStartDate(form: SymptomsAssignedForm): Date | null {
-    const candidates = [form.assignedAt, form.createdAt, form.updatedAt];
+    const maybeStartDate = (form as SymptomsAssignedForm & { startDate?: string | Date }).startDate;
+    const candidates = [maybeStartDate, form.assignedAt, form.createdAt, form.updatedAt];
 
     for (const candidate of candidates) {
       if (!candidate) continue;
@@ -1227,6 +1230,16 @@ export class SymptomsRendererComponent implements OnInit {
     }
 
     return null;
+  }
+
+  private getFormEndDate(startDate: Date, durationInDays: number): Date | null {
+    if (!Number.isFinite(durationInDays) || durationInDays <= 0) {
+      return null;
+    }
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + durationInDays - 1);
+    return this.toDateOnly(endDate);
   }
 
   private toDateOnly(value: Date): Date {
