@@ -77,7 +77,37 @@ export class SymptomsRendererComponent implements OnInit {
     return this.historyDate.trim() !== '';
   }
 
+  get hasDurationLimit(): boolean {
+    return Number(this.form?.durationInDays) > 0;
+  }
+
+  get remainingDays(): number {
+    const form = this.form;
+    if (!form) return 0;
+
+    const duration = Number(form.durationInDays);
+    if (!Number.isFinite(duration) || duration <= 0) return 0;
+
+    const startDate = this.getFormStartDate(form);
+    if (!startDate) return duration;
+
+    const today = this.toDateOnly(new Date());
+    const daysElapsed = Math.floor((today.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+    return duration - daysElapsed;
+  }
+
+  get isFormExpired(): boolean {
+    if (!this.hasDurationLimit) return false;
+    return this.remainingDays <= 0;
+  }
+
+  get isFormActive(): boolean {
+    return !this.isHistoryMode && !this.isFormExpired;
+  }
+
   canSubmitMore(): boolean {
+    if (!this.isFormActive) return false;
+
     return this.questions.some((q) => {
       const count = this.getAnswerCountToday(q._id ?? '');
       const limit = this.getQuestionDailyLimit(q);
@@ -201,6 +231,8 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   isFormValid(): boolean {
+    if (!this.isFormActive) return false;
+
     const checks = this.currentQuestions.map((q) => {
       const required = this.isQuestionRequired(q);
       const limitReached = this.isQuestionLimitReached(q);
@@ -221,7 +253,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   canGoNext(): boolean {
-    if (!this.canSubmitMore() || this.isHistoryMode) return false;
+    if (!this.canSubmitMore() || !this.isFormActive) return false;
     const questions = this.currentQuestions;
     if (questions.length === 0) return true;
     return this.isFormValid();
@@ -260,7 +292,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.canSubmitMore() || this.isHistoryMode) return;
+    if (!this.canSubmitMore() || !this.isFormActive) return;
 
     this.markAllTouched();
 
@@ -641,7 +673,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onScaleSelectFor(question: SymptomsQuestion, value: number): void {
-    if (this.isQuestionLimitReached(question)) return;
+    if (!this.isFormActive || this.isQuestionLimitReached(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -655,7 +687,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onSingleChoiceSelectFor(question: SymptomsQuestion, value: string | boolean): void {
-    if (this.isQuestionLimitReached(question)) return;
+    if (!this.isFormActive || this.isQuestionLimitReached(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -665,7 +697,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onMultipleChoiceToggleFor(question: SymptomsQuestion, option: number | string): void {
-    if (this.isQuestionLimitReached(question)) return;
+    if (!this.isFormActive || this.isQuestionLimitReached(question)) return;
     const array = this.getMultipleChoiceArray(question);
     if (!array) return;
 
@@ -970,7 +1002,7 @@ export class SymptomsRendererComponent implements OnInit {
     });
   }
 
-  private isQuestionLimitReached(question: SymptomsQuestion): boolean {
+  isQuestionLimitReached(question: SymptomsQuestion): boolean {
     const questionId = question._id ?? '';
     if (!questionId) {
       return false;
@@ -997,10 +1029,11 @@ export class SymptomsRendererComponent implements OnInit {
       const limitReached = this.isQuestionLimitReached(question);
       const required = this.isQuestionRequired(question);
       const validators = this.getValidatorsForQuestion(question, required);
+      const shouldDisable = this.isHistoryMode || this.isFormExpired || limitReached;
 
-      if (limitReached && control.enabled) {
+      if (shouldDisable && control.enabled) {
         control.disable({ emitEvent: false });
-      } else if (!limitReached && control.disabled && !this.isHistoryMode) {
+      } else if (!shouldDisable && control.disabled) {
         control.enable({ emitEvent: false });
       }
 
@@ -1180,5 +1213,25 @@ export class SymptomsRendererComponent implements OnInit {
 
     const parsedDate = new Date(rawDate);
     return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+  }
+
+  private getFormStartDate(form: SymptomsAssignedForm): Date | null {
+    const candidates = [form.assignedAt, form.createdAt, form.updatedAt];
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const parsed = new Date(candidate);
+      if (!Number.isNaN(parsed.getTime())) {
+        return this.toDateOnly(parsed);
+      }
+    }
+
+    return null;
+  }
+
+  private toDateOnly(value: Date): Date {
+    const normalized = new Date(value);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
   }
 }

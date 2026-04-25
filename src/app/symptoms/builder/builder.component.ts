@@ -52,6 +52,7 @@ export class BuilderComponent implements OnInit {
   title = '';
   description = '';
   medicalService = '';
+  durationInDays = 1;
   selectedPatients: string[] = [];
   searchTerm = '';
   showPatientModal = false;
@@ -163,6 +164,11 @@ loadDepartments(): void {
 
   get isMedicalServiceValid(): boolean {
     return this.medicalService.trim() !== '';
+  }
+
+  get isDurationValid(): boolean {
+    const value = Number(this.durationInDays);
+    return Number.isInteger(value) && value >= 1;
   }
 
   get isPatientValid(): boolean {
@@ -278,7 +284,11 @@ loadDepartments(): void {
   }
 
   isFormValid(): boolean {
-    return this.isTitleValid && this.isMedicalServiceValid && this.isPatientValid && this.allQuestionsValid;
+    return this.isTitleValid
+      && this.isMedicalServiceValid
+      && this.isDurationValid
+      && this.isPatientValid
+      && this.allQuestionsValid;
   }
 
   touchQuestion(index: number): void {
@@ -291,6 +301,10 @@ loadDepartments(): void {
 
   showServiceError(): boolean {
     return this.submitted && !this.isMedicalServiceValid;
+  }
+
+  showDurationError(): boolean {
+    return this.submitted && !this.isDurationValid;
   }
 
   showPatientError(): boolean {
@@ -556,6 +570,7 @@ loadDepartments(): void {
       title:          this.title.trim(),
       description:    this.description.trim(),
       medicalService: this.medicalService,
+      durationInDays: Number(this.durationInDays),
       patientIds:     this.selectedPatients,
       questions:      this.questions.map((q) => ({
         label:    q.label.trim(),
@@ -630,6 +645,7 @@ loadDepartments(): void {
         this.title = form.title || '';
         this.description = form.description || '';
         this.medicalService = form.medicalService || '';
+        this.durationInDays = this.normalizeDurationInDays(form.durationInDays);
         const maybeForm = form as SymptomForm & { patientIds?: string[] };
         this.selectedPatients = Array.isArray(maybeForm.patientIds)
           ? maybeForm.patientIds.filter((patientId) => typeof patientId === 'string' && patientId.trim() !== '')
@@ -714,6 +730,11 @@ loadDepartments(): void {
   private normalizeOccurrenceCount(value: number | undefined, fallback: number): number {
     const count = Number(value);
     return Number.isInteger(count) && count >= 1 && count <= 10 ? count : fallback;
+  }
+
+  private normalizeDurationInDays(value: number | undefined): number {
+    const duration = Number(value);
+    return Number.isInteger(duration) && duration >= 1 ? duration : 1;
   }
 
   private updateFormSection(): void {
