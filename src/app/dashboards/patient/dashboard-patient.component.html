@@ -24,7 +24,7 @@
     </div>
   </div>
 
-<!-- ── Daily Symptoms Streak ──────────────────────────── -->
+<!-- Daily Symptoms Timeline -->
 <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-white/[0.05] dark:bg-white/[0.03]">
   <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
     <div>
@@ -32,41 +32,28 @@
         Daily Symptoms Check
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Follow-up tracking since account creation
+        Follow-up tracking within your allowed submission window
       </p>
     </div>
 
-    <div class="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-      <div class="inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700 dark:bg-green-500/10 dark:text-green-400">
-        <span class="text-base leading-none">⚡</span>
-        <span>{{ streak }}-day streak</span>
+    <div class="flex flex-col items-start gap-2 sm:items-end">
+      <div class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
+        <span>Day {{ timelineCurrentDay }} of {{ timelineTotalDays }}</span>
       </div>
-
-      <button
-        type="button"
-        (click)="fillTodaySymptoms()"
-        class="inline-flex items-center justify-center rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 active:scale-[0.98]"
-      >
-        Fill today →
-      </button>
+      <div class="text-xs text-gray-500 dark:text-gray-400">
+        You have {{ daysRemaining }} day{{ daysRemaining > 1 ? 's' : '' }} remaining
+      </div>
     </div>
   </div>
 
-  <div class="mt-5 grid grid-cols-10 gap-1">
+  <div class="mt-5 flex flex-wrap gap-1.5">
     <button
-      *ngFor="let day of symptomDays"
+      *ngFor="let day of daysTimeline"
       type="button"
-      (click)="day.status !== 'empty' ? goToSymptomsHistory(day.date) : null"
-      class="h-5 w-5 appearance-none rounded-[4px] border-0 p-0"
-      [ngClass]="{
-        'bg-green-500': day.status === 'submitted',
-        'bg-red-400': day.status === 'missed',
-        'bg-green-700 ring-2 ring-green-300 ring-offset-1': day.status === 'today' || day.status === 'today-submitted',
-        'bg-gray-100': day.status === 'empty'
-      }"
-      [disabled]="day.status === 'empty'"
-      [class.cursor-pointer]="day.status !== 'empty'"
-      [class.cursor-default]="day.status === 'empty'"
+      (click)="day.status !== 'future' ? goToSymptomsHistory(day.date) : null"
+      class="h-6 w-6 appearance-none rounded-md border p-0 transition-transform hover:scale-105"
+      [ngClass]="getTimelineCellClasses(day)"
+      [disabled]="day.status === 'future'"
       [attr.title]="day.tooltip"
       [attr.aria-label]="day.tooltip"
     ></button>
@@ -82,7 +69,7 @@
       Missed
     </span>
     <span class="inline-flex items-center gap-2">
-      <span class="h-3 w-3 rounded bg-green-700 ring-2 ring-green-300"></span>
+      <span class="h-3 w-3 rounded bg-green-500 ring-2 ring-brand-300"></span>
       Today
     </span>
     <span class="inline-flex items-center gap-2">
@@ -90,8 +77,19 @@
       Future
     </span>
   </div>
+
+  <div class="mt-4">
+    <button
+      type="button"
+      (click)="fillTodaySymptoms()"
+      class="inline-flex items-center justify-center rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 active:scale-[0.98]"
+    >
+      Fill today
+    </button>
+  </div>
 </div>
 
+<!-- Medical Questionnaires -->
 <!-- ── Medical Questionnaires ──────────────────────────── -->
 <div class="mt-6">
   <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white/90">
@@ -263,3 +261,4 @@
     </div>
   </div>
 </div>
+

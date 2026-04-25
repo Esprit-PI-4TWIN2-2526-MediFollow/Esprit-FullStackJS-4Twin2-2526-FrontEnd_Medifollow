@@ -7,7 +7,7 @@ import { Users } from '../../models/users';
 import { Questionnaire } from '../../models/questionnaire';
 import { QuestionnaireService } from '../../services/questionnaire.service';
 import { QuestionnaireResponsePopulated } from '../../models/questionnaire-response';
-import { SymptomDayCell, SymptomResponse } from './symptoms-response.model';
+import { SymptomAssignedForm, SymptomDayCell, SymptomResponse } from './symptoms-response.model';
 import { SymptomsResponseService } from './symptoms-response.service';
 
 @Component({
@@ -19,8 +19,10 @@ export class DashboardPatientComponent implements OnInit {
 
   currentUser: Users | null = null;
   today = new Date();
-  symptomDays: SymptomDayCell[] = [];
-  streak = 0;
+  daysTimeline: SymptomDayCell[] = [];
+  timelineCurrentDay = 0;
+  timelineTotalDays = 0;
+  daysRemaining = 0;
 
   // ── Questionnaires ──────────────────────────────────────
   questionnaires: Questionnaire[] = [];
@@ -70,22 +72,25 @@ export class DashboardPatientComponent implements OnInit {
       completedResponses: this.questionnaireService.getPatientResponses(user._id).pipe(
         catchError(() => of([] as QuestionnaireResponsePopulated[]))
       ),
+      symptomForm: this.symptomsResponseService.getAssignedForm(user._id).pipe(
+        catchError(() => of(null as SymptomAssignedForm | null))
+      ),
       symptomResponses: this.symptomsResponseService.getPatientResponses(user._id).pipe(
         catchError(() => of([] as SymptomResponse[]))
       )
     }).subscribe({
-      next: ({ completedResponses, symptomResponses }) => {
+      next: ({ completedResponses, symptomForm, symptomResponses }) => {
         this.completedIds = completedResponses.map(response =>
           typeof response.questionnaireId === 'object'
             ? response.questionnaireId._id
             : response.questionnaireId as string
         );
 
-        this.initializeSymptomsStreak(user.createdAt, symptomResponses);
+        this.initializeSymptomsTimeline(symptomForm, user.createdAt, symptomResponses);
       },
       error: () => {
         this.completedIds = [];
-        this.initializeSymptomsStreak(user.createdAt, []);
+        this.initializeSymptomsTimeline(null, user.createdAt, []);
       }
     });
   }
@@ -130,75 +135,95 @@ export class DashboardPatientComponent implements OnInit {
     this.router.navigate(['/patient/symptoms-history', this.toDateKey(date)]);
   }
 
-  private initializeSymptomsStreak(createdAt: string | Date, responses: SymptomResponse[]): void {
-    this.symptomDays = this.generateSymptomDays(createdAt, responses);
-    this.streak = this.calculateStreak(this.symptomDays);
+  private initializeSymptomsTimeline(
+    form: SymptomAssignedForm | null,
+    fallbackStartDate: string | Date,
+    responses: SymptomResponse[]
+  ): void {
+    this.daysTimeline = this.generateDaysTimeline(form, fallbackStartDate, responses);
+    this.timelineTotalDays = this.daysTimeline.length;
+
+    if (!form?.durationInDays || this.timelineTotalDays === 0) {
+      this.timelineCurrentDay = 0;
+      this.daysRemaining = 0;
+      return;
+    }
+
+    const startDate = this.resolveSymptomsStartDate(form, fallbackStartDate);
+    const today = this.startOfDay(this.today);
+    const elapsedDays = Math.floor((today.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
+    this.timelineCurrentDay = today < startDate ? 0 : Math.min(this.timelineTotalDays, elapsedDays + 1);
+    this.daysRemaining = today < startDate
+      ? this.timelineTotalDays
+      : Math.max(this.timelineTotalDays - elapsedDays, 0);
   }
 
-  private generateSymptomDays(createdAt: string | Date, responses: SymptomResponse[]): SymptomDayCell[] {
-    const createdDate = this.startOfDay(createdAt ? new Date(createdAt) : this.today);
+  private generateDaysTimeline(
+    form: SymptomAssignedForm | null,
+    fallbackStartDate: string | Date,
+    responses: SymptomResponse[]
+  ): SymptomDayCell[] {
+    const durationInDays = Number(form?.durationInDays);
+    if (!Number.isInteger(durationInDays) || durationInDays <= 0) {
+      return [];
+    }
+
+    const startDate = this.resolveSymptomsStartDate(form, fallbackStartDate);
     const today = this.startOfDay(this.today);
     const submittedDays = new Set(
       responses
         .map(response => this.extractResponseDate(response))
         .filter((value): value is string => value !== null)
     );
-    const days: SymptomDayCell[] = [];
-    const cursor = new Date(createdDate);
 
-    while (cursor <= today) {
-      const isoDate = this.toDateKey(cursor);
-      const isToday = isoDate === this.toDateKey(today);
-      const hasSubmission = submittedDays.has(isoDate);
+    return Array.from({ length: durationInDays }, (_, index) => {
+      const dayDate = new Date(startDate);
+      dayDate.setDate(dayDate.getDate() + index);
+
+      const dateKey = this.toDateKey(dayDate);
+      const isToday = dateKey === this.toDateKey(today);
+      const hasSubmission = submittedDays.has(dateKey);
       const status = isToday
-        ? hasSubmission ? 'today-submitted' : 'today'
-        : hasSubmission ? 'submitted' : 'missed';
+        ? 'today'
+        : dayDate < today
+          ? (hasSubmission ? 'submitted' : 'missed')
+          : 'future';
 
-      days.push({
-        date: new Date(cursor),
+      return {
+        date: dayDate,
         status,
-        tooltip: `${this.formatTooltipDate(cursor)} - ${this.getStatusLabel(status)}`,
+        tooltip: `${this.formatTooltipDate(dayDate)} - ${this.getStatusLabel(status, hasSubmission)}`,
+        submitted: hasSubmission,
         isToday
-      });
-
-      cursor.setDate(cursor.getDate() + 1);
-    }
-
-    while (days.length % 10 !== 0) {
-      const futureDate = new Date(cursor);
-
-      days.push({
-        date: futureDate,
-        status: 'empty',
-        tooltip: `${this.formatTooltipDate(futureDate)} - ${this.getStatusLabel('empty')}`,
-        isToday: false
-      });
-
-      cursor.setDate(cursor.getDate() + 1);
-    }
-
-    return days;
+      };
+    });
   }
 
-  private calculateStreak(days: SymptomDayCell[]): number {
-    let streak = 0;
-
-    for (let index = days.length - 1; index >= 0; index--) {
-      const status = days[index].status;
-
-      if (status === 'empty') {
-        continue;
-      }
-
-      if (status === 'submitted' || status === 'today-submitted') {
-        streak++;
-        continue;
-      }
-
-      break;
+  getTimelineCellClasses(day: SymptomDayCell): string[] {
+    if (day.status === 'future') {
+      return [
+        'bg-gray-100 border-gray-200 dark:bg-gray-800 dark:border-gray-700',
+        'cursor-not-allowed opacity-70',
+      ];
     }
 
-    return streak;
+    if (day.status === 'today') {
+      const base = day.submitted
+        ? 'bg-green-500 border-green-500'
+        : 'bg-red-400 border-red-400';
+
+      return [
+        base,
+        'ring-2 ring-brand-300 ring-offset-1 dark:ring-brand-700',
+        'cursor-pointer',
+      ];
+    }
+
+    if (day.status === 'submitted') {
+      return ['bg-green-500 border-green-500', 'cursor-pointer'];
+    }
+
+    return ['bg-red-400 border-red-400', 'cursor-pointer'];
   }
 
   private extractResponseDate(response: SymptomResponse): string | null {
@@ -237,18 +262,27 @@ export class DashboardPatientComponent implements OnInit {
     });
   }
 
-  private getStatusLabel(status: SymptomDayCell['status']): string {
+  private getStatusLabel(status: SymptomDayCell['status'], submitted = false): string {
     switch (status) {
       case 'submitted':
         return 'submitted';
-      case 'today-submitted':
-        return 'submitted today';
       case 'today':
-        return 'pending today';
-      case 'empty':
-        return 'not available';
+        return submitted ? 'submitted today' : 'today';
+      case 'future':
+        return 'future';
       default:
         return 'missed';
     }
+  }
+
+  private resolveSymptomsStartDate(form: SymptomAssignedForm | null, fallbackStartDate: string | Date): Date {
+    const sourceDate = form?.startDate ?? form?.assignedAt ?? form?.createdAt ?? fallbackStartDate;
+    const parsedDate = new Date(sourceDate);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return this.startOfDay(this.today);
+    }
+
+    return this.startOfDay(parsedDate);
   }
 }
