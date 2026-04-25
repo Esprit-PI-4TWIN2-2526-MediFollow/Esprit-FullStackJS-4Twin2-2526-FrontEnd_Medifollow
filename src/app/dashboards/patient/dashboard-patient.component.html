@@ -24,70 +24,14 @@
     </div>
   </div>
 
-<!-- Daily Symptoms Timeline -->
-<div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-white/[0.05] dark:bg-white/[0.03]">
-  <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-    <div>
-      <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">
-        Daily Symptoms Check
-      </h3>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Follow-up tracking within your allowed submission window
-      </p>
-    </div>
-
-    <div class="flex flex-col items-start gap-2 sm:items-end">
-      <div class="inline-flex items-center gap-2 rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">
-        <span>Day {{ timelineCurrentDay }} of {{ timelineTotalDays }}</span>
-      </div>
-      <div class="text-xs text-gray-500 dark:text-gray-400">
-        You have {{ daysRemaining }} day{{ daysRemaining > 1 ? 's' : '' }} remaining
-      </div>
-    </div>
-  </div>
-
-  <div class="mt-5 flex flex-wrap gap-1.5">
-    <button
-      *ngFor="let day of daysTimeline"
-      type="button"
-      (click)="day.status !== 'future' ? goToSymptomsHistory(day.date) : null"
-      class="h-6 w-6 appearance-none rounded-md border p-0 transition-transform hover:scale-105"
-      [ngClass]="getTimelineCellClasses(day)"
-      [disabled]="day.status === 'future'"
-      [attr.title]="day.tooltip"
-      [attr.aria-label]="day.tooltip"
-    ></button>
-  </div>
-
-  <div class="mt-5 flex flex-wrap items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
-    <span class="inline-flex items-center gap-2">
-      <span class="h-3 w-3 rounded bg-green-500"></span>
-      Submitted
-    </span>
-    <span class="inline-flex items-center gap-2">
-      <span class="h-3 w-3 rounded bg-red-400"></span>
-      Missed
-    </span>
-    <span class="inline-flex items-center gap-2">
-      <span class="h-3 w-3 rounded bg-green-500 ring-2 ring-brand-300"></span>
-      Today
-    </span>
-    <span class="inline-flex items-center gap-2">
-      <span class="h-3 w-3 rounded bg-gray-100 border border-gray-200"></span>
-      Future
-    </span>
-  </div>
-
-  <div class="mt-4">
-    <button
-      type="button"
-      (click)="fillTodaySymptoms()"
-      class="inline-flex items-center justify-center rounded-xl bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600 active:scale-[0.98]"
-    >
-      Fill today
-    </button>
-  </div>
-</div>
+<!-- Daily Symptoms Check -->
+<app-daily-symptoms-check
+  [totalDays]="timelineTotalDays"
+  [currentDay]="timelineCurrentDay"
+  [submittedDays]="submittedDayIndices"
+  [missedDays]="missedDayIndices"
+  (fillToday)="fillTodaySymptoms()"
+></app-daily-symptoms-check>
 
 <!-- Medical Questionnaires -->
 <!-- ── Medical Questionnaires ──────────────────────────── -->

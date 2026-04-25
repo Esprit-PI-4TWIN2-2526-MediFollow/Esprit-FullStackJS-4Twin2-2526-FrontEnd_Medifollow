@@ -110,6 +110,20 @@ export class DashboardPatientComponent implements OnInit {
 
   // ── Helpers ─────────────────────────────────────────────
 
+  get submittedDayIndices(): number[] {
+    return this.daysTimeline
+      .map((d, i) => ({ status: d.status, day: i + 1 }))
+      .filter(d => d.status === 'submitted')
+      .map(d => d.day);
+  }
+
+  get missedDayIndices(): number[] {
+    return this.daysTimeline
+      .map((d, i) => ({ status: d.status, day: i + 1 }))
+      .filter(d => d.status === 'missed')
+      .map(d => d.day);
+  }
+
   getWelcomeName(): string {
     return this.currentUser?.firstName?.trim() || 'there';
   }
