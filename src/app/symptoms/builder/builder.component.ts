@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { Users } from '../../models/users';
 import { UsersService } from '../../services/user/users.service';
 import {
@@ -35,9 +36,17 @@ export class BuilderComponent implements OnInit {
   // ── State ────────────────────────────────────────────────
   isSubmitting = false;
   isGenerating = false;
+  hasGeneratedQuestions = false;
   errorMessage = '';
   generateError = '';
   generateCount = 5;
+  formData = {
+    title: '',
+    description: '',
+    service: '',
+    section: '',
+    numberOfQuestions: 5,
+  };
 
   // ── Form data ────────────────────────────────────────────
   title = '';
@@ -112,6 +121,7 @@ medicalServices: string[] = [];
   constructor(
     private route: ActivatedRoute,
     private router: Router,
+    private http: HttpClient,
     private symptomService: SymptomService,
     private usersService: UsersService,
 private serviceManagementService:ServiceManagementService
@@ -123,6 +133,7 @@ private serviceManagementService:ServiceManagementService
     this.loadPatients();
     this.loadPatientsWithForms();
 this.loadDepartments();
+    this.updateFormSection();
 
     if (this.isEditMode) {
       this.loadForm();
@@ -234,18 +245,21 @@ loadDepartments(): void {
   nextStep(): void {
     if (!this.isLastStep) {
       this.currentStep++;
+      this.updateFormSection();
     }
   }
 
   prevStep(): void {
     if (!this.isFirstStep) {
       this.currentStep--;
+      this.updateFormSection();
     }
   }
 
   goToStep(index: number): void {
     if (index <= this.currentStep) {
       this.currentStep = index;
+      this.updateFormSection();
       return;
     }
 
@@ -256,6 +270,7 @@ loadDepartments(): void {
     }
 
     this.currentStep = index;
+    this.updateFormSection();
   }
 
   get allQuestionsValid(): boolean {
@@ -481,19 +496,34 @@ loadDepartments(): void {
       return;
     }
 
+    this.formData = {
+      title: this.title.trim(),
+      description: this.description.trim(),
+      service: this.medicalService,
+      section: this.getCurrentSection(),
+      numberOfQuestions: Number(this.generateCount),
+    };
+    const body = {
+      title: this.formData.title,
+      description: this.formData.description,
+      service: this.formData.service,
+      section: this.formData.section.toLowerCase(),
+      numberOfQuestions: Number(this.formData.numberOfQuestions),
+    };
+    console.log('REQUEST SENT:', body);
+
     this.isGenerating  = true;
     this.generateError = '';
 
-    this.symptomService
-      .generateQuestionsWithAI(
-        this.title,
-        this.description,
-        this.generateCount,
-        this.currentStepCategory
+    this.http
+      .post<{ questions?: SymptomAiQuestion[] } | SymptomAiQuestion[]>(
+        'http://localhost:3000/symptoms/generate',
+        body
       )
       .subscribe({
         next: (result) => {
-          const normalized = result.questions.map((q, i) => ({
+          const generated = Array.isArray(result) ? result : (result.questions || []);
+          const normalized = generated.map((q, i) => ({
             ...this.normalizeAiQuestion(q),
             required: true,
             occurrencesPerDay: 1,
@@ -501,10 +531,11 @@ loadDepartments(): void {
             category: q.category || this.currentStepCategory,
           }));
           this.questions = [...this.questions, ...normalized];
+          this.hasGeneratedQuestions = normalized.length > 0;
           this.isGenerating = false;
         },
         error: (err) => {
-          console.error('Failed to generate symptom questions', err);
+          console.error('API ERROR:', err);
           this.generateError = 'Failed to generate questions. Please try again.';
           this.isGenerating  = false;
         },
@@ -683,5 +714,24 @@ loadDepartments(): void {
   private normalizeOccurrenceCount(value: number | undefined, fallback: number): number {
     const count = Number(value);
     return Number.isInteger(count) && count >= 1 && count <= 10 ? count : fallback;
+  }
+
+  private updateFormSection(): void {
+    this.formData.section = this.getCurrentSection();
+  }
+
+  private getCurrentSection(): string {
+    switch (this.currentStep + 1) {
+      case 1:
+        return 'vital parameters';
+      case 2:
+        return 'symptoms';
+      case 3:
+        return 'patient context';
+      case 4:
+        return 'clinical data';
+      default:
+        return 'symptoms';
+    }
   }
 }
