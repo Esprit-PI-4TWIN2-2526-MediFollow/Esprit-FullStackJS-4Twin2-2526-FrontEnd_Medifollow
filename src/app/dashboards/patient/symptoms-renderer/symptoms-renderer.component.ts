@@ -79,25 +79,26 @@ export class SymptomsRendererComponent implements OnInit {
 
   canSubmitMore(): boolean {
     return this.questions.some((q) => {
-      const count = this.getTodayCount(q._id ?? '');
-      const limit = q.measurementsPerDay ?? 1;
+      const count = this.getAnswerCountToday(q._id ?? '');
+      const limit = this.getQuestionDailyLimit(q);
       console.log('Question:', q.label, 'count:', count, 'limit:', limit);
       return count < limit;
     });
   }
 
   isQuestionRequired(question: SymptomsQuestion): boolean {
-    const count = this.getTodayCount(question._id ?? '');
-    const limit = question.measurementsPerDay ?? 1;
-    const hasAtLeastOneAnswer = this.todayResponses.some((r) =>
-      this.normalizeAnswers(r.answers).some((a) => a.questionId === question._id)
-    );
-    const limitReached = count >= limit;
+    if (!question.required) {
+      return false;
+    }
 
-    return !hasAtLeastOneAnswer || !limitReached;
+    return !this.isQuestionLimitReached(question);
   }
 
   getTodayCount(questionId: string): number {
+    return this.getAnswerCountToday(questionId);
+  }
+
+  getAnswerCountToday(questionId: string): number {
     return this.getTodayAnswersForQuestion(questionId);
   }
 
@@ -202,14 +203,16 @@ export class SymptomsRendererComponent implements OnInit {
   isFormValid(): boolean {
     const checks = this.currentQuestions.map((q) => {
       const required = this.isQuestionRequired(q);
+      const limitReached = this.isQuestionLimitReached(q);
       const control = this.getControl(q);
       const value = control?.value;
 
       return {
         label: q.label,
         required,
+        limitReached,
         value,
-        valid: !required || this.hasAnswerValue(q, value),
+        valid: limitReached || !required || this.hasAnswerValue(q, value),
       };
     });
 
@@ -262,6 +265,11 @@ export class SymptomsRendererComponent implements OnInit {
     this.markAllTouched();
 
     if (this.responseForm.invalid) {
+      return;
+    }
+
+    // Dynamic per-question validation: only remaining required questions block submission.
+    if (!this.isSubmissionValid()) {
       return;
     }
 
@@ -633,6 +641,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onScaleSelectFor(question: SymptomsQuestion, value: number): void {
+    if (this.isQuestionLimitReached(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -646,6 +655,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onSingleChoiceSelectFor(question: SymptomsQuestion, value: string | boolean): void {
+    if (this.isQuestionLimitReached(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -655,6 +665,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onMultipleChoiceToggleFor(question: SymptomsQuestion, option: number | string): void {
+    if (this.isQuestionLimitReached(question)) return;
     const array = this.getMultipleChoiceArray(question);
     if (!array) return;
 
@@ -811,6 +822,7 @@ export class SymptomsRendererComponent implements OnInit {
     this.symptomsResponseService.getResponsesByDate(this.patientId, today).subscribe({
       next: (responses) => {
         this.todayResponses = responses;
+        this.refreshQuestionValidationState();
 
         if (!this.isHistoryMode) {
           this.selectedResponse = this.orderedResponses[0] || null;
@@ -821,6 +833,7 @@ export class SymptomsRendererComponent implements OnInit {
       },
       error: () => {
         this.todayResponses = [];
+        this.refreshQuestionValidationState();
         if (!this.isHistoryMode) {
           this.selectedResponse = null;
         }
@@ -860,36 +873,12 @@ export class SymptomsRendererComponent implements OnInit {
     }
 
     this.responseForm = this.fb.group(group);
+    this.refreshQuestionValidationState();
   }
 
   private createControl(question: SymptomsQuestion): AbstractControl {
     const type = this.normalizeType(question.type);
-    const validators: ValidatorFn[] = [];
-
-    if (this.isQuestionRequired(question)) {
-      if (type === 'multiple_choice') {
-        validators.push(this.requireAtLeastOneSelectionValidator);
-      } else {
-        validators.push(Validators.required);
-      }
-    }
-
-    if (type === 'text') {
-      validators.push(Validators.minLength(3));
-    }
-
-    if (type === 'number') {
-      if (question.validation?.min !== undefined) {
-        validators.push(Validators.min(question.validation.min));
-      }
-      if (question.validation?.max !== undefined) {
-        validators.push(Validators.max(question.validation.max));
-      }
-    }
-
-    if (type === 'date') {
-      validators.push(this.noFutureDateValidator);
-    }
+    const validators = this.getValidatorsForQuestion(question, this.isQuestionRequired(question));
 
     if (type === 'multiple_choice') {
       const optionControls = (question.options ?? []).map(() => this.fb.control(false));
@@ -963,6 +952,93 @@ export class SymptomsRendererComponent implements OnInit {
     }
 
     return value !== null && value !== undefined && value !== '';
+  }
+
+  private isSubmissionValid(): boolean {
+    return this.questions.every((question) => {
+      if (this.isQuestionLimitReached(question)) {
+        return true;
+      }
+
+      if (!this.isQuestionRequired(question)) {
+        return true;
+      }
+
+      const control = this.getControl(question);
+      const value = control?.value;
+      return this.hasAnswerValue(question, value);
+    });
+  }
+
+  private isQuestionLimitReached(question: SymptomsQuestion): boolean {
+    const questionId = question._id ?? '';
+    if (!questionId) {
+      return false;
+    }
+
+    const count = this.getAnswerCountToday(questionId);
+    return count >= this.getQuestionDailyLimit(question);
+  }
+
+  private getQuestionDailyLimit(question: SymptomsQuestion): number {
+    return (
+      question.measurementsPerDay ??
+      question.occurrencesPerDay ??
+      question.maxOccurrencesPerDay ??
+      1
+    );
+  }
+
+  private refreshQuestionValidationState(): void {
+    for (const question of this.questions) {
+      const control = this.getControl(question);
+      if (!control) continue;
+
+      const limitReached = this.isQuestionLimitReached(question);
+      const required = this.isQuestionRequired(question);
+      const validators = this.getValidatorsForQuestion(question, required);
+
+      if (limitReached && control.enabled) {
+        control.disable({ emitEvent: false });
+      } else if (!limitReached && control.disabled && !this.isHistoryMode) {
+        control.enable({ emitEvent: false });
+      }
+
+      control.setValidators(validators);
+      control.updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+  private getValidatorsForQuestion(question: SymptomsQuestion, required: boolean): ValidatorFn[] {
+    const type = this.normalizeType(question.type);
+    const validators: ValidatorFn[] = [];
+
+    if (required) {
+      if (type === 'multiple_choice') {
+        validators.push(this.requireAtLeastOneSelectionValidator);
+      } else {
+        validators.push(Validators.required);
+      }
+    }
+
+    if (type === 'text') {
+      validators.push(Validators.minLength(3));
+    }
+
+    if (type === 'number') {
+      if (question.validation?.min !== undefined) {
+        validators.push(Validators.min(question.validation.min));
+      }
+      if (question.validation?.max !== undefined) {
+        validators.push(Validators.max(question.validation.max));
+      }
+    }
+
+    if (type === 'date') {
+      validators.push(this.noFutureDateValidator);
+    }
+
+    return validators;
   }
 
   private markCurrentStepTouched(): void {
