@@ -10,6 +10,9 @@ import {
 import { AiAnalysis } from '../../models/ai-analysis';
 import { AiAnalysisService } from '../../services/ai-analysis.service';
 
+type StatsType = 'temperature' | 'heartRate' | 'bloodPressure' | 'spo2';
+type StatsPeriod = 'today' | 'week' | 'all';
+
 @Component({
   selector: 'app-doctor-view-symptoms',
   templateUrl: './doctor-view-symptoms.component.html',
@@ -38,6 +41,17 @@ export class DoctorViewSymptomsComponent implements OnInit {
   aiAnalysis: AiAnalysis | null = null;
   isLoadingAnalysis = false;
   analysisError = '';
+  showStatsModal = false;
+  selectedStatsType: StatsType = 'spo2';
+  selectedStatsPeriod: StatsPeriod = 'today';
+  selectedStatsChartData: ChartData<'line'> = this.createEmptyLineChartData('SpO2 (%)');
+  selectedStatsChartOptions: ChartOptions<'line'> = this.createLineChartOptions('SpO2 (%)');
+  selectedStatsLastValue = '-';
+  selectedStatsAverage = '-';
+  selectedStatsRange = '-';
+  selectedStatsMeasures = 0;
+  selectedStatsInterpretation = 'No data available for interpretation.';
+  selectedStatsInterpretationWarning = false;
 
   temperatureChartData: ChartData<'line'> = this.createEmptyLineChartData('Temperature (degC)');
   heartRateChartData: ChartData<'line'> = this.createEmptyLineChartData('Heart Rate (bpm)');
@@ -192,6 +206,7 @@ export class DoctorViewSymptomsComponent implements OnInit {
   selectSubmission(submission: DoctorSymptomsSubmission): void {
     this.selectedSubmission = submission;
     this.buildCharts();
+    this.rebuildSelectedStatsChart();
     this.aiAnalysis = null;
     this.analysisError = '';
     this.loadAiAnalysis(submission);
@@ -199,6 +214,42 @@ export class DoctorViewSymptomsComponent implements OnInit {
 
   isSelected(submission: DoctorSymptomsSubmission): boolean {
     return this.selectedSubmission?._id === submission._id;
+  }
+
+  openStatsModal(): void {
+    this.showStatsModal = true;
+    this.rebuildSelectedStatsChart();
+  }
+
+  closeStatsModal(): void {
+    this.showStatsModal = false;
+  }
+
+  setStatsType(type: StatsType): void {
+    this.selectedStatsType = type;
+    this.rebuildSelectedStatsChart();
+  }
+
+  setStatsPeriod(period: StatsPeriod): void {
+    this.selectedStatsPeriod = period;
+    this.rebuildSelectedStatsChart();
+  }
+
+  getStatsTypeLabel(type = this.selectedStatsType): string {
+    switch (type) {
+      case 'temperature': return 'Temperature';
+      case 'heartRate': return 'Heart Rate';
+      case 'bloodPressure': return 'Blood Pressure';
+      default: return 'SpO2';
+    }
+  }
+
+  getStatsPeriodLabel(): string {
+    switch (this.selectedStatsPeriod) {
+      case 'today': return 'Today';
+      case 'week': return 'Last 7 days';
+      default: return 'All period';
+    }
   }
 
   getUserInitials(): string {
@@ -230,6 +281,7 @@ export class DoctorViewSymptomsComponent implements OnInit {
         this.submissions = submissions;
         this.selectedSubmission = submissions[0] ?? null;
         this.buildCharts();
+        this.rebuildSelectedStatsChart();
         this.isLoadingVitalsHistory = false;
         this.vitalsHistoryError = '';
         this.isLoadingSymptoms = false;
@@ -353,6 +405,304 @@ export class DoctorViewSymptomsComponent implements OnInit {
     };
 
     this.updateSpo2AxisScale();
+  }
+
+  private rebuildSelectedStatsChart(): void {
+    switch (this.selectedStatsType) {
+      case 'temperature':
+        this.rebuildTemperatureStatsChart();
+        return;
+      case 'heartRate':
+        this.rebuildHeartRateStatsChart();
+        return;
+      case 'bloodPressure':
+        this.rebuildBloodPressureStatsChart();
+        return;
+      default:
+        this.rebuildSpo2StatsChart();
+    }
+  }
+
+  private rebuildTemperatureStatsChart(): void {
+    const rows = this.getFilteredRows(this.temperatureData);
+    const labels = rows.map((row) => this.formatChartDate(row.date));
+    const values = rows.map((row) => row.value);
+
+    this.selectedStatsChartData = {
+      labels,
+      datasets: [
+        this.createThresholdLineDataset('Temperature (degC)', values, (value) => value > 38),
+      ],
+    };
+    this.selectedStatsChartOptions = this.createLineChartOptions('Temperature (degC)');
+    this.setSingleValueKpis(values, 'degC');
+    this.setTemperatureInterpretation(values);
+  }
+
+  private rebuildHeartRateStatsChart(): void {
+    const rows = this.getFilteredRows(this.heartRateData);
+    const labels = rows.map((row) => this.formatChartDate(row.date));
+    const values = rows.map((row) => row.value);
+
+    this.selectedStatsChartData = {
+      labels,
+      datasets: [
+        this.createThresholdLineDataset('Heart Rate (bpm)', values, (value) => value > 100 || value < 60),
+      ],
+    };
+    this.selectedStatsChartOptions = this.createLineChartOptions('Heart Rate (bpm)');
+    this.setSingleValueKpis(values, 'bpm');
+    this.setHeartRateInterpretation(values);
+  }
+
+  private rebuildBloodPressureStatsChart(): void {
+    const rows = this.getFilteredRows(this.bpData);
+    const labels = rows.map((row) => this.formatChartDate(row.date));
+    const systolic = rows.map((row) => row.systolic);
+    const diastolic = rows.map((row) => row.diastolic);
+
+    this.selectedStatsChartData = {
+      labels,
+      datasets: [
+        this.createThresholdLineDataset('Systolic (mmHg)', systolic, (value) => value >= 140, this.normalColor),
+        this.createThresholdLineDataset('Diastolic (mmHg)', diastolic, (value) => value >= 90, '#0ea5e9'),
+      ],
+    };
+    this.selectedStatsChartOptions = this.createLineChartOptions('Blood Pressure (mmHg)', true);
+
+    if (rows.length === 0) {
+      this.selectedStatsLastValue = '-';
+      this.selectedStatsAverage = '-';
+      this.selectedStatsRange = '-';
+      this.selectedStatsMeasures = 0;
+      this.selectedStatsInterpretation = 'No blood pressure data available for interpretation.';
+      this.selectedStatsInterpretationWarning = false;
+      return;
+    }
+
+    const last = rows[rows.length - 1];
+    const avgSystolic = this.average(systolic);
+    const avgDiastolic = this.average(diastolic);
+    const minSystolic = Math.min(...systolic);
+    const maxSystolic = Math.max(...systolic);
+    const minDiastolic = Math.min(...diastolic);
+    const maxDiastolic = Math.max(...diastolic);
+
+    this.selectedStatsLastValue = `${Math.round(last.systolic)}/${Math.round(last.diastolic)} mmHg`;
+    this.selectedStatsAverage = `${Math.round(avgSystolic)}/${Math.round(avgDiastolic)} mmHg`;
+    this.selectedStatsRange = `S ${Math.round(minSystolic)}-${Math.round(maxSystolic)} / D ${Math.round(minDiastolic)}-${Math.round(maxDiastolic)}`;
+    this.selectedStatsMeasures = rows.length;
+    this.setBloodPressureInterpretation(last.systolic, last.diastolic);
+  }
+
+  private rebuildSpo2StatsChart(): void {
+    const rows = this.getFilteredRows(this.spo2Data);
+    const labels = rows.map((row) => this.formatChartDate(row.date));
+    const values = rows.map((row) => row.value);
+
+    this.selectedStatsChartData = {
+      labels,
+      datasets: [
+        this.createThresholdLineDataset('SpO2 (%)', values, (value) => value < 95),
+        {
+          label: 'Clinical threshold (95%)',
+          data: values.map(() => 95),
+          borderColor: '#f59e0b',
+          borderDash: [6, 6],
+          borderWidth: 1.5,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          fill: false,
+        },
+      ],
+    };
+    this.selectedStatsChartOptions = this.createSpo2StatsOptions(values);
+    this.setSingleValueKpis(values, '%');
+    this.setSpo2Interpretation(values);
+  }
+
+  private setSingleValueKpis(values: number[], unit: string): void {
+    if (values.length === 0) {
+      this.selectedStatsLastValue = '-';
+      this.selectedStatsAverage = '-';
+      this.selectedStatsRange = '-';
+      this.selectedStatsMeasures = 0;
+      return;
+    }
+
+    const last = values[values.length - 1];
+    const avg = this.average(values);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+
+    this.selectedStatsLastValue = `${this.formatNumber(last)} ${unit}`;
+    this.selectedStatsAverage = `${this.formatNumber(avg)} ${unit}`;
+    this.selectedStatsRange = `${this.formatNumber(min)} - ${this.formatNumber(max)} ${unit}`;
+    this.selectedStatsMeasures = values.length;
+  }
+
+  private setSpo2Interpretation(values: number[]): void {
+    if (values.length === 0) {
+      this.selectedStatsInterpretation = 'No SpO2 data available for interpretation.';
+      this.selectedStatsInterpretationWarning = false;
+      return;
+    }
+
+    const last = values[values.length - 1];
+    if (last < 95) {
+      this.selectedStatsInterpretation = 'Critical warning: Latest SpO2 is below 95%. Assess oxygenation and clinical status urgently.';
+      this.selectedStatsInterpretationWarning = true;
+      return;
+    }
+
+    this.selectedStatsInterpretation = 'Stable status: Latest SpO2 is within acceptable range.';
+    this.selectedStatsInterpretationWarning = false;
+  }
+
+  private setTemperatureInterpretation(values: number[]): void {
+    if (values.length === 0) {
+      this.selectedStatsInterpretation = 'No temperature data available for interpretation.';
+      this.selectedStatsInterpretationWarning = false;
+      return;
+    }
+
+    const last = values[values.length - 1];
+    if (last > 38) {
+      this.selectedStatsInterpretation = 'Fever warning: Latest temperature is above 38 degC.';
+      this.selectedStatsInterpretationWarning = true;
+      return;
+    }
+
+    this.selectedStatsInterpretation = 'Stable status: Latest temperature is within normal range.';
+    this.selectedStatsInterpretationWarning = false;
+  }
+
+  private setHeartRateInterpretation(values: number[]): void {
+    if (values.length === 0) {
+      this.selectedStatsInterpretation = 'No heart rate data available for interpretation.';
+      this.selectedStatsInterpretationWarning = false;
+      return;
+    }
+
+    const last = values[values.length - 1];
+    if (last > 100 || last < 60) {
+      this.selectedStatsInterpretation = 'Abnormal pulse warning: Latest heart rate is outside the 60-100 bpm range.';
+      this.selectedStatsInterpretationWarning = true;
+      return;
+    }
+
+    this.selectedStatsInterpretation = 'Stable status: Latest heart rate is in expected range.';
+    this.selectedStatsInterpretationWarning = false;
+  }
+
+  private setBloodPressureInterpretation(lastSystolic: number, lastDiastolic: number): void {
+    if (lastSystolic >= 140 || lastDiastolic >= 90) {
+      this.selectedStatsInterpretation = 'Hypertension warning: Latest blood pressure is above recommended threshold.';
+      this.selectedStatsInterpretationWarning = true;
+      return;
+    }
+
+    this.selectedStatsInterpretation = 'Stable status: Latest blood pressure is within expected range.';
+    this.selectedStatsInterpretationWarning = false;
+  }
+
+  private getFilteredRows<T extends { date: string }>(rows: T[]): T[] {
+    if (this.selectedStatsPeriod === 'all') {
+      return rows;
+    }
+
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekStart = new Date(todayStart);
+    weekStart.setDate(todayStart.getDate() - 6);
+
+    return rows.filter((row) => {
+      const rowDate = new Date(row.date);
+      if (Number.isNaN(rowDate.getTime())) {
+        return false;
+      }
+
+      if (this.selectedStatsPeriod === 'today') {
+        return (
+          rowDate.getFullYear() === todayStart.getFullYear() &&
+          rowDate.getMonth() === todayStart.getMonth() &&
+          rowDate.getDate() === todayStart.getDate()
+        );
+      }
+
+      return rowDate >= weekStart && rowDate <= now;
+    });
+  }
+
+  private createSpo2StatsOptions(values: number[]): ChartOptions<'line'> {
+    if (values.length === 0) {
+      return {
+        ...this.createLineChartOptions('SpO2 (%)', true),
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: '#6b7280', maxRotation: 0, autoSkip: true },
+          },
+          y: {
+            min: 90,
+            max: 100,
+            grid: { color: 'rgba(148, 163, 184, 0.2)' },
+            ticks: { color: '#6b7280', stepSize: 1 },
+            title: {
+              display: true,
+              text: 'SpO2 (%)',
+              color: '#64748b',
+              font: { size: 11 },
+            },
+          },
+        },
+      };
+    }
+
+    let min = Math.floor(Math.min(...values) - 1);
+    let max = Math.ceil(Math.max(...values) + 1);
+    min = Math.max(85, min);
+    max = Math.min(100, max);
+
+    if (max - min < 4) {
+      const mid = (max + min) / 2;
+      min = Math.max(85, Math.floor(mid - 2));
+      max = Math.min(100, Math.ceil(mid + 2));
+    }
+
+    return {
+      ...this.createLineChartOptions('SpO2 (%)', true),
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#6b7280', maxRotation: 0, autoSkip: true },
+        },
+        y: {
+          min,
+          max,
+          grid: { color: 'rgba(148, 163, 184, 0.2)' },
+          ticks: { color: '#6b7280', stepSize: 1 },
+          title: {
+            display: true,
+            text: 'SpO2 (%)',
+            color: '#64748b',
+            font: { size: 11 },
+          },
+        },
+      },
+    };
+  }
+
+  private average(values: number[]): number {
+    if (values.length === 0) {
+      return 0;
+    }
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  }
+
+  private formatNumber(value: number): string {
+    const rounded = Math.round(value * 10) / 10;
+    return Number.isInteger(rounded) ? `${rounded}` : rounded.toFixed(1);
   }
 
   private getSubmissionDate(submission: DoctorSymptomsSubmission): string {
