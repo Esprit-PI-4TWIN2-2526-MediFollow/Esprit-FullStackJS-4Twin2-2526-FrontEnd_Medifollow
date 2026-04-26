@@ -368,7 +368,7 @@
                     <button
                       type="button"
                       (click)="onBooleanSelect(question, true)"
-                      [disabled]="!isFormActive || isQuestionLimitReached(question)"
+                      [disabled]="isQuestionInputDisabled(question)"
                       class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors"
                       [ngClass]="{
                         'border-green-500 bg-green-50 text-green-700 dark:border-green-400 dark:bg-green-900/20 dark:text-green-400': getAnswer(question) === true,
@@ -385,7 +385,7 @@
                     <button
                       type="button"
                       (click)="onBooleanSelect(question, false)"
-                      [disabled]="!isFormActive || isQuestionLimitReached(question)"
+                      [disabled]="isQuestionInputDisabled(question)"
                       class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors"
                       [ngClass]="{
                         'border-red-500 bg-red-50 text-red-700 dark:border-red-400 dark:bg-red-900/20 dark:text-red-400': getAnswer(question) === false,
@@ -412,7 +412,7 @@
                       <input
                         type="radio"
                         [name]="question._id || question.label"
-                        [disabled]="!isFormActive || isQuestionLimitReached(question)"
+                        [disabled]="isQuestionInputDisabled(question)"
                         class="h-4 w-4 border-gray-300 text-brand-500 focus:ring-brand-500/30"
                         [checked]="getFormControl(question).value === opt"
                         (change)="onSingleChoiceSelectFor(question, opt)" />
@@ -430,7 +430,7 @@
                            class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-brand-200 hover:bg-brand-50/50 dark:border-gray-700 dark:bg-transparent dark:text-gray-300">
                       <input
                         type="checkbox"
-                        [disabled]="!isFormActive || isQuestionLimitReached(question)"
+                        [disabled]="isQuestionInputDisabled(question)"
                         class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
                         [checked]="isOptionCheckedFor(question, i)"
                         (change)="onMultipleChoiceToggleFor(question, i)" />
@@ -468,7 +468,7 @@
                       *ngFor="let val of [1,2,3,4,5,6,7,8,9,10]"
                       type="button"
                       (click)="onScaleSelect(question, val)"
-                      [disabled]="!isFormActive || isQuestionLimitReached(question)"
+                      [disabled]="isQuestionInputDisabled(question)"
                       class="flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-medium transition-colors"
                       [ngClass]="{
                         'border-brand-500 bg-brand-500 text-white': getAnswer(question) === val,
@@ -484,6 +484,11 @@
                   </p>
                 </ng-container>
               </ng-container>
+
+              <p *ngIf="hasReachedDailyMax(question) && !isQuestionInputDisabled(question)"
+                 class="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                Maximum entries reached for today, but you can still update your value.
+              </p>
             </div>
               </div>
 

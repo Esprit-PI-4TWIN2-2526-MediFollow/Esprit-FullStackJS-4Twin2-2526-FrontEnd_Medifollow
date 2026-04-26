@@ -110,16 +110,11 @@ export class SymptomsRendererComponent implements OnInit {
   canSubmitMore(): boolean {
     if (!this.isFormActive) return false;
 
-    return this.questions.some((q) => {
-      const count = this.getAnswerCountToday(q._id ?? '');
-      const limit = this.getQuestionDailyLimit(q);
-      console.log('Question:', q.label, 'count:', count, 'limit:', limit);
-      return count < limit;
-    });
+    return this.questions.some((question) => !this.isQuestionInteractionBlocked(question));
   }
 
   isQuestionRequired(question: SymptomsQuestion): boolean {
-    if (!question.required) {
+    if (!this.isQuestionMarkedRequired(question)) {
       return false;
     }
 
@@ -675,7 +670,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onScaleSelectFor(question: SymptomsQuestion, value: number): void {
-    if (!this.isFormActive || this.isQuestionLimitReached(question)) return;
+    if (this.isQuestionInteractionBlocked(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -689,7 +684,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onSingleChoiceSelectFor(question: SymptomsQuestion, value: string | boolean): void {
-    if (!this.isFormActive || this.isQuestionLimitReached(question)) return;
+    if (this.isQuestionInteractionBlocked(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -699,7 +694,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onMultipleChoiceToggleFor(question: SymptomsQuestion, option: number | string): void {
-    if (!this.isFormActive || this.isQuestionLimitReached(question)) return;
+    if (this.isQuestionInteractionBlocked(question)) return;
     const array = this.getMultipleChoiceArray(question);
     if (!array) return;
 
@@ -1005,6 +1000,10 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   isQuestionLimitReached(question: SymptomsQuestion): boolean {
+    if (!this.isQuestionMarkedRequired(question)) {
+      return false;
+    }
+
     const questionId = question._id ?? '';
     if (!questionId) {
       return false;
@@ -1015,12 +1014,19 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   private getQuestionDailyLimit(question: SymptomsQuestion): number {
-    return (
+    const perQuestionLimit = (
       question.measurementsPerDay ??
       question.occurrencesPerDay ??
       question.maxOccurrencesPerDay ??
       1
     );
+
+    if (this.isQuestionMarkedRequired(question)) {
+      return perQuestionLimit;
+    }
+
+    // Optional questions use the highest configured limit in the form.
+    return Math.max(perQuestionLimit, this.getHighestQuestionDailyLimit());
   }
 
   private refreshQuestionValidationState(): void {
@@ -1028,10 +1034,9 @@ export class SymptomsRendererComponent implements OnInit {
       const control = this.getControl(question);
       if (!control) continue;
 
-      const limitReached = this.isQuestionLimitReached(question);
       const required = this.isQuestionRequired(question);
       const validators = this.getValidatorsForQuestion(question, required);
-      const shouldDisable = this.isHistoryMode || this.isFormExpired || limitReached;
+      const shouldDisable = this.isQuestionInputDisabled(question);
 
       if (shouldDisable && control.enabled) {
         control.disable({ emitEvent: false });
@@ -1042,6 +1047,54 @@ export class SymptomsRendererComponent implements OnInit {
       control.setValidators(validators);
       control.updateValueAndValidity({ emitEvent: false });
     }
+  }
+
+  private isQuestionInteractionBlocked(question: SymptomsQuestion): boolean {
+    return this.isQuestionInputDisabled(question);
+  }
+
+  private getHighestQuestionDailyLimit(): number {
+    const limits = this.questions.map((question) =>
+      question.measurementsPerDay ??
+      question.occurrencesPerDay ??
+      question.maxOccurrencesPerDay ??
+      1
+    );
+
+    return limits.length > 0 ? Math.max(...limits) : 1;
+  }
+
+  // Strict system-only blocking: history mode or expired form.
+  // Daily max no longer blocks editing.
+  isQuestionInputDisabled(_question: SymptomsQuestion): boolean {
+    return this.isHistoryMode || this.isFormExpired;
+  }
+
+  hasReachedDailyMax(question: SymptomsQuestion): boolean {
+    const questionId = question._id ?? '';
+    if (!questionId) return false;
+
+    return this.getAnswerCountToday(questionId) >= this.getQuestionDailyLimit(question);
+  }
+
+  private isQuestionMarkedRequired(question: SymptomsQuestion): boolean {
+    const raw = (question as any).required;
+
+    if (typeof raw === 'boolean') {
+      return raw;
+    }
+
+    if (typeof raw === 'string') {
+      const normalized = raw.trim().toLowerCase();
+      if (normalized === 'true') return true;
+      if (normalized === 'false') return false;
+    }
+
+    if (typeof raw === 'number') {
+      return raw !== 0;
+    }
+
+    return !!raw;
   }
 
   private getValidatorsForQuestion(question: SymptomsQuestion, required: boolean): ValidatorFn[] {
@@ -1100,6 +1153,7 @@ export class SymptomsRendererComponent implements OnInit {
       questions: [...(form.questions ?? [])]
         .map((question) => ({
           ...question,
+          required: this.isQuestionMarkedRequired(question),
           measurementsPerDay:
             question.measurementsPerDay ??
             question.occurrencesPerDay ??
