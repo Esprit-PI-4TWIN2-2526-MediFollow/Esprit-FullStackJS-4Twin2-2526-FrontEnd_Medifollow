@@ -53,7 +53,40 @@ export class DoctorViewSymptomsComponent implements OnInit {
   readonly temperatureChartOptions = this.createLineChartOptions('Temperature (degC)');
   readonly heartRateChartOptions = this.createLineChartOptions('Heart Rate (bpm)');
   readonly bloodPressureChartOptions = this.createLineChartOptions('Blood Pressure (mmHg)', true);
-  readonly spo2ChartOptions = this.createLineChartOptions('SpO2 (%)');
+  spo2ChartOptions: ChartOptions<'line'> = {
+    ...this.createLineChartOptions('SpO2 (%)'),
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: '#6b7280',
+          maxRotation: 0,
+          autoSkip: true,
+        },
+      },
+      y: {
+        min: 90,
+        max: 100,
+        grid: {
+          color: 'rgba(148, 163, 184, 0.2)',
+        },
+        ticks: {
+          color: '#6b7280',
+          stepSize: 1,
+        },
+        title: {
+          display: true,
+          text: 'SpO2 (%)',
+          color: '#64748b',
+          font: {
+            size: 11,
+          },
+        },
+      },
+    },
+  };
 
   constructor(
     private route: ActivatedRoute,
@@ -318,6 +351,8 @@ export class DoctorViewSymptomsComponent implements OnInit {
         )
       ]
     };
+
+    this.updateSpo2AxisScale();
   }
 
   private getSubmissionDate(submission: DoctorSymptomsSubmission): string {
@@ -335,8 +370,42 @@ export class DoctorViewSymptomsComponent implements OnInit {
   }
 
   private extractSpo2(submission: DoctorSymptomsSubmission): number | null {
-    const row = submission.vitalSigns.find((item) => item.label.toLowerCase().includes('spo2') || item.label.toLowerCase().includes('oxygen'));
-    return row ? this.toNumber(row.value) : null;
+    const isSpo2Label = (label: string): boolean => {
+      const normalized = this.normalizeLabel(label);
+      return (
+        normalized.includes('spo2') ||
+        normalized.includes('sao2') ||
+        normalized.includes('oxygen') ||
+        normalized.includes('oxygene') ||
+        normalized.includes('saturation') ||
+        normalized.includes('oxymetrie') ||
+        normalized.includes('oximetry')
+      );
+    };
+
+    const vitalRow = submission.vitalSigns.find((item) => isSpo2Label(item.label));
+    const symptomRow = submission.symptoms.find((item) => isSpo2Label(item.label));
+    const raw = vitalRow?.value ?? symptomRow?.value;
+    if (raw === undefined || raw === null) {
+      return null;
+    }
+
+    let value = this.toNumber(raw);
+    if (value === null) {
+      return null;
+    }
+
+    // Some APIs send SpO2 as ratio (0.96) instead of percent (96).
+    if (value > 0 && value <= 1) {
+      value *= 100;
+    }
+
+    // Guard against mis-mapped values from unrelated questions.
+    if (value < 50 || value > 100) {
+      return null;
+    }
+
+    return value;
   }
 
   private extractBloodPressure(submission: DoctorSymptomsSubmission): { systolic: number; diastolic: number } | null {
@@ -355,11 +424,69 @@ export class DoctorViewSymptomsComponent implements OnInit {
     return { systolic, diastolic };
   }
 
-  private toNumber(value: string): number | null {
-    const match = value.match(/-?\d+(\.\d+)?/);
+  private toNumber(value: unknown): number | null {
+    const text = String(value ?? '');
+    const match = text.match(/-?\d+([.,]\d+)?/);
     if (!match) return null;
-    const parsed = Number(match[0]);
+    const parsed = Number(match[0].replace(',', '.'));
     return Number.isFinite(parsed) ? parsed : null;
+  }
+
+  private normalizeLabel(value: string): string {
+    return value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]/g, '')
+      .toLowerCase();
+  }
+
+  private updateSpo2AxisScale(): void {
+    const values = this.spo2Data
+      .map((row) => row.value)
+      .filter((value): value is number => Number.isFinite(value));
+
+    if (values.length === 0) {
+      this.applySpo2Scale(90, 100);
+      return;
+    }
+
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const padding = 1;
+
+    // Auto zoom around the recorded SpO2 values with safe clinical bounds.
+    let min = Math.floor(minValue - padding);
+    let max = Math.ceil(maxValue + padding);
+
+    min = Math.max(85, min);
+    max = Math.min(100, max);
+
+    // Keep at least a small visual range.
+    if (max - min < 4) {
+      const mid = (max + min) / 2;
+      min = Math.max(85, Math.floor(mid - 2));
+      max = Math.min(100, Math.ceil(mid + 2));
+    }
+
+    this.applySpo2Scale(min, max);
+  }
+
+  private applySpo2Scale(min: number, max: number): void {
+    this.spo2ChartOptions = {
+      ...this.spo2ChartOptions,
+      scales: {
+        ...this.spo2ChartOptions.scales,
+        y: {
+          ...(this.spo2ChartOptions.scales?.['y'] as object),
+          min,
+          max,
+          ticks: {
+            ...((this.spo2ChartOptions.scales?.['y'] as any)?.ticks ?? {}),
+            stepSize: 1,
+          },
+        },
+      },
+    };
   }
 
   private getDateTimestamp(value: string | null | undefined): number {
