@@ -19,7 +19,7 @@ type StatsPeriod = 'today' | 'week' | 'all';
   styleUrl: './doctor-view-symptoms.component.css'
 })
 export class DoctorViewSymptomsComponent implements OnInit {
-  private readonly normalColor = '#2563eb';
+  private readonly normalColor = '#3b82f6';
   private readonly abnormalColor = '#ef4444';
 
   patientId = '';
