@@ -37,7 +37,7 @@
     "face-api.js": "^0.22.2",
     "flatpickr": "^4.6.13",
     "ng-apexcharts": "^1.13.0",
-    "ng2-charts": "^4.1.1",
+    "ng2-charts": "^5.0.4",
     "rxjs": "~7.8.0",
     "socket.io-client": "^4.8.3",
     "sweetalert2": "^11.26.18",
