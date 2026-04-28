@@ -24,7 +24,7 @@ pipeline {
 
         stage('Install') {
             steps {
-                sh 'npm install --legacy-peer-deps'
+                sh 'npm ci --legacy-peer-deps'
             }
         }
 
@@ -50,7 +50,7 @@ pipeline {
                         ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=MediFollow-Frontend \
                         -Dsonar.sources=src \
-                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.host.url=http://sonarqube:9000 \
                         -Dsonar.login=$SONAR_TOKEN \
                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                         """
@@ -58,6 +58,5 @@ pipeline {
                 }
             }
         }
-
     }
 }
