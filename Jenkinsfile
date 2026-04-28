@@ -3,6 +3,7 @@ pipeline {
 
     options {
         skipDefaultCheckout(true)
+        disableConcurrentBuilds()
     }
 
     tools {
@@ -13,6 +14,7 @@ pipeline {
         SONAR_TOKEN = credentials('sonar-token')
         PUPPETEER_CACHE_DIR = "${WORKSPACE}/.cache/puppeteer"
         NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
+        CHROME_BIN = '/usr/bin/google-chrome'
     }
 
     stages {
