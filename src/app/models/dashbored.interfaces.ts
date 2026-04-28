@@ -1,8 +1,33 @@
+// dashboard.interfaces.ts (fichier corrigé)
 export interface Summary {
   patients: { total: number; newThisWeek: number };
   doctors: { total: number };
-  services: { total: number; active: number; inactive: number };
+  services: {
+    total: number;
+    active: number;
+    inactive: number;
+    emergency?: number; // Ajouté pour le template
+  };
   questionnaires: { total: number; active: number; totalResponses: number };
+  staff?: {
+    doctors: { total: number };
+    nurses: { total: number };
+    coordinators: { total: number };
+  };
+  symptoms?: {
+    totalResponses: number;
+    pendingValidations: number;
+  };
+  followup?: {
+    overallRate: number;
+    todayRate: number;
+    respondedToday: number;
+    everResponded: number;
+    completedToday: number;
+  };
+  alerts?: {
+    highRiskPatients: number;
+  };
 }
 
 export interface ActivityPoint {
@@ -18,6 +43,7 @@ export interface ComplianceService {
   patientCount: number;
   activeQuestionnaires: number;
   nonCompliantEstimate: number;
+  distinctRespondents?: number; // Ajouté
 }
 
 export interface QuestionnaireStats {
@@ -32,7 +58,8 @@ export interface QuestionnaireStats {
 
 export interface Alert {
   id?: string;
-  type: 'critical' | 'warning' | 'info';
+  type?: 'critical' | 'warning' | 'info';
+  severity?: 'HIGH' | 'MEDIUM' | 'LOW';
   message: string;
   service?: string;
   createdAt?: string;
@@ -45,6 +72,8 @@ export interface HighRiskPatient {
   assignedDepartment?: string;
   riskScore?: number;
   lastActivity?: string;
+  totalResponses?: number; // Ajouté
+  activeQuestionnaires?: number; // Ajouté
 }
 
 export interface GlobalFollowupRate {
@@ -68,4 +97,6 @@ export interface InactivePatient {
   assignedDepartment?: string;
   lastSeen?: string;
   daysSinceActivity?: number;
+  email?: string; // Ajouté
+  lastLogin?: string; // Ajouté
 }

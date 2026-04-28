@@ -1,0 +1,49 @@
+// src/styles/_tokens.scss
+// Shared once — imported where needed, NOT repeated per component
+
+:root {
+  --clr-primary:        #0ca8a0;
+  --clr-primary-dark:   #0a9490;
+  --clr-primary-darker: #087d78;
+  --clr-primary-light:  #f0fdfb;
+  --clr-primary-mid:    #ccf7f5;
+  --clr-primary-border: #9aeae7;
+
+  --clr-success:        #22c55e;
+  --clr-success-bg:     #f0fdf4;
+  --clr-success-border: #bbf7d0;
+  --clr-danger:         #ef4444;
+  --clr-danger-bg:      #fef2f2;
+  --clr-danger-border:  #fecaca;
+  --clr-warning:        #f59e0b;
+  --clr-warning-bg:     #fffbeb;
+  --clr-info:           #3b82f6;
+  --clr-info-bg:        #eff6ff;
+
+  --clr-bg:             #f8fafc;
+  --clr-surface:        #ffffff;
+  --clr-border:         #e2e8f0;
+  --clr-border-light:   #f1f5f9;
+  --clr-gray-50:        #f8fafc;
+  --clr-gray-100:       #f1f5f9;
+  --clr-gray-200:       #e2e8f0;
+  --clr-gray-300:       #cbd5e1;
+  --clr-gray-400:       #94a3b8;
+  --clr-gray-500:       #64748b;
+  --clr-gray-600:       #475569;
+  --clr-gray-700:       #334155;
+  --clr-gray-800:       #1e293b;
+  --clr-gray-900:       #0f172a;
+  --clr-white:          #ffffff;
+
+  --radius-xs: 4px; --radius-sm: 6px; --radius-md: 8px;
+  --radius-lg: 12px; --radius-xl: 16px;
+
+  --shadow-xs:    0 1px 2px rgba(15,23,42,.04);
+  --shadow-sm:    0 1px 3px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+  --shadow-md:    0 4px 6px rgba(15,23,42,.05), 0 2px 4px rgba(15,23,42,.04);
+  --shadow-lg:    0 10px 15px rgba(15,23,42,.06), 0 4px 6px rgba(15,23,42,.04);
+  --shadow-modal: 0 20px 48px rgba(15,23,42,.14), 0 8px 16px rgba(15,23,42,.08);
+
+  --transition: 150ms ease;
+}

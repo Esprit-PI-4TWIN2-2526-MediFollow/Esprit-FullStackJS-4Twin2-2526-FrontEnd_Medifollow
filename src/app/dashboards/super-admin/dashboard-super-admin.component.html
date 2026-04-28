@@ -1,250 +1,358 @@
-<!-- ════════════════════════════════════════════════════════
-     ADMIN DASHBOARD — Design Premium Médical
-     Sora (display) + Nunito Sans (body)
-════════════════════════════════════════════════════════ -->
-<div class="db-page">
+<div class="dash-wrapper">
 
-  <!-- ── Page header ──────────────────────────────────────── -->
-  <div class="page-header">
-    <div>
-      <h1 class="page-title">Dashboard</h1>
-      <p class="page-sub">{{ today | date: 'EEEE, MMMM d, y' }}</p>
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       HEADER
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <div class="dash-header">
+    <div class="hdr-left">
+      <h1>{{ 'SUPER_ADMIN_DASHBOARD.ADMIN_TITLE' | translate }}</h1>
+      <p>{{ currentDate }} --  {{ 'SUPER_ADMIN_DASHBOARD.REAL_TIME_UPDATE' | translate }}</p>
+    </div>
+    <div class="hdr-right">
+      <div class="badge-live">
+        <span class="live-dot"></span>{{ 'SUPER_ADMIN_DASHBOARD.LIVE' | translate }}
+      </div>
+      <div class="range-btns">
+        <button
+          *ngFor="let r of ranges"
+          [class.active]="selectedRange === r.value"
+          (click)="setRange(r.value)"
+          class="rbtn">
+          {{ r.label }}
+        </button>
+      </div>
+      <button class="btn-refresh" (click)="refreshAll()" [class.spinning]="loading">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="15" height="15">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       KPI CARDS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card teal">
+      <div class="kpi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.ACTIVE_PATIENTS' | translate }}</span>
+        <span class="kpi-value">{{ summary?.patients?.total | number }}</span>
+        <span class="kpi-sub">{{ 'SUPER_ADMIN_DASHBOARD.NEW_THIS_WEEK' | translate:{ count: summary?.patients?.newThisWeek } }}</span>
+      </div>
     </div>
 
-  </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"/>
+          <path d="M8 9V7a4 4 0 0 1 8 0v2"/>
+          <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
+        </svg>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.ACTIVE_DOCTORS' | translate }}</span>
+        <span class="kpi-value">{{ summary?.staff?.doctors?.total | number }}</span>
+        <span class="kpi-sub">{{ summary?.staff?.nurses?.total }} {{ 'SUPER_ADMIN_DASHBOARD.NURSES' | translate }} & {{ summary?.staff?.coordinators?.total }} {{ 'SUPER_ADMIN_DASHBOARD.COORDINATORS' | translate }}</span>
+      </div>
+    </div>
 
+    <div class="kpi-card amber">
+      <div class="kpi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+        </svg>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.ACTIVE_SERVICES' | translate }}</span>
+        <span class="kpi-value">{{ summary?.services?.active | number }}</span>
+        <span class="kpi-sub">{{ summary?.services?.emergency }} {{ 'SUPER_ADMIN_DASHBOARD.EMERGENCY_SERVICES' | translate }} & {{ summary?.services?.inactive }} {{ 'SUPER_ADMIN_DASHBOARD.INACTIVE_SERVICES' | translate }}</span>
+      </div>
+    </div>
 
+    <div class="kpi-card coral">
+      <div class="kpi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.QUESTIONNAIRE_RESPONSES' | translate }}</span>
+        <span class="kpi-value">{{ summary?.questionnaires?.totalResponses | number }}</span>
+        <span class="kpi-sub">{{ summary?.symptoms?.totalResponses | number }} {{ 'SUPER_ADMIN_DASHBOARD.SYMPTOM_RESPONSES' | translate }}</span>
+      </div>
+    </div>
 
-  <!-- ── Loading skeleton ─────────────────────────────────── -->
-  <div *ngIf="isLoading" class="skeleton-row">
-    <div class="skel" *ngFor="let i of [1,2,3,4,5]"></div>
-  </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-label">Taux de suivi global</span>
+        <span class="kpi-value">{{ summary?.followup?.overallRate }}%</span>
+        <span class="kpi-sub">{{ summary?.followup?.todayRate }}% aujourd'hui & {{ summary?.followup?.respondedToday }} patients</span>
+      </div>
+    </div>
 
-  <ng-container *ngIf="!isLoading && summary">
-
-    <!-- ══ CRITICAL ALERTS BANNER ══════════════════════════════ -->
-    <div *ngIf="criticalAlerts.length > 0" class="alerts-banner">
-      <div *ngFor="let a of criticalAlerts" class="alert-item alert-item--critical">
-        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    <div class="kpi-card red">
+      <div class="kpi-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
           <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
         </svg>
-        <span>{{ a.message }}</span>
-        <span *ngIf="a.service" class="alert-service">{{ a.service }}</span>
-        <span *ngIf="a.createdAt" class="alert-time">{{ relativeDate(a.createdAt) }}</span>
+      </div>
+      <div class="kpi-body">
+        <span class="kpi-label">Patients à risque élevé</span>
+        <span class="kpi-value">{{ summary?.alerts?.highRiskPatients | number }}</span>
+        <span class="kpi-sub">{{ summary?.symptoms?.pendingValidations }} validations en attente</span>
       </div>
     </div>
 
-    <!-- ══ KPI CARDS ════════════════════════════════════════════ -->
-    <div class="kpi-row">
+  </div>
 
-      <!-- Patients -->
-      <div class="kpi-card kpi-card--teal">
-        <div class="kpi-card__top">
-          <span class="kpi-icon kpi-icon--teal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
-            </svg>
-          </span>
-          <span class="kpi-trend">
-            <svg viewBox="0 0 16 16" fill="currentColor" width="10" height="10"><path d="M8 3l4 5H4z"/></svg>
-            +{{ summary.patients.newThisWeek }} this week
-          </span>
-        </div>
-        <div class="kpi-value">{{ summary.patients.total }}</div>
-        <div class="kpi-label">Total Patients</div>
-      </div>
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       CHARTS ROW
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <div class="charts-row">
 
-      <!-- Doctors -->
-      <div class="kpi-card kpi-card--blue">
-        <div class="kpi-card__top">
-          <span class="kpi-icon kpi-icon--blue">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M12 2a5 5 0 100 10A5 5 0 0012 2z"/>
-              <path d="M12 14c-5.33 0-8 2.67-8 4v1h16v-1c0-1.33-2.67-4-8-4z"/>
-              <path d="M15 9h4M17 7v4"/>
-            </svg>
-          </span>
-          <span class="kpi-sub-label">With specialization</span>
-        </div>
-        <div class="kpi-value">{{ summary.doctors.total }}</div>
-        <div class="kpi-label">Active Doctors</div>
-      </div>
-
-      <!-- Services -->
-      <div class="kpi-card kpi-card--indigo">
-        <div class="kpi-card__top">
-          <span class="kpi-icon kpi-icon--indigo">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <rect x="2" y="7" width="20" height="14" rx="2"/>
-              <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-              <line x1="12" y1="12" x2="12" y2="16"/><line x1="10" y1="14" x2="14" y2="14"/>
-            </svg>
-          </span>
-          <div class="kpi-tags">
-            <span class="svc-badge svc-badge--active">{{ summary.services.active }} active</span>
-            <span class="svc-badge svc-badge--inactive">{{ summary.services.inactive }} inactive</span>
-          </div>
-        </div>
-        <div class="kpi-value">{{ summary.services.total }}</div>
-        <div class="kpi-label">Services</div>
-      </div>
-
-      <!-- Questionnaires -->
-      <div class="kpi-card kpi-card--amber">
-        <div class="kpi-card__top">
-          <span class="kpi-icon kpi-icon--amber">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-              <polyline points="14 2 14 8 20 8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-          </span>
-          <span class="kpi-sub-label">{{ summary.questionnaires.totalResponses | number }} responses</span>
-        </div>
-        <div class="kpi-value">{{ summary.questionnaires.total }}</div>
-        <div class="kpi-label">Questionnaires</div>
-      </div>
-
-
-    </div>
-
-    <!-- ══ ROW 2 : Activity + Compliance ════════════════════════ -->
-    <div class="grid-2">
-
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#2563eb">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-              </svg>
-              Follow-up Activity
-            </h2>
-            <p class="card-sub">New patients &amp; questionnaire responses over time</p>
-          </div>
-        <div class="range-tabs">
-  <span class="range-tab">7 last days</span>
-</div>
-
-        </div>
+    <!-- Activity Chart -->
+    <div class="card chart-card">
+      <div class="card-header">
+        <span class="card-title">Activité de suivi</span>
+        <span class="card-subtitle">{{ rangeLabel }}</span>
         <div class="chart-legend">
-          <span><i class="dot dot--blue"></i> New Patients</span>
-          <span><i class="dot dot--teal"></i> Responses</span>
-        </div>
-        <div class="bar-chart">
-          <div class="bar-chart__inner">
-            <div *ngFor="let d of activity; trackBy: trackByDate" class="bar-group">
-              <div class="bar-wrap">
-                <div class="bar bar--responses" [style.height.%]="barHeight(d.submittedResponses)" [title]="d.submittedResponses + ' responses'"></div>
-                <div class="bar bar--patients"  [style.height.%]="barHeight(d.newPatients)"       [title]="d.newPatients + ' new patients'"></div>
-              </div>
-              <span class="bar-label">{{ shortDate(d.date) }}</span>
-            </div>
-          </div>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:#1D9E75"></span>Nouveaux patients
+          </span>
+          <span class="leg-item">
+            <span class="leg-dot" style="background:#378ADD;border-radius:0"></span>Réponses soumises
+          </span>
         </div>
       </div>
-
-      <!-- Compliance -->
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#0ea472">
-                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              Compliance by Service
-            </h2>
-            <p class="card-sub">Questionnaire completion rate per service</p>
-          </div>
-        </div>
-        <div class="compliance-list">
-          <div *ngFor="let svc of compliance" class="compliance-item">
-            <div class="compliance-item__head">
-              <span class="compliance-item__name">{{ svc.serviceName }}</span>
-              <span class="compliance-item__pct" [style.color]="complianceColor(svc.complianceRate)">
-                {{ svc.complianceRate }}%
-              </span>
-            </div>
-            <div class="compliance-track">
-              <div class="compliance-fill"
-                   [style.width.%]="svc.complianceRate"
-                   [style.background]="complianceColor(svc.complianceRate)">
-              </div>
-            </div>
-            <div class="compliance-item__meta">
-              <span>{{ svc.patientCount }} patients</span>
-              <span>{{ svc.totalResponses }} responses</span>
-            </div>
-          </div>
-        </div>
+      <div class="chart-container" style="height:220px">
+        <canvas #activityChart></canvas>
       </div>
-
     </div>
 
-    <!-- ══ ROW 3 : AI Insights + Alerts ════════════════════════ -->
-    <div class="grid-2 grid-2--equal" *ngIf="aiInsights.length > 0 || alerts.length > 0">
-
-      <!-- AI Insights -->
-      <div class="card" *ngIf="aiInsights.length > 0">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">
-              <span class="ai-badge">AI</span>
-              Insights
-            </h2>
-            <p class="card-sub">Automated analysis from your data</p>
+    <!-- Gauge + Mini stats -->
+    <div class="card gauge-card">
+      <div class="card-header">
+        <span class="card-title">Suivi global</span>
+      </div>
+      <div class="gauge-wrap">
+        <div class="gauge-ring">
+          <canvas #gaugeChart width="130" height="130"></canvas>
+          <div class="gauge-center">
+            <span class="gauge-pct">{{ summary?.followup?.overallRate ?? 0 }}%</span>
+            <span class="gauge-lbl">global</span>
           </div>
         </div>
-        <div class="insights-list">
-          <div *ngFor="let ins of aiInsights" class="insight-item">
-            <div class="insight-dot" [style.background]="insightColor(ins.severity)"></div>
-            <div class="insight-body">
-              <span class="insight-category">{{ ins.category }}</span>
-              <p class="insight-msg">{{ ins.message }}</p>
-            </div>
-            <span class="severity-pill"
-                  [class.severity-pill--high]="ins.severity === 'high'"
-                  [class.severity-pill--medium]="ins.severity === 'medium'"
-                  [class.severity-pill--low]="ins.severity === 'low'">
-              {{ ins.severity }}
-            </span>
+        <div class="mini-stats">
+          <div class="mini-stat">
+            <span class="ms-val">{{ summary?.followup?.respondedToday | number }}</span>
+            <span class="ms-lbl">Répondants aujourd'hui</span>
+          </div>
+          <div class="mini-stat">
+            <span class="ms-val">{{ summary?.followup?.everResponded | number }}</span>
+            <span class="ms-lbl">Ont déjà répondu</span>
+          </div>
+          <div class="mini-stat">
+            <span class="ms-val">{{ summary?.followup?.completedToday | number }}</span>
+            <span class="ms-lbl">Soumissions aujourd'hui</span>
+          </div>
+          <div class="mini-stat">
+            <span class="ms-val">{{ summary?.questionnaires?.active | number }}</span>
+            <span class="ms-lbl">Questionnaires actifs</span>
           </div>
         </div>
       </div>
-      <div class="card" *ngIf="alerts.length > 0">
-        <div class="card-header">
-          <div>
-            <h2 class="card-title">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#e11d48">
-                <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
-              </svg>
-              Alerts
-            </h2>
-            <p class="card-sub">System notifications &amp; warnings</p>
+    </div>
+
+  </div>
+
+
+  <div class="bottom-row">
+
+    <!-- Compliance by service -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Conformité par service</span>
+        <span class="card-subtitle">{{ compliance.length }} services</span>
+      </div>
+      <div class="compliance-list">
+        <div *ngFor="let s of compliance?.slice(0, 7)" class="comp-item">
+          <div class="comp-header">
+            <span class="comp-name">{{ s.serviceName }}</span>
+            <span class="comp-pct" [style.color]="getRateColor(s.complianceRate)">{{ s.complianceRate }}%</span>
           </div>
-          <span class="alert-count-badge">{{ alerts.length }}</span>
+          <div class="comp-bar">
+            <div class="comp-fill"
+              [style.width.%]="s.complianceRate"
+              [style.background]="getRateColor(s.complianceRate)">
+            </div>
+          </div>
+          <div class="comp-detail">
+            {{ s.distinctRespondents }}/{{ s.patientCount }} patients Â· {{ s.activeQuestionnaires }} questionnaires
+          </div>
+        </div>
+        <div *ngIf="!compliance?.length" class="empty-state">Aucune donnée de conformité</div>
+      </div>
+    </div>
+
+    <!-- High risk patients -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Patients à risque élevé</span>
+        <span class="badge-count red">{{ highRiskPatients.length }}</span>
+      </div>
+      <table class="risk-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>Service</th>
+            <th>Réponses</th>
+            <th>Risque</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of highRiskPatients?.slice(0, 6)">
+            <td>
+              <div class="patient-cell">
+                <div class="avatar" [style.background]="getAvatarBg(p.riskScore ?? 0)">
+{{ p.firstName.charAt(0) + p.lastName.charAt(0) }}
+                </div>
+<span>{{ p.firstName }} {{ p.lastName.charAt(0) }}.</span>
+              </div>
+            </td>
+            <td class="text-muted">{{ p.assignedDepartment }}</td>
+            <td class="text-mono">{{ p.totalResponses }}/{{ p.activeQuestionnaires }}</td>
+            <td>
+              <span class="risk-badge" [class.high]="(p.riskScore ?? 0) >= 85" [class.medium]="(p.riskScore ?? 0) < 85">
+                {{ p.riskScore ?? 0 }}%
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="!highRiskPatients?.length">
+            <td colspan="4" class="empty-state">Aucun patient critique détecté</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Right column: Alerts + AI Insights -->
+    <div class="right-col">
+
+      <!-- Alerts -->
+      <!-- <div class="card">
+        <div class="card-header">
+          <span class="card-title">Alertes systÃ¨me</span>
+          <span class="badge-count" [class.red]="hasHighAlert" [class.amber]="!hasHighAlert">
+            {{ alerts.length }}
+          </span>
         </div>
         <div class="alerts-list">
-          <div *ngFor="let a of alerts" class="alert-row"
-               [class.alert-row--critical]="a.type === 'critical'"
-               [class.alert-row--warning]="a.type === 'warning'"
-               [class.alert-row--info]="a.type === 'info'">
-            <div class="alert-row__dot"></div>
-            <div class="alert-row__body">
-              <p class="alert-row__msg">{{ a.message }}</p>
-              <span *ngIf="a.service" class="alert-row__svc">{{ a.service }}</span>
+          <div *ngFor="let a of alerts" class="alert-item" [class]="'alert-' + a.severity">
+            <div class="alert-dot"></div>
+            <div class="alert-body">
+              <span class="alert-type">{{ a.type }}</span>
+              <span class="alert-msg">{{ a.message }}</span>
             </div>
-            <span class="alert-row__time">{{ relativeDate(a.createdAt) }}</span>
+          </div>
+          <div *ngIf="!alerts?.length" class="alert-item alert-LOW">
+            <div class="alert-dot"></div>
+            <span>Aucune alerte active</span>
           </div>
         </div>
-      </div>
+      </div> -->
 
+      <!-- AI Insights -->
+    <div class="card ai-card">
+
+  <div class="card-header">
+    <span class="card-title">AI Dashboard Assistant</span>
+  </div>
+
+  <!-- CHAT BOX -->
+  <div class="chat-box">
+
+    <div *ngFor="let msg of messages">
+      <div [ngClass]="msg.role" class="chat-msg">
+        {{ msg.text }}
+      </div>
     </div>
 
-  </ng-container>
+  </div>
+
+  <!-- INPUT -->
+  <div class="chat-input">
+    <input
+      [(ngModel)]="userQuestion"
+      placeholder="Ask: Why engagement is low?"
+    />
+
+    <button (click)="sendQuestion()">
+      Send
+    </button>
+  </div>
+
+    </div>
+    </div>
+
+
+
+
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       INACTIVE PATIENTS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+<div class="card inactive-full" style="margin-top: 12px;">
+    <div class="card-header" style="cursor:pointer" (click)="toggleInactive()">
+      <span class="card-title">Patients inactifs (7j+)</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="badge-count amber">{{ inactivePatients.length }}</span>
+        <svg [style.transform]="showInactive ? 'rotate(180deg)' : ''"
+             style="transition:.2s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14">
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </div>
+    </div>
+    <div *ngIf="showInactive" class="inactive-table-wrap">
+      <table class="risk-table" style="margin-top:8px">
+        <thead>
+          <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Service</th>
+            <th>Dernière connexion</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of inactivePatients?.slice(0, 10)">
+            <td>{{ p.firstName }} {{ p.lastName }}</td>
+            <td class="text-muted text-mono" style="font-size:11px">{{ p.email }}</td>
+            <td class="text-muted">{{ p.assignedDepartment || '' }}</td>
+            <td class="text-muted">{{ p.lastLogin | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
 </div>
-<!-- <app-gesture-settings></app-gesture-settings> -->
