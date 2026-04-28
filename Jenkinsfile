@@ -11,7 +11,8 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonar-token')
-        CHROME_BIN = '/usr/bin/chromium'
+        PUPPETEER_CACHE_DIR = "${WORKSPACE}/.cache/puppeteer"
+        NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
     }
 
     stages {
@@ -24,17 +25,29 @@ pipeline {
 
         stage('Install') {
             steps {
-                sh 'npm ci --legacy-peer-deps'
+                sh '''
+                set -eux
+
+                npm ci --prefer-offline --legacy-peer-deps
+                npx puppeteer browsers install chrome
+                '''
             }
         }
 
         stage('Test & Coverage') {
             steps {
+                script {
+                    env.CHROME_BIN = sh(
+                        script: 'node -e "const puppeteer = require(\'puppeteer\'); console.log(puppeteer.executablePath());"',
+                        returnStdout: true
+                    ).trim()
+                }
                 sh '''
                 set -eux
 
                 echo "Using Chrome: $CHROME_BIN"
-                $CHROME_BIN --version || true
+                test -x "$CHROME_BIN"
+                "$CHROME_BIN" --version
 
                 npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
                 '''
