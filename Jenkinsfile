@@ -35,24 +35,19 @@ pipeline {
         }
 
         stage('Test & Coverage') {
-            steps {
-                script {
-                    env.CHROME_BIN = sh(
-                        script: 'node -e "const puppeteer = require(\'puppeteer\'); console.log(puppeteer.executablePath());"',
-                        returnStdout: true
-                    ).trim()
-                }
-                sh '''
-                set -eux
-
-                echo "Using Chrome: $CHROME_BIN"
-                test -x "$CHROME_BIN"
-                "$CHROME_BIN" --version
-
-                npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
-                '''
-            }
+    agent {
+        docker {
+            image 'cypress/browsers:node18.12.0-chrome107'
+            args '--user root'
         }
+    }
+    steps {
+        sh '''
+        npm ci --legacy-peer-deps
+        npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
+        '''
+    }
+}
 
         stage('SonarQube') {
             steps {
