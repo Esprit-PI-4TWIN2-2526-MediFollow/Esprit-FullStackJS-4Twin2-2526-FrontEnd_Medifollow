@@ -14,35 +14,35 @@ pipeline {
         SONAR_TOKEN = credentials('sonar-token')
         PUPPETEER_CACHE_DIR = "${WORKSPACE}/.cache/puppeteer"
         NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
-        CHROME_BIN = '/usr/bin/google-chrome'
+        CHROME_BIN = '/usr/bin/chromium'
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow.git'
+                git branch: 'main',
+                    url: 'https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow.git'
             }
         }
 
         stage('Install') {
             steps {
                 sh '''
+                set -eux
                 npm ci --prefer-offline --legacy-peer-deps
                 '''
             }
         }
 
         stage('Test & Coverage') {
-            agent {
-                docker {
-                    image 'cypress/browsers:node18.12.0-chrome107'
-                    args '--user root'
-                    reuseNode true
-                }
-            }
             steps {
                 sh '''
+                set -eux
+
+                echo "Using Chrome: $CHROME_BIN"
+                $CHROME_BIN --version || true
+
                 npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
                 '''
             }
