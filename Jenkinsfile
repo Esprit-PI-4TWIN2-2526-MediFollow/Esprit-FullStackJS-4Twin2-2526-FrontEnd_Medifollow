@@ -24,17 +24,14 @@ pipeline {
         }
 
         stage('Install') {
-            steps {
-                sh '''
-                set -eux
+    steps {
+        sh '''
+        npm ci --prefer-offline --legacy-peer-deps
+        '''
+    }
+}
 
-                npm ci --prefer-offline --legacy-peer-deps
-                npx puppeteer browsers install chrome
-                '''
-            }
-        }
-
-        stage('Test & Coverage') {
+stage('Test & Coverage') {
     agent {
         docker {
             image 'cypress/browsers:node18.12.0-chrome107'
@@ -43,7 +40,6 @@ pipeline {
     }
     steps {
         sh '''
-        npm ci --legacy-peer-deps
         npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
         '''
     }
