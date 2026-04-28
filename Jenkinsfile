@@ -24,26 +24,27 @@ pipeline {
         }
 
         stage('Install') {
-    steps {
-        sh '''
-        npm ci --prefer-offline --legacy-peer-deps
-        '''
-    }
-}
-
-stage('Test & Coverage') {
-    agent {
-        docker {
-            image 'cypress/browsers:node18.12.0-chrome107'
-            args '--user root'
+            steps {
+                sh '''
+                npm ci --prefer-offline --legacy-peer-deps
+                '''
+            }
         }
-    }
-    steps {
-        sh '''
-        npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
-        '''
-    }
-}
+
+        stage('Test & Coverage') {
+            agent {
+                docker {
+                    image 'cypress/browsers:node18.12.0-chrome107'
+                    args '--user root'
+                    reuseNode true
+                }
+            }
+            steps {
+                sh '''
+                npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
+                '''
+            }
+        }
 
         stage('SonarQube') {
             steps {
