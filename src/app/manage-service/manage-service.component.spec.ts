@@ -1,18 +1,16 @@
-import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ManageServiceComponent } from './manage-service.component';
+import { buildComponentTestingModule } from '../testing/test-bed-helpers';
 
 describe('ManageServiceComponent', () => {
   let component: ManageServiceComponent;
   let fixture: ComponentFixture<ManageServiceComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [ManageServiceComponent],
-      imports: [HttpClientTestingModule]
-    })
-    .compileComponents();
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(ManageServiceComponent),
+    ).compileComponents();
 
     fixture = TestBed.createComponent(ManageServiceComponent);
     component = fixture.componentInstance;
