@@ -47,7 +47,7 @@ export class DoctorSymptomsService {
   }
 
   getPatientVitalsHistory(patientId: string): Observable<DoctorVitalsHistoryPoint[]> {
-    return this.http.get<unknown>(`http://localhost:3000/symptoms/doctor/patient/${patientId}/vitals-history`)
+    return this.http.get<unknown>(`${ApiConfig.BASE_URL}/symptoms/doctor/patient/${patientId}/vitals-history`)
       .pipe(
         map((payload) => this.extractArray(payload)
           .map((item) => this.mapVitalsPoint(item))

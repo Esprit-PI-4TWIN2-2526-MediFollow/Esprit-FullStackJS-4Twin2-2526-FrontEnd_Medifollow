@@ -11,6 +11,7 @@ import {
   QuestionCategory,
 } from '../services/symptom.service';
 import { ServiceManagementService } from '../../services/service/service-management.service';
+import { ApiConfig } from '../../config/api.config';
 
 // Internal model (mirrors Questionnaires' Question shape)
 interface SymptomQuestion {
@@ -531,7 +532,7 @@ loadDepartments(): void {
 
     this.http
       .post<{ questions?: SymptomAiQuestion[] } | SymptomAiQuestion[]>(
-        'http://localhost:3000/symptoms/generate',
+        `${ApiConfig.BASE_URL}/symptoms/generate`,
         body
       )
       .subscribe({

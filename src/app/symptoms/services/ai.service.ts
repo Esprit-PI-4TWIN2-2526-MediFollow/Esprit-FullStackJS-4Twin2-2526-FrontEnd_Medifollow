@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { SymptomAiQuestion } from './symptom.service';
+import { ApiConfig } from '../../config/api.config';
 
 export interface GenerateQuestionsPayload {
   title: string;
@@ -17,7 +18,7 @@ export interface GenerateQuestionsResponse {
 
 @Injectable({ providedIn: 'root' })
 export class AiService {
-  private readonly symptomsGenerateApi = 'http://localhost:3000/symptoms/generate';
+  private readonly symptomsGenerateApi = `${ApiConfig.BASE_URL}/symptoms/generate`;
 
   constructor(private http: HttpClient) {}
 
