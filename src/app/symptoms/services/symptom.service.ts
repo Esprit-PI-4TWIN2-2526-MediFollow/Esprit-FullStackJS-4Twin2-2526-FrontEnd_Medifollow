@@ -36,6 +36,7 @@ export interface SymptomForm {
   title: string;
   description?: string;
   medicalService?: string;
+  durationInDays?: number;
   patientId?: string;
   patientIds?: string[];
   questions: SymptomQuestion[];

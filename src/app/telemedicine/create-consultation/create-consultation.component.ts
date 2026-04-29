@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { ConsultationService } from '../services/consultation.service';
 import { CreateConsultationDto } from '../models/consultation.model';
 import { environment } from '../../../environments/environment';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-create-consultation',
@@ -48,14 +49,19 @@ export class CreateConsultationComponent implements OnInit {
         this.patients = data;
       },
       error: (err) => {
-        console.error('Erreur chargement patients:', err);
+        console.error('Error loading patients:', err);
       }
     });
   }
 
   onSubmit(): void {
     if (!this.selectedPatientId || !this.scheduledDate || !this.scheduledTime || !this.reason.trim()) {
-      alert('Veuillez remplir tous les champs requis');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please fill in all required fields',
+        confirmButtonColor: '#087f8b'
+      });
       return;
     }
 
@@ -74,13 +80,26 @@ export class CreateConsultationComponent implements OnInit {
 
     this.consultationService.create(dto).subscribe({
       next: (consultation) => {
-        alert('Consultation créée avec succès!');
-        this.router.navigate(['/telemedicine/consultation', consultation._id]);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Consultation created successfully',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          this.router.navigate(['/telemedicine/consultation', consultation._id]);
+        });
       },
       error: (err) => {
-        this.error = 'Erreur lors de la création de la consultation';
+        this.error = 'Error creating consultation';
         console.error(err);
         this.loading = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to create consultation',
+          confirmButtonColor: '#087f8b'
+        });
       }
     });
   }

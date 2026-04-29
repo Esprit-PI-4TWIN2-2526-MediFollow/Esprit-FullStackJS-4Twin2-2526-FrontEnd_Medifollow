@@ -77,27 +77,55 @@ export class SymptomsRendererComponent implements OnInit {
     return this.historyDate.trim() !== '';
   }
 
+  get hasDurationLimit(): boolean {
+    return Number(this.form?.durationInDays) > 0;
+  }
+
+  get remainingDays(): number {
+    const form = this.form;
+    if (!form) return 0;
+
+    const duration = Number(form.durationInDays);
+    if (!Number.isFinite(duration) || duration <= 0) return 0;
+
+    const startDate = this.getFormStartDate(form);
+    if (!startDate) return duration;
+
+    const endDate = this.getFormEndDate(startDate, duration);
+    if (!endDate) return duration;
+
+    const today = this.toDateOnly(new Date());
+    return Math.floor((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  }
+
+  get isFormExpired(): boolean {
+    if (!this.hasDurationLimit) return false;
+    return this.remainingDays <= 0;
+  }
+
+  get isFormActive(): boolean {
+    return !this.isHistoryMode && !this.isFormExpired;
+  }
+
   canSubmitMore(): boolean {
-    return this.questions.some((q) => {
-      const count = this.getTodayCount(q._id ?? '');
-      const limit = q.measurementsPerDay ?? 1;
-      console.log('Question:', q.label, 'count:', count, 'limit:', limit);
-      return count < limit;
-    });
+    if (!this.isFormActive) return false;
+
+    return this.questions.some((question) => !this.isQuestionInteractionBlocked(question));
   }
 
   isQuestionRequired(question: SymptomsQuestion): boolean {
-    const count = this.getTodayCount(question._id ?? '');
-    const limit = question.measurementsPerDay ?? 1;
-    const hasAtLeastOneAnswer = this.todayResponses.some((r) =>
-      this.normalizeAnswers(r.answers).some((a) => a.questionId === question._id)
-    );
-    const limitReached = count >= limit;
+    if (!this.isQuestionMarkedRequired(question)) {
+      return false;
+    }
 
-    return !hasAtLeastOneAnswer || !limitReached;
+    return !this.isQuestionLimitReached(question);
   }
 
   getTodayCount(questionId: string): number {
+    return this.getAnswerCountToday(questionId);
+  }
+
+  getAnswerCountToday(questionId: string): number {
     return this.getTodayAnswersForQuestion(questionId);
   }
 
@@ -200,16 +228,20 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   isFormValid(): boolean {
+    if (!this.isFormActive) return false;
+
     const checks = this.currentQuestions.map((q) => {
       const required = this.isQuestionRequired(q);
+      const limitReached = this.isQuestionLimitReached(q);
       const control = this.getControl(q);
       const value = control?.value;
 
       return {
         label: q.label,
         required,
+        limitReached,
         value,
-        valid: !required || this.hasAnswerValue(q, value),
+        valid: limitReached || !required || this.hasAnswerValue(q, value),
       };
     });
 
@@ -218,7 +250,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   canGoNext(): boolean {
-    if (!this.canSubmitMore() || this.isHistoryMode) return false;
+    if (!this.canSubmitMore() || !this.isFormActive) return false;
     const questions = this.currentQuestions;
     if (questions.length === 0) return true;
     return this.isFormValid();
@@ -257,11 +289,16 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.canSubmitMore() || this.isHistoryMode) return;
+    if (!this.canSubmitMore() || !this.isFormActive) return;
 
     this.markAllTouched();
 
     if (this.responseForm.invalid) {
+      return;
+    }
+
+    // Dynamic per-question validation: only remaining required questions block submission.
+    if (!this.isSubmissionValid()) {
       return;
     }
 
@@ -633,6 +670,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onScaleSelectFor(question: SymptomsQuestion, value: number): void {
+    if (this.isQuestionInteractionBlocked(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -646,6 +684,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onSingleChoiceSelectFor(question: SymptomsQuestion, value: string | boolean): void {
+    if (this.isQuestionInteractionBlocked(question)) return;
     this.getControl(question)?.setValue(value);
     this.getControl(question)?.markAsTouched();
   }
@@ -655,6 +694,7 @@ export class SymptomsRendererComponent implements OnInit {
   }
 
   onMultipleChoiceToggleFor(question: SymptomsQuestion, option: number | string): void {
+    if (this.isQuestionInteractionBlocked(question)) return;
     const array = this.getMultipleChoiceArray(question);
     if (!array) return;
 
@@ -811,6 +851,7 @@ export class SymptomsRendererComponent implements OnInit {
     this.symptomsResponseService.getResponsesByDate(this.patientId, today).subscribe({
       next: (responses) => {
         this.todayResponses = responses;
+        this.refreshQuestionValidationState();
 
         if (!this.isHistoryMode) {
           this.selectedResponse = this.orderedResponses[0] || null;
@@ -821,6 +862,7 @@ export class SymptomsRendererComponent implements OnInit {
       },
       error: () => {
         this.todayResponses = [];
+        this.refreshQuestionValidationState();
         if (!this.isHistoryMode) {
           this.selectedResponse = null;
         }
@@ -860,36 +902,12 @@ export class SymptomsRendererComponent implements OnInit {
     }
 
     this.responseForm = this.fb.group(group);
+    this.refreshQuestionValidationState();
   }
 
   private createControl(question: SymptomsQuestion): AbstractControl {
     const type = this.normalizeType(question.type);
-    const validators: ValidatorFn[] = [];
-
-    if (this.isQuestionRequired(question)) {
-      if (type === 'multiple_choice') {
-        validators.push(this.requireAtLeastOneSelectionValidator);
-      } else {
-        validators.push(Validators.required);
-      }
-    }
-
-    if (type === 'text') {
-      validators.push(Validators.minLength(3));
-    }
-
-    if (type === 'number') {
-      if (question.validation?.min !== undefined) {
-        validators.push(Validators.min(question.validation.min));
-      }
-      if (question.validation?.max !== undefined) {
-        validators.push(Validators.max(question.validation.max));
-      }
-    }
-
-    if (type === 'date') {
-      validators.push(this.noFutureDateValidator);
-    }
+    const validators = this.getValidatorsForQuestion(question, this.isQuestionRequired(question));
 
     if (type === 'multiple_choice') {
       const optionControls = (question.options ?? []).map(() => this.fb.control(false));
@@ -965,6 +983,152 @@ export class SymptomsRendererComponent implements OnInit {
     return value !== null && value !== undefined && value !== '';
   }
 
+  private isSubmissionValid(): boolean {
+    return this.questions.every((question) => {
+      if (this.isQuestionLimitReached(question)) {
+        return true;
+      }
+
+      if (!this.isQuestionRequired(question)) {
+        return true;
+      }
+
+      const control = this.getControl(question);
+      const value = control?.value;
+      return this.hasAnswerValue(question, value);
+    });
+  }
+
+  isQuestionLimitReached(question: SymptomsQuestion): boolean {
+    if (!this.isQuestionMarkedRequired(question)) {
+      return false;
+    }
+
+    const questionId = question._id ?? '';
+    if (!questionId) {
+      return false;
+    }
+
+    const count = this.getAnswerCountToday(questionId);
+    return count >= this.getQuestionDailyLimit(question);
+  }
+
+  private getQuestionDailyLimit(question: SymptomsQuestion): number {
+    const perQuestionLimit = (
+      question.measurementsPerDay ??
+      question.occurrencesPerDay ??
+      question.maxOccurrencesPerDay ??
+      1
+    );
+
+    if (this.isQuestionMarkedRequired(question)) {
+      return perQuestionLimit;
+    }
+
+    // Optional questions use the highest configured limit in the form.
+    return Math.max(perQuestionLimit, this.getHighestQuestionDailyLimit());
+  }
+
+  private refreshQuestionValidationState(): void {
+    for (const question of this.questions) {
+      const control = this.getControl(question);
+      if (!control) continue;
+
+      const required = this.isQuestionRequired(question);
+      const validators = this.getValidatorsForQuestion(question, required);
+      const shouldDisable = this.isQuestionInputDisabled(question);
+
+      if (shouldDisable && control.enabled) {
+        control.disable({ emitEvent: false });
+      } else if (!shouldDisable && control.disabled) {
+        control.enable({ emitEvent: false });
+      }
+
+      control.setValidators(validators);
+      control.updateValueAndValidity({ emitEvent: false });
+    }
+  }
+
+  private isQuestionInteractionBlocked(question: SymptomsQuestion): boolean {
+    return this.isQuestionInputDisabled(question);
+  }
+
+  private getHighestQuestionDailyLimit(): number {
+    const limits = this.questions.map((question) =>
+      question.measurementsPerDay ??
+      question.occurrencesPerDay ??
+      question.maxOccurrencesPerDay ??
+      1
+    );
+
+    return limits.length > 0 ? Math.max(...limits) : 1;
+  }
+
+  // Strict system-only blocking: history mode or expired form.
+  // Daily max no longer blocks editing.
+  isQuestionInputDisabled(_question: SymptomsQuestion): boolean {
+    return this.isHistoryMode || this.isFormExpired;
+  }
+
+  hasReachedDailyMax(question: SymptomsQuestion): boolean {
+    const questionId = question._id ?? '';
+    if (!questionId) return false;
+
+    return this.getAnswerCountToday(questionId) >= this.getQuestionDailyLimit(question);
+  }
+
+  private isQuestionMarkedRequired(question: SymptomsQuestion): boolean {
+    const raw = (question as any).required;
+
+    if (typeof raw === 'boolean') {
+      return raw;
+    }
+
+    if (typeof raw === 'string') {
+      const normalized = raw.trim().toLowerCase();
+      if (normalized === 'true') return true;
+      if (normalized === 'false') return false;
+    }
+
+    if (typeof raw === 'number') {
+      return raw !== 0;
+    }
+
+    return !!raw;
+  }
+
+  private getValidatorsForQuestion(question: SymptomsQuestion, required: boolean): ValidatorFn[] {
+    const type = this.normalizeType(question.type);
+    const validators: ValidatorFn[] = [];
+
+    if (required) {
+      if (type === 'multiple_choice') {
+        validators.push(this.requireAtLeastOneSelectionValidator);
+      } else {
+        validators.push(Validators.required);
+      }
+    }
+
+    if (type === 'text') {
+      validators.push(Validators.minLength(3));
+    }
+
+    if (type === 'number') {
+      if (question.validation?.min !== undefined) {
+        validators.push(Validators.min(question.validation.min));
+      }
+      if (question.validation?.max !== undefined) {
+        validators.push(Validators.max(question.validation.max));
+      }
+    }
+
+    if (type === 'date') {
+      validators.push(this.noFutureDateValidator);
+    }
+
+    return validators;
+  }
+
   private markCurrentStepTouched(): void {
     for (const question of this.currentQuestions) {
       this.getControl(question)?.markAsTouched();
@@ -989,6 +1153,7 @@ export class SymptomsRendererComponent implements OnInit {
       questions: [...(form.questions ?? [])]
         .map((question) => ({
           ...question,
+          required: this.isQuestionMarkedRequired(question),
           measurementsPerDay:
             question.measurementsPerDay ??
             question.occurrencesPerDay ??
@@ -1104,5 +1269,36 @@ export class SymptomsRendererComponent implements OnInit {
 
     const parsedDate = new Date(rawDate);
     return Number.isNaN(parsedDate.getTime()) ? 0 : parsedDate.getTime();
+  }
+
+  private getFormStartDate(form: SymptomsAssignedForm): Date | null {
+    const maybeStartDate = (form as SymptomsAssignedForm & { startDate?: string | Date }).startDate;
+    const candidates = [maybeStartDate, form.assignedAt, form.createdAt, form.updatedAt];
+
+    for (const candidate of candidates) {
+      if (!candidate) continue;
+      const parsed = new Date(candidate);
+      if (!Number.isNaN(parsed.getTime())) {
+        return this.toDateOnly(parsed);
+      }
+    }
+
+    return null;
+  }
+
+  private getFormEndDate(startDate: Date, durationInDays: number): Date | null {
+    if (!Number.isFinite(durationInDays) || durationInDays <= 0) {
+      return null;
+    }
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + durationInDays - 1);
+    return this.toDateOnly(endDate);
+  }
+
+  private toDateOnly(value: Date): Date {
+    const normalized = new Date(value);
+    normalized.setHours(0, 0, 0, 0);
+    return normalized;
   }
 }
