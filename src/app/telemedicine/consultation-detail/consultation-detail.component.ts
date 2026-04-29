@@ -6,6 +6,7 @@ import { MedicalDocumentService } from '../services/medical-document.service';
 import { Consultation } from '../models/consultation.model';
 import { Prescription } from '../models/prescription.model';
 import { MedicalDocument } from '../models/medical-document.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-consultation-detail',
@@ -62,7 +63,7 @@ export class ConsultationDetailComponent implements OnInit {
         this.loadDocuments(id);
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement de la consultation';
+        this.error = 'Error loading consultation';
         console.error(err);
         this.loading = false;
       }
@@ -75,7 +76,7 @@ export class ConsultationDetailComponent implements OnInit {
         this.prescriptions = data;
       },
       error: (err) => {
-        console.error('Erreur chargement prescriptions:', err);
+        console.error('Error loading prescriptions:', err);
       }
     });
   }
@@ -86,7 +87,7 @@ export class ConsultationDetailComponent implements OnInit {
         this.documents = data;
       },
       error: (err) => {
-        console.error('Erreur chargement documents:', err);
+        console.error('Error loading documents:', err);
       }
     });
   }
@@ -94,19 +95,33 @@ export class ConsultationDetailComponent implements OnInit {
   startConsultation(): void {
     if (!this.consultation) return;
 
-    if (confirm('Démarrer cette consultation? Une fenêtre de vidéoconférence va s\'ouvrir.')) {
-      this.consultationService.start(this.consultation._id).subscribe({
-        next: (data) => {
-          this.consultation = data;
-          // Open video meeting
-          this.openVideoMeeting();
-        },
-        error: (err) => {
-          alert('Erreur lors du démarrage');
-          console.error(err);
-        }
-      });
-    }
+    Swal.fire({
+      title: 'Start Consultation?',
+      text: 'A video conference window will open',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#087f8b',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, start it!'
+    }).then((result) => {
+      if (result.isConfirmed && this.consultation) {
+        this.consultationService.start(this.consultation._id).subscribe({
+          next: (data) => {
+            this.consultation = data;
+            this.openVideoMeeting();
+          },
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Error starting consultation',
+              confirmButtonColor: '#087f8b'
+            });
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 
   openVideoMeeting(): void {
@@ -152,7 +167,12 @@ export class ConsultationDetailComponent implements OnInit {
     if (!this.consultation) return;
 
     if (!this.endDiagnosis.trim()) {
-      alert('Le diagnostic est requis');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Diagnosis',
+        text: 'Diagnosis is required',
+        confirmButtonColor: '#087f8b'
+      });
       return;
     }
 
@@ -164,10 +184,21 @@ export class ConsultationDetailComponent implements OnInit {
       next: (data) => {
         this.consultation = data;
         this.closeEndForm();
-        alert('Consultation terminée avec succès');
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Consultation ended successfully',
+          timer: 2000,
+          showConfirmButton: false
+        });
       },
       error: (err) => {
-        alert('Erreur lors de la fin de consultation');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error ending consultation',
+          confirmButtonColor: '#087f8b'
+        });
         console.error(err);
       }
     });
@@ -176,17 +207,39 @@ export class ConsultationDetailComponent implements OnInit {
   cancelConsultation(): void {
     if (!this.consultation) return;
 
-    if (confirm('Annuler cette consultation?')) {
-      this.consultationService.cancel(this.consultation._id).subscribe({
-        next: (data) => {
-          this.consultation = data;
-        },
-        error: (err) => {
-          alert('Erreur lors de l\'annulation');
-          console.error(err);
-        }
-      });
-    }
+    Swal.fire({
+      title: 'Cancel Consultation?',
+      text: 'This action cannot be undone',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#f04438',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, cancel it!'
+    }).then((result) => {
+      if (result.isConfirmed && this.consultation) {
+        this.consultationService.cancel(this.consultation._id).subscribe({
+          next: (data) => {
+            this.consultation = data;
+            Swal.fire({
+              icon: 'success',
+              title: 'Cancelled',
+              text: 'Consultation has been cancelled',
+              timer: 2000,
+              showConfirmButton: false
+            });
+          },
+          error: (err) => {
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'Error cancelling consultation',
+              confirmButtonColor: '#087f8b'
+            });
+            console.error(err);
+          }
+        });
+      }
+    });
   }
 
   createPrescription(): void {
@@ -224,11 +277,11 @@ export class ConsultationDetailComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
-      'pending': 'En attente',
-      'in-progress': 'En cours',
-      'completed': 'Terminée',
-      'cancelled': 'Annulée',
-      'no-show': 'Absent'
+      'pending': 'Pending',
+      'in-progress': 'In Progress',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled',
+      'no-show': 'No Show'
     };
     return labels[status] || status;
   }

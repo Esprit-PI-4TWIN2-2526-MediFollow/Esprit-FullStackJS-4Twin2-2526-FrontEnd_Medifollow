@@ -1,0 +1,168 @@
+<div class="dsc">
+
+  <!-- ── 1. Header ─────────────────────────────────────────────────────── -->
+  <div class="dsc__header">
+    <div class="dsc__header-left">
+      <h2 class="dsc__title">Daily Symptoms Check</h2>
+      <p class="dsc__subtitle">
+        Follow-up tracking within your allowed submission window
+      </p>
+    </div>
+    <span class="dsc__badge">Day {{ currentDay }} of {{ totalDays }}</span>
+  </div>
+
+  <!-- ── 2. Middle: ring + stat pills ──────────────────────────────────── -->
+  <div class="dsc__middle">
+
+    <div class="dsc__ring-wrapper">
+      <svg class="dsc__ring-svg" viewBox="0 0 110 110" aria-hidden="true">
+        <circle class="dsc__ring-track" cx="55" cy="55" r="48" />
+        <circle
+          class="dsc__ring-progress"
+          cx="55" cy="55" r="48"
+          transform="rotate(-90 55 55)"
+          [attr.stroke-dasharray]="circumference"
+          [attr.stroke-dashoffset]="strokeDashoffset"
+        />
+        <circle
+          class="dsc__ring-dot"
+          [attr.cx]="todayDotCx"
+          [attr.cy]="todayDotCy"
+          r="5"
+        />
+        <text class="dsc__ring-pct" x="55" y="52"
+              text-anchor="middle" dominant-baseline="middle">{{ progressPercent }}%</text>
+        <text class="dsc__ring-sub" x="55" y="66"
+              text-anchor="middle">done</text>
+      </svg>
+    </div>
+
+    <div class="dsc__stats">
+      <div class="dsc__stat dsc__stat--submitted">
+        <span class="dsc__stat-dot dsc__stat-dot--submitted"></span>
+        <span class="dsc__stat-label">Submitted</span>
+        <span class="dsc__stat-count">{{ completedCount }}</span>
+      </div>
+      <div class="dsc__stat dsc__stat--missed">
+        <span class="dsc__stat-dot dsc__stat-dot--missed"></span>
+        <span class="dsc__stat-label">Missed</span>
+        <span class="dsc__stat-count">{{ missedCount }}</span>
+      </div>
+      <div class="dsc__stat dsc__stat--remaining">
+        <span class="dsc__stat-dot dsc__stat-dot--remaining"></span>
+        <span class="dsc__stat-label">Remaining</span>
+        <span class="dsc__stat-count">{{ remainingCount }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── 3. Day dots timeline ───────────────────────────────────────────── -->
+  <div class="dsc__timeline" role="list" aria-label="Daily symptoms calendar">
+    <div class="dsc__day" *ngFor="let day of daysArray" role="listitem">
+      <div
+        class="dsc__dot"
+        [ngClass]="'dsc__dot--' + getDayStatus(day)"
+        [class.dsc__dot--active]="selectedDay === day"
+        (click)="onDotClick(day, getDayStatus(day))"
+        role="button"
+        [attr.tabindex]="getDayStatus(day) === 'submitted' ? 0 : -1"
+        [attr.aria-label]="'Day ' + day + ' — ' + getDayStatus(day)"
+        [attr.aria-pressed]="selectedDay === day"
+      >{{ day }}</div>
+      <span
+        class="dsc__dot-label"
+        [class.dsc__dot-label--today]="getDayStatus(day) === 'today'"
+      >{{ getDayStatus(day) === 'today' ? 'Today' : 'D' + day }}</span>
+    </div>
+  </div>
+
+  <!-- ── 4. History panel ───────────────────────────────────────────────── -->
+  <div
+    *ngIf="selectedRecord"
+    [@slideDown]
+    class="dsc__panel"
+  >
+
+    <!-- Panel header -->
+    <div class="dsc__panel-header">
+      <div class="dsc__panel-header-left">
+        <span class="dsc__panel-title">
+          Jour {{ selectedRecord.day }}
+          &nbsp;—&nbsp;
+          {{ selectedRecord.date | date:'EEEE d MMMM yyyy' : '' : 'fr' }}
+        </span>
+        <span class="dsc__panel-sub">Soumis à {{ selectedRecord.submittedAt }}</span>
+      </div>
+      <div class="dsc__panel-header-right">
+        <span
+          class="dsc__feeling"
+          [ngClass]="'dsc__feeling--' + selectedRecord.overallFeeling"
+        >{{ getFeelingLabel(selectedRecord.overallFeeling) }}</span>
+        <button
+          type="button"
+          class="dsc__panel-close"
+          (click)="closePanel()"
+          aria-label="Fermer le panneau"
+        >×</button>
+      </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="dsc__panel-divider" role="separator"></div>
+
+    <!-- Answers list -->
+    <div class="dsc__answers" role="list">
+      <div
+        class="dsc__answer"
+        *ngFor="let answer of selectedRecord.answers"
+        role="listitem"
+      >
+        <span class="dsc__answer-label">{{ answer.questionLabel }}</span>
+        <span
+          class="dsc__answer-value"
+          [ngClass]="'dsc__answer-value--' + answer.severity"
+        >{{ answer.value }}</span>
+      </div>
+    </div>
+
+    <!-- Panel footer -->
+    <div class="dsc__panel-footer">
+      <button
+        type="button"
+        class="dsc__view-report"
+        (click)="onViewReport()"
+      >Voir le rapport complet &rarr;</button>
+    </div>
+
+  </div>
+
+  <!-- ── 5. Footer: legend + CTA ───────────────────────────────────────── -->
+  <div class="dsc__footer">
+
+    <div class="dsc__legend" aria-hidden="true">
+      <span class="dsc__legend-item">
+        <span class="dsc__legend-dot dsc__legend-dot--submitted"></span>
+        Submitted
+      </span>
+      <span class="dsc__legend-item">
+        <span class="dsc__legend-dot dsc__legend-dot--missed"></span>
+        Missed
+      </span>
+      <span class="dsc__legend-item">
+        <span class="dsc__legend-dot dsc__legend-dot--today"></span>
+        Today
+      </span>
+      <span class="dsc__legend-item">
+        <span class="dsc__legend-dot dsc__legend-dot--future"></span>
+        Future
+      </span>
+    </div>
+
+    <button type="button" class="dsc__cta" (click)="onFillToday()">
+      Fill today
+    </button>
+
+  </div>
+
+</div>

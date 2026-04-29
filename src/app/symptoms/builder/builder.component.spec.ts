@@ -7,6 +7,7 @@ import { of, throwError } from 'rxjs';
 
 import { BuilderComponent } from './builder.component';
 import { SymptomForm, SymptomService } from '../services/symptom.service';
+import { AiService } from '../services/ai.service';
 import { Users } from '../../models/users';
 import { UsersService } from '../../services/user/users.service';
 import { Service, ServiceManagementService } from '../../services/service/service-management.service';
@@ -15,6 +16,7 @@ describe('BuilderComponent', () => {
   let component: BuilderComponent;
   let fixture: ComponentFixture<BuilderComponent>;
   let symptomService: jasmine.SpyObj<SymptomService>;
+  let aiService: jasmine.SpyObj<AiService>;
   let usersService: jasmine.SpyObj<UsersService>;
   let serviceManagementService: jasmine.SpyObj<ServiceManagementService>;
   let router: Router;
@@ -55,8 +57,8 @@ describe('BuilderComponent', () => {
       'updateForm',
       'getForms',
       'getFormById',
-      'generateQuestionsWithAI',
     ]);
+    aiService = jasmine.createSpyObj<AiService>('AiService', ['generateQuestions']);
     usersService = jasmine.createSpyObj<UsersService>('UsersService', ['getUsers']);
     serviceManagementService = jasmine.createSpyObj<ServiceManagementService>(
       'ServiceManagementService',
@@ -67,7 +69,7 @@ describe('BuilderComponent', () => {
     symptomService.createForm.and.returnValue(of({ _id: 'form-1', title: 'Saved', questions: [] }));
     symptomService.updateForm.and.returnValue(of({ _id: 'form-1', title: 'Updated', questions: [] }));
     symptomService.getFormById.and.returnValue(of({ _id: 'form-1', title: 'Loaded', questions: [] }));
-    symptomService.generateQuestionsWithAI.and.returnValue(of({ questions: [] }));
+    aiService.generateQuestions.and.returnValue(of({ questions: [] }));
     usersService.getUsers.and.returnValue(of([patient, physician]));
     serviceManagementService.getAll.and.returnValue(of([activeService, inactiveService]));
 
@@ -76,6 +78,7 @@ describe('BuilderComponent', () => {
       imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterTestingModule],
       providers: [
         { provide: SymptomService, useValue: symptomService },
+        { provide: AiService, useValue: aiService },
         { provide: UsersService, useValue: usersService },
         { provide: ServiceManagementService, useValue: serviceManagementService },
         {
@@ -191,7 +194,7 @@ describe('BuilderComponent', () => {
     component.title = 'Post-op monitoring';
     component.medicalService = 'Cardiology';
     component.currentStep = 1;
-    symptomService.generateQuestionsWithAI.and.returnValue(of({
+    aiService.generateQuestions.and.returnValue(of({
       questions: [
         { label: ' Pain level ', type: 'rating' },
         { label: 'Symptoms', type: 'multiple', options: [' Cough ', '', 'Fatigue'] },
@@ -201,12 +204,13 @@ describe('BuilderComponent', () => {
     component.generateWithAI();
 
     const generatedQuestions = component.questions.slice(-2);
-    expect(symptomService.generateQuestionsWithAI).toHaveBeenCalledWith(
-      'Post-op monitoring',
-      '',
-      5,
-      'subjective_symptoms'
-    );
+    expect(aiService.generateQuestions).toHaveBeenCalledWith({
+      title: 'Post-op monitoring',
+      description: '',
+      medicalService: 'Cardiology',
+      category: 'symptoms',
+      numberOfQuestions: 5,
+    });
     expect(generatedQuestions[0]).toEqual(jasmine.objectContaining({
       label: 'Pain level',
       type: 'scale',
@@ -231,12 +235,18 @@ describe('BuilderComponent', () => {
 
     component.title = 'Daily form';
     component.medicalService = 'Cardiology';
-    symptomService.generateQuestionsWithAI.and.returnValue(throwError(() => new Error('AI down')));
+    aiService.generateQuestions.and.returnValue(throwError(() => new Error('AI down')));
 
     component.generateWithAI();
 
     expect(component.generateError).toBe('Failed to generate questions. Please try again.');
     expect(component.isGenerating).toBeFalse();
+
+    aiService.generateQuestions.and.returnValue(
+      throwError(() => ({ status: 404 }))
+    );
+    component.generateWithAI();
+    expect(component.generateError).toBe("Endpoint introuvable: vérifier l’URL backend");
   });
 
   it('should create a symptoms form with trimmed values and selected patients', () => {
