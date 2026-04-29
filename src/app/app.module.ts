@@ -1,13 +1,16 @@
-import { NgModule } from '@angular/core';
+import { NgModule, APP_INITIALIZER } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { FullCalendarModule } from '@fullcalendar/angular';
 
 import { AppRoutingModule } from './app-routing.module';
+import { initializeRouterIdEncoder } from './core/router-id-encoder.initializer';
+import { UrlEncryptionService } from './services/url-encryption.service';
 import { AlertComponent } from './shared/components/ui/alert/alert.component';
 import { AlertsComponent } from './pages/ui-elements/alerts/alerts.component';
 import { AppComponent } from './app.component';
@@ -270,6 +273,13 @@ import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translat
         prefix: './i18n/',
         suffix: '.json',
       },
+    },
+    // Initialize Router ID encoder at app startup
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeRouterIdEncoder,
+      deps: [Router, UrlEncryptionService],
+      multi: true
     },
   ],
   bootstrap: [AppComponent]
