@@ -1,1 +1,23 @@
 
+.stats-modal-overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.stats-modal-card {
+  background: linear-gradient(145deg, #0f172a, #1e293b);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: stats-modal-enter 0.3s ease forwards;
+  transform: scale(0.95);
+  opacity: 0;
+}
+
+@keyframes stats-modal-enter {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

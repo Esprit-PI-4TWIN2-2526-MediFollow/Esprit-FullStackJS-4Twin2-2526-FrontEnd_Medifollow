@@ -2,8 +2,15 @@ export type SymptomDayStatus =
   | 'submitted'
   | 'missed'
   | 'today'
-  | 'today-submitted'
-  | 'empty';
+  | 'future';
+
+export interface SymptomAssignedForm {
+  _id?: string;
+  startDate?: string | Date;
+  durationInDays?: number;
+  assignedAt?: string | Date;
+  createdAt?: string | Date;
+}
 
 export interface SymptomResponse {
   _id?: string;
@@ -19,4 +26,5 @@ export interface SymptomDayCell {
   status: SymptomDayStatus;
   tooltip: string;
   isToday: boolean;
+  submitted: boolean;
 }

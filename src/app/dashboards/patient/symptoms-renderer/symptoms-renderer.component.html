@@ -173,6 +173,20 @@
       </div>
 
       <div *ngIf="!isHistoryMode && form">
+        <div *ngIf="hasDurationLimit && isFormExpired"
+             class="mb-3 rounded-lg border border-error-200 bg-error-50 px-4 py-3
+                    text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20
+                    dark:text-error-400">
+          This form has expired. You can no longer submit symptoms.
+        </div>
+
+        <div *ngIf="hasDurationLimit && !isFormExpired"
+             class="mb-3 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3
+                    text-sm text-brand-700 dark:border-brand-800 dark:bg-brand-900/20
+                    dark:text-brand-300">
+          You have {{ remainingDays }} day{{ remainingDays > 1 ? 's' : '' }} remaining
+        </div>
+
         <div class="mb-3 rounded-2xl border border-gray-200 bg-white p-4
                     dark:border-white/[0.05] dark:bg-white/[0.03]">
           <div class="mb-2 flex items-center justify-between text-sm">
@@ -249,7 +263,7 @@
               {{ submissionMessage || 'You can review today\'s submissions below.' }}
             </div>
 
-            <div *ngIf="!canSubmitMore()"
+            <div *ngIf="!canSubmitMore() && !isFormExpired"
                  class="mb-3 rounded-lg border border-error-200 bg-error-50 px-4 py-3
                         text-sm text-error-600 dark:border-error-800 dark:bg-error-900/20
                         dark:text-error-400">
@@ -354,6 +368,7 @@
                     <button
                       type="button"
                       (click)="onBooleanSelect(question, true)"
+                      [disabled]="isQuestionInputDisabled(question)"
                       class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors"
                       [ngClass]="{
                         'border-green-500 bg-green-50 text-green-700 dark:border-green-400 dark:bg-green-900/20 dark:text-green-400': getAnswer(question) === true,
@@ -370,6 +385,7 @@
                     <button
                       type="button"
                       (click)="onBooleanSelect(question, false)"
+                      [disabled]="isQuestionInputDisabled(question)"
                       class="flex flex-1 items-center justify-center gap-2 rounded-lg border px-4 py-3 text-sm font-medium transition-colors"
                       [ngClass]="{
                         'border-red-500 bg-red-50 text-red-700 dark:border-red-400 dark:bg-red-900/20 dark:text-red-400': getAnswer(question) === false,
@@ -396,6 +412,7 @@
                       <input
                         type="radio"
                         [name]="question._id || question.label"
+                        [disabled]="isQuestionInputDisabled(question)"
                         class="h-4 w-4 border-gray-300 text-brand-500 focus:ring-brand-500/30"
                         [checked]="getFormControl(question).value === opt"
                         (change)="onSingleChoiceSelectFor(question, opt)" />
@@ -413,6 +430,7 @@
                            class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm text-gray-700 transition hover:border-brand-200 hover:bg-brand-50/50 dark:border-gray-700 dark:bg-transparent dark:text-gray-300">
                       <input
                         type="checkbox"
+                        [disabled]="isQuestionInputDisabled(question)"
                         class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
                         [checked]="isOptionCheckedFor(question, i)"
                         (change)="onMultipleChoiceToggleFor(question, i)" />
@@ -450,6 +468,7 @@
                       *ngFor="let val of [1,2,3,4,5,6,7,8,9,10]"
                       type="button"
                       (click)="onScaleSelect(question, val)"
+                      [disabled]="isQuestionInputDisabled(question)"
                       class="flex h-9 w-9 items-center justify-center rounded-lg border text-sm font-medium transition-colors"
                       [ngClass]="{
                         'border-brand-500 bg-brand-500 text-white': getAnswer(question) === val,
@@ -465,6 +484,11 @@
                   </p>
                 </ng-container>
               </ng-container>
+
+              <p *ngIf="hasReachedDailyMax(question) && !isQuestionInputDisabled(question)"
+                 class="mt-2 text-xs text-amber-600 dark:text-amber-400">
+                Maximum entries reached for today, but you can still update your value.
+              </p>
             </div>
               </div>
 
@@ -493,7 +517,7 @@
                 <button *ngIf="currentStep === 3"
                   (click)="submit()"
                   type="button"
-                  [disabled]="responseForm.invalid || isSubmitting || !canSubmitMore()"
+                  [disabled]="responseForm.invalid || isSubmitting || !canSubmitMore() || !isFormActive"
                   class="inline-flex h-11 items-center justify-center gap-2 rounded-xl
                          bg-brand-500 px-6 text-sm font-medium text-white transition
                          hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-40">

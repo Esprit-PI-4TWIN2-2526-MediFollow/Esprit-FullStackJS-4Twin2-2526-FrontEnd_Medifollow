@@ -9,7 +9,9 @@ import { LanguageService } from './services/i18n/language.service';
 export class AppComponent {
   title = 'Frontend_Medifollow';
 
-  constructor(private languageService: LanguageService) {
+  constructor(
+    private languageService: LanguageService
+  ) {
     this.languageService.initialize();
   }
 }

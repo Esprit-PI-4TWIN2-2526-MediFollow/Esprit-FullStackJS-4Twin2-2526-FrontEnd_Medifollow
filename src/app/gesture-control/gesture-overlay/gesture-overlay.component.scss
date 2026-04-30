@@ -79,7 +79,8 @@ display: block;
   pointer-events: all;
   position: fixed;
   bottom: 24px;
-  right: 24px;
+  left: 20px;   // ← changer right: 24px par left: 20px
+  right: auto;  // ← ajouter ceci
   background: rgba(59, 139, 212, 0.9);
   color: #fff;
   border: none;

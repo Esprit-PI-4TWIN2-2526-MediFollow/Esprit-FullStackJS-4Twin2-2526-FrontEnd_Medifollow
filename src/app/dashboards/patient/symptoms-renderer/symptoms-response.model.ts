@@ -34,7 +34,11 @@ export interface SymptomsAssignedForm {
   description?: string;
   patientId?: string;
   medicalService?: string;
+  durationInDays?: number;
   status?: 'active' | 'inactive';
+  assignedAt?: string | Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
   questions: SymptomsQuestion[];
 }
 
