@@ -341,9 +341,12 @@
         <tbody>
           <tr *ngFor="let p of inactivePatients?.slice(0, 10)">
             <td>{{ p.firstName }} {{ p.lastName }}</td>
-            <td class="text-muted text-mono" style="font-size:11px">{{ p.email }}</td>
+            <td class="text-muted text-mono" style="font-size:11px">{{ p.email || '-' }}</td>
             <td class="text-muted">{{ p.assignedDepartment || '' }}</td>
-            <td class="text-muted">{{ p.lastLogin | date:'dd/MM/yyyy' }}</td>
+            <td class="text-muted">{{ formatInactivePatientLastLogin(p.lastLogin) }}</td>
+          </tr>
+          <tr *ngIf="!inactivePatients?.length">
+            <td colspan="4" class="empty-state">Aucun patient inactif detecte</td>
           </tr>
         </tbody>
       </table>

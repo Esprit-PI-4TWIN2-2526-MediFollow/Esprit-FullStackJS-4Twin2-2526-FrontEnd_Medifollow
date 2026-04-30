@@ -108,6 +108,6 @@ export interface InactivePatient {
   assignedDepartment?: string;
   lastSeen?: string;
   daysSinceActivity?: number;
-  email?: string; // Ajouté
-  lastLogin?: string; // Ajouté
+  email?: string | null;
+  lastLogin?: string | null;
 }

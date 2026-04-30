@@ -100,6 +100,19 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
       ?? 0;
   }
 
+  formatInactivePatientLastLogin(lastLogin?: string | null): string {
+    if (!lastLogin) {
+      return 'Jamais connecte';
+    }
+
+    const parsedDate = new Date(lastLogin);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return 'Date indisponible';
+    }
+
+    return parsedDate.toLocaleDateString('fr-FR');
+  }
+
   constructor(
     private dashboardService: DashboardService,
     private readonly translate: TranslateService,
@@ -236,11 +249,7 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.inactivePatients = data.map(p => ({
-            ...p,
-            email: p.email || 'email@non.renseigne',
-            lastLogin: p.lastLogin || p.lastSeen || new Date().toISOString(),
-          }));
+          this.inactivePatients = data;
           this.cdr.detectChanges();
         },
       });
