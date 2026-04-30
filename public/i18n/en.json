@@ -1,10 +1,10 @@
-{
+﻿{
   "COMMON": {
     "TODAY": "Today",
     "YESTERDAY": "Yesterday",
     "DAYS_AGO": "{{count}}d ago",
-    "SHOW_LESS": "↑ Show less",
-    "SHOW_ALL": "↓ Show all ({{count}})"
+    "SHOW_LESS": "â†‘ Show less",
+    "SHOW_ALL": "â†“ Show all ({{count}})"
   },
   "HEADER": {
     "TOGGLE_SIDEBAR": "Toggle sidebar",
@@ -290,10 +290,10 @@
     },
     "AI": {
       "TITLE": "Generate with AI",
-      "SUBTITLE": "Describe the service — AI fills the entire form",
+      "SUBTITLE": "Describe the service â€” AI fills the entire form",
       "DESCRIPTION_LABEL": "Your description",
       "DESCRIPTION_PLACEHOLDER": "Ex: Neurology unit on the 4th floor, 15 beds, open Monday to Friday...",
-      "DESCRIPTION_HINT": "One word is enough — AI fills the rest",
+      "DESCRIPTION_HINT": "One word is enough â€” AI fills the rest",
       "FOOTER_TIP": "You can edit the form before saving",
       "GENERATING": "Generating...",
       "GENERATE_FORM": "Generate form",
@@ -344,12 +344,12 @@
       "APPLY_TEMPLATE": "Apply a template:",
       "COUNT": "{{count}} schedule(s)",
       "ADD_DAY": "+ Add a day",
-      "EMPTY": "No schedule defined — use a template or add manually",
+      "EMPTY": "No schedule defined â€” use a template or add manually",
       "PRESETS": {
-        "WEEKDAYS": "Mon–Fri 8am–5pm",
-        "EXTENDED": "Mon–Sat 7:30am–4pm",
+        "WEEKDAYS": "Monâ€“Fri 8amâ€“5pm",
+        "EXTENDED": "Monâ€“Sat 7:30amâ€“4pm",
         "ALL_DAY": "24/7",
-        "PHARMACY": "Daily 8am–8pm"
+        "PHARMACY": "Daily 8amâ€“8pm"
       }
     },
     "VIEW_MODAL": {
@@ -393,7 +393,7 @@
   },
   "SUPER_ADMIN_DASHBOARD": {
     "PAGE_TITLE": "Dashboard",
-    "ADMIN_TITLE": "Admin Dashboard",
+    "ADMIN_TITLE": "Dashboard",
     "REAL_TIME_UPDATE": "Real-time updates",
     "LIVE": "Live",
     "REFRESH": "Refresh",
@@ -446,14 +446,33 @@
     "NO_RISK_DETECTED": "No critical patients detected",
     "NO_COMPLIANCE_DATA": "No compliance data available",
     "NO_HIGH_RISK": "No critical patients detected",
+    "NO_INACTIVE_PATIENTS": "No inactive patients detected",
     "TABLE_PATIENT": "Patient",
+    "TABLE_NAME": "Name",
+    "TABLE_EMAIL": "Email",
     "TABLE_SERVICE": "Service",
     "TABLE_RESPONSES": "Responses",
     "TABLE_RISK": "Risk",
+    "TABLE_LAST_LOGIN": "Last login",
     "AI_ASSISTANT": "AI Dashboard Assistant",
-    "CHAT_PLACEHOLDER": "Ask questions about your dashboard data..."
-  },
-  "SYMPTOMS_REVIEW": {
+    "CHAT_PLACEHOLDER": "Ask your questions about the dashboard data...",
+    "SEND": "Send",
+    "SEARCH_SERVICE": "Search a service",
+    "SEARCH_PATIENT": "Search a patient",
+    "SEARCH_INACTIVE_PATIENT": "Search an inactive patient",
+    "INACTIVE_PATIENTS_7D": "Inactive Patients (7d+)",
+    "NEVER_LOGGED_IN": "Never logged in",
+    "DATE_UNAVAILABLE": "Date unavailable",
+    "GLOBAL": "global",
+    "RESPONDED_TODAY": "Responded today",
+    "EVER_RESPONDED": "Ever responded",
+    "SUBMISSIONS_TODAY": "Submissions today",
+    "ACTIVE_QUESTIONNAIRES_LABEL": "Active questionnaires",
+    "SUBMITTED_RESPONSES": "Submitted responses",
+    "SERVICE_COUNT": "{{count}} services",
+    "COMPLIANCE_DETAIL": "{{respondents}}/{{total}} patients · {{questionnaires}} questionnaires",
+    "AI_ERROR": "An error occurred"
+  },  "SYMPTOMS_REVIEW": {
   "BACK": "Back to responses",
   "LOADING": "Loading symptoms response details...",
   "PATIENT": {
@@ -555,3 +574,4 @@
     }
   }
 }
+

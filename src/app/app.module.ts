@@ -246,7 +246,7 @@ import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translat
     FullCalendarModule,
     TranslateModule,
     TranslateModule.forRoot({
-      defaultLanguage: 'fr',
+      defaultLanguage: 'en',
       loader: {
         provide: TranslateLoader,
         useClass: TranslateHttpLoader,

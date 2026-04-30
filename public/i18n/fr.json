@@ -3,8 +3,8 @@
     "TODAY": "Aujourd'hui",
     "YESTERDAY": "Hier",
     "DAYS_AGO": "il y a {{count}} j",
-    "SHOW_LESS": "↑ Voir moins",
-    "SHOW_ALL": "↓ Voir tout ({{count}})"
+    "SHOW_LESS": "Voir moins",
+    "SHOW_ALL": "Voir tout ({{count}})"
   },
   "HEADER": {
     "TOGGLE_SIDEBAR": "Basculer la barre latérale",
@@ -290,10 +290,10 @@
     },
     "AI": {
       "TITLE": "Générer avec l'IA",
-      "SUBTITLE": "Décrivez le service — l'IA remplit tout le formulaire",
+      "SUBTITLE": "Décrivez le service pour que l'IA remplisse tout le formulaire",
       "DESCRIPTION_LABEL": "Votre description",
       "DESCRIPTION_PLACEHOLDER": "Ex : unité de neurologie au 4e étage, 15 lits, ouverte du lundi au vendredi...",
-      "DESCRIPTION_HINT": "Un seul mot suffit — l'IA complète le reste",
+      "DESCRIPTION_HINT": "Un seul mot suffit pour que l'IA complète le reste",
       "FOOTER_TIP": "Vous pourrez modifier le formulaire avant l'enregistrement",
       "GENERATING": "Génération...",
       "GENERATE_FORM": "Générer le formulaire",
@@ -344,7 +344,7 @@
       "APPLY_TEMPLATE": "Appliquer un modèle :",
       "COUNT": "{{count}} horaire(s)",
       "ADD_DAY": "+ Ajouter un jour",
-      "EMPTY": "Aucun horaire défini — utilisez un modèle ou ajoutez-les manuellement",
+      "EMPTY": "Aucun horaire défini – utilisez un modèle ou ajoutez-les manuellement",
       "PRESETS": {
         "WEEKDAYS": "Lun–Ven 8h–17h",
         "EXTENDED": "Lun–Sam 7h30–16h",
@@ -446,76 +446,96 @@
     "NO_RISK_DETECTED": "Aucun patient critique détecté",
     "NO_COMPLIANCE_DATA": "Aucune donnée de conformité",
     "NO_HIGH_RISK": "Aucun patient critique détecté",
+    "NO_INACTIVE_PATIENTS": "Aucun patient inactif détecté",
     "TABLE_PATIENT": "Patient",
+    "TABLE_NAME": "Nom",
+    "TABLE_EMAIL": "Email",
     "TABLE_SERVICE": "Service",
     "TABLE_RESPONSES": "Réponses",
     "TABLE_RISK": "Risque",
+    "TABLE_LAST_LOGIN": "Dernière connexion",
     "AI_ASSISTANT": "Assistant IA du tableau de bord",
-    "CHAT_PLACEHOLDER": "Posez vos questions sur les données du tableau de bord..."
+    "CHAT_PLACEHOLDER": "Posez vos questions sur les données du tableau de bord...",
+    "SEND": "Envoyer",
+    "SEARCH_SERVICE": "Rechercher un service",
+    "SEARCH_PATIENT": "Rechercher un patient",
+    "SEARCH_INACTIVE_PATIENT": "Rechercher un patient inactif",
+    "INACTIVE_PATIENTS_7D": "Patients inactifs (7j+)",
+    "NEVER_LOGGED_IN": "Jamais connecté",
+    "DATE_UNAVAILABLE": "Date indisponible",
+    "GLOBAL": "global",
+    "RESPONDED_TODAY": "Répondants aujourd'hui",
+    "EVER_RESPONDED": "Ont déjà répondu",
+    "SUBMISSIONS_TODAY": "Soumissions aujourd'hui",
+    "ACTIVE_QUESTIONNAIRES_LABEL": "Questionnaires actifs",
+    "SUBMITTED_RESPONSES": "Réponses soumises",
+    "SERVICE_COUNT": "{{count}} services",
+    "COMPLIANCE_DETAIL": "{{respondents}}/{{total}} patients · {{questionnaires}} questionnaires",
+    "AI_ERROR": "Une erreur est survenue"
   },
   "SYMPTOMS_REVIEW": {
-  "BACK": "Retour aux réponses",
-  "LOADING": "Chargement des détails de la réponse...",
-  "PATIENT": {
-    "UNKNOWN": "Patient inconnu",
-    "DEPARTMENT_MISSING": "Service non précisé",
-    "SUBMITTED": "Soumis"
+    "BACK": "Retour aux réponses",
+    "LOADING": "Chargement des détails de la réponse...",
+    "PATIENT": {
+      "UNKNOWN": "Patient inconnu",
+      "DEPARTMENT_MISSING": "Service non précisé",
+      "SUBMITTED": "Soumis"
+    },
+    "VALIDATED_BADGE": {
+      "PROBLEM_REPORTED": "Problème déjà signalé",
+      "ALREADY_VALIDATED": "Déjà validé"
+    },
+    "VITALS": {
+      "TITLE": "Aperçu des constantes",
+      "SUBTITLE": "Les couleurs de triage automatique indiquent les valeurs normales, en alerte ou critiques.",
+      "BLOOD_PRESSURE": "Pression artérielle",
+      "HEART_RATE": "Fréquence cardiaque",
+      "TEMPERATURE": "Température",
+      "WEIGHT": "Poids"
+    },
+    "ANSWERS": {
+      "TITLE": "Réponses soumises",
+      "SUBTITLE": "Examinez les réponses du patient avant d'agir.",
+      "EMPTY": "Aucun détail de réponse n'a été fourni pour cette soumission."
+    },
+    "NOTE": {
+      "TITLE": "Note de validation",
+      "SUBTITLE": "Ajoutez une courte note clinique avant de valider ou de signaler un problème.",
+      "PLACEHOLDER": "Documentez votre évaluation ou le problème à escalader...",
+      "TAB_ACCEPT": "accepter",
+      "ESC_DISMISS": "ignorer"
+    },
+    "ACTIONS": {
+      "VALIDATE": "Valider la réponse",
+      "SAVING": "Enregistrement...",
+      "SIGNAL_PROBLEM": "Signaler un problème",
+      "CANCEL": "Annuler"
+    },
+    "VALIDATION_SUMMARY": {
+      "TITLE": "Résumé de validation",
+      "STATUS": "Statut",
+      "STATUS_PROBLEM": "Problème signalé",
+      "STATUS_VALIDATED": "Validé",
+      "VALIDATED_BY": "Validé par",
+      "VALIDATED_AT": "Validé le",
+      "DEFAULT_NURSE": "Infirmier(ère) assigné(e)"
+    },
+    "DASHBOARD": {
+      "LABEL": "Tableau de validation",
+      "TITLE": "Valider les réponses",
+      "SUBTITLE": "Examinez les réponses aux symptômes des patients de votre service, validez les soumissions normales et escaladez rapidement les constantes préoccupantes.",
+      "PENDING": "En attente",
+      "TOTAL_VISIBLE": "Total visible",
+      "DEPARTMENT_FILTER_NOTE": "Les patients sont filtrés selon votre service assigné uniquement.",
+      "LOADING": "Chargement des réponses aux symptômes...",
+      "EMPTY_TITLE": "Aucune réponse trouvée",
+      "EMPTY_SUBTITLE": "Essayez un autre filtre ou revenez lorsque de nouvelles soumissions arrivent.",
+      "OPEN_READONLY": "Ouvrir les détails en lecture seule",
+      "OPEN_REVIEW": "Ouvrir la réponse et valider cette soumission",
+      "VIEW_DETAILS": "Voir les détails",
+      "REVIEW_RESPONSE": "Examiner la réponse"
+    }
   },
-  "VALIDATED_BADGE": {
-    "PROBLEM_REPORTED": "Problème déjà signalé",
-    "ALREADY_VALIDATED": "Déjà validé"
-  },
-  "VITALS": {
-    "TITLE": "Aperçu des constantes",
-    "SUBTITLE": "Les couleurs de triage automatique indiquent les valeurs normales, en alerte ou critiques.",
-    "BLOOD_PRESSURE": "Pression artérielle",
-    "HEART_RATE": "Fréquence cardiaque",
-    "TEMPERATURE": "Température",
-    "WEIGHT": "Poids"
-  },
-  "ANSWERS": {
-    "TITLE": "Réponses soumises",
-    "SUBTITLE": "Examinez les réponses du patient avant d'agir.",
-    "EMPTY": "Aucun détail de réponse n'a été fourni pour cette soumission."
-  },
-  "NOTE": {
-    "TITLE": "Note de validation",
-    "SUBTITLE": "Ajoutez une courte note clinique avant de valider ou de signaler un problème.",
-    "PLACEHOLDER": "Documentez votre évaluation ou le problème à escalader...",
-    "TAB_ACCEPT": "accepter",
-    "ESC_DISMISS": "ignorer"
-  },
-  "ACTIONS": {
-    "VALIDATE": "Valider la réponse",
-    "SAVING": "Enregistrement...",
-    "SIGNAL_PROBLEM": "Signaler un problème",
-    "CANCEL": "Annuler"
-  },
-  "VALIDATION_SUMMARY": {
-    "TITLE": "Résumé de validation",
-    "STATUS": "Statut",
-    "STATUS_PROBLEM": "Problème signalé",
-    "STATUS_VALIDATED": "Validé",
-    "VALIDATED_BY": "Validé par",
-    "VALIDATED_AT": "Validé le",
-    "DEFAULT_NURSE": "Infirmier(ère) assigné(e)"
-  },
-  "DASHBOARD": {
-    "LABEL": "Tableau de validation",
-    "TITLE": "Valider les réponses",
-    "SUBTITLE": "Examinez les réponses aux symptômes des patients de votre service, validez les soumissions normales et escaladez rapidement les constantes préoccupantes.",
-    "PENDING": "En attente",
-    "TOTAL_VISIBLE": "Total visible",
-    "DEPARTMENT_FILTER_NOTE": "Les patients sont filtrés selon votre service assigné uniquement.",
-    "LOADING": "Chargement des réponses aux symptômes...",
-    "EMPTY_TITLE": "Aucune réponse trouvée",
-    "EMPTY_SUBTITLE": "Essayez un autre filtre ou revenez lorsque de nouvelles soumissions arrivent.",
-    "OPEN_READONLY": "Ouvrir les détails en lecture seule",
-    "OPEN_REVIEW": "Ouvrir la réponse et valider cette soumission",
-    "VIEW_DETAILS": "Voir les détails",
-    "REVIEW_RESPONSE": "Examiner la réponse"
-  }
-},
   "ERRORS": {
     "LOAD": "Erreur lors du chargement des données.",
     "VALIDATE": "Erreur lors de la validation de la réponse.",

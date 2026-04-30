@@ -22,7 +22,7 @@ import {
   AIInsight,
 } from '../../models/dashbored.interfaces';
 import { DashboardService } from '../../services/dashbored/dashbored.service';
-import { TranslateService } from '@ngx-translate/core';
+import { LangChangeEvent, TranslateService } from '@ngx-translate/core';
 
 type ChartModule = typeof import('chart.js');
 type ChartInstance = any;
@@ -47,12 +47,6 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
   showInactive = false;
   selectedRange: '7d' | '30d' | '90d' = '7d';
 
-  ranges = [
-    { label: '7j', value: '7d' as const },
-    { label: '30j', value: '30d' as const },
-    { label: '90j', value: '90d' as const },
-  ];
-
   summary?: Summary;
   activity: ActivityPoint[] = [];
   compliance: ComplianceService[] = [];
@@ -65,7 +59,8 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
   inactivePatientsSearch = '';
 
   get currentDate(): string {
-    return new Date().toLocaleDateString('fr-FR', {
+    const locale = this.translate.currentLang === 'fr' ? 'fr-FR' : 'en-US';
+    return new Date().toLocaleDateString(locale, {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -73,13 +68,21 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
     });
   }
 
+  get ranges(): { label: string; value: '7d' | '30d' | '90d' }[] {
+    return [
+      { label: this.translate.instant('SUPER_ADMIN_DASHBOARD.RANGE_7D'), value: '7d' },
+      { label: this.translate.instant('SUPER_ADMIN_DASHBOARD.RANGE_30D'), value: '30d' },
+      { label: this.translate.instant('SUPER_ADMIN_DASHBOARD.RANGE_90D'), value: '90d' },
+    ];
+  }
+
   get rangeLabel(): string {
     const labels: Record<string, string> = {
-      '7d': '7 derniers jours',
-      '30d': '30 derniers jours',
-      '90d': '90 derniers jours',
+      '7d': 'SUPER_ADMIN_DASHBOARD.LAST_7_DAYS',
+      '30d': 'SUPER_ADMIN_DASHBOARD.LAST_30_DAYS',
+      '90d': 'SUPER_ADMIN_DASHBOARD.LAST_90_DAYS',
     };
-    return labels[this.selectedRange] ?? '7 derniers jours';
+    return this.translate.instant(labels[this.selectedRange] ?? 'SUPER_ADMIN_DASHBOARD.LAST_7_DAYS');
   }
 
   get hasHighAlert(): boolean {
@@ -145,15 +148,15 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
 
   formatInactivePatientLastLogin(lastLogin?: string | null): string {
     if (!lastLogin) {
-      return 'Jamais connecte';
+      return this.translate.instant('SUPER_ADMIN_DASHBOARD.NEVER_LOGGED_IN');
     }
 
     const parsedDate = new Date(lastLogin);
     if (Number.isNaN(parsedDate.getTime())) {
-      return 'Date indisponible';
+      return this.translate.instant('SUPER_ADMIN_DASHBOARD.DATE_UNAVAILABLE');
     }
 
-    return parsedDate.toLocaleDateString('fr-FR');
+    return parsedDate.toLocaleDateString(this.translate.currentLang === 'fr' ? 'fr-FR' : 'en-US');
   }
 
   constructor(
@@ -163,6 +166,12 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
   ) { }
 
   ngOnInit(): void {
+    this.translate.onLangChange
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((event: LangChangeEvent) => {
+        this.handleLanguageChange(event.lang);
+      });
+
     this.loadAll();
   }
 
@@ -350,7 +359,7 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
         labels,
         datasets: [
           {
-            label: 'Nouveaux patients',
+            label: this.translate.instant('SUPER_ADMIN_DASHBOARD.NEW_PATIENTS'),
             data: patients,
             borderColor: '#1D9E75',
             backgroundColor: 'rgba(29,158,117,0.08)',
@@ -361,7 +370,7 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
             borderWidth: 2,
           },
           {
-            label: 'RÃ©ponses soumises',
+            label: this.translate.instant('SUPER_ADMIN_DASHBOARD.SUBMITTED_RESPONSES'),
             data: responses,
             borderColor: '#378ADD',
             backgroundColor: 'rgba(55,138,221,0.06)',
@@ -462,10 +471,16 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
         this.messages.push({ role: 'ai', text: res.answer });
       },
       error: () => {
-        this.messages.push({ role: 'ai', text: 'Error occurred' });
+        this.messages.push({ role: 'ai', text: this.translate.instant('SUPER_ADMIN_DASHBOARD.AI_ERROR') });
       }
     });
 
     this.userQuestion = '';
+  }
+
+  private handleLanguageChange(language: string): void {
+    document.documentElement.lang = language;
+    this.cdr.markForCheck();
+    void this.renderCharts();
   }
 }

@@ -1,12 +1,9 @@
 <div class="dash-wrapper">
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       HEADER
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="dash-header">
     <div class="hdr-left">
       <h1>{{ 'SUPER_ADMIN_DASHBOARD.ADMIN_TITLE' | translate }}</h1>
-      <p>{{ currentDate }} --  {{ 'SUPER_ADMIN_DASHBOARD.REAL_TIME_UPDATE' | translate }}</p>
+      <p>{{ currentDate }} -- {{ 'SUPER_ADMIN_DASHBOARD.REAL_TIME_UPDATE' | translate }}</p>
     </div>
     <div class="hdr-right">
       <div class="badge-live">
@@ -30,9 +27,6 @@
     </div>
   </div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       KPI CARDS
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="kpi-grid">
 
     <div class="kpi-card teal">
@@ -47,7 +41,7 @@
         <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.ACTIVE_PATIENTS' | translate }}</span>
         <span class="kpi-value">{{ summary?.patients?.total | number }}</span>
         <span class="kpi-sub">{{ 'SUPER_ADMIN_DASHBOARD.NEW_THIS_WEEK' | translate:{ count: summary?.patients?.newThisWeek } }}</span>
-        <div *ngIf="!filteredCompliance.length" class="empty-state">Aucune donnÃ©e de conformitÃ©</div>
+        <div *ngIf="!filteredCompliance.length" class="empty-state">{{ 'SUPER_ADMIN_DASHBOARD.NO_COMPLIANCE_DATA' | translate }}</div>
       </div>
     </div>
 
@@ -102,9 +96,9 @@
         </svg>
       </div>
       <div class="kpi-body">
-        <span class="kpi-label">Taux de suivi global</span>
+        <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.OVERALL_FOLLOW_UP_RATE' | translate }}</span>
         <span class="kpi-value">{{ summary?.followup?.overallRate }}%</span>
-        <span class="kpi-sub">{{ summary?.followup?.todayRate }}% aujourd'hui & {{ summary?.followup?.respondedToday }} patients</span>
+        <span class="kpi-sub">{{ summary?.followup?.todayRate }}% {{ 'SUPER_ADMIN_DASHBOARD.TODAY_RATE' | translate }} & {{ summary?.followup?.respondedToday }} {{ 'SUPER_ADMIN_DASHBOARD.PATIENTS_RESPONDED' | translate }}</span>
       </div>
     </div>
 
@@ -116,30 +110,26 @@
         </svg>
       </div>
       <div class="kpi-body">
-        <span class="kpi-label">Patients à risque élevé</span>
+        <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.HIGH_RISK_LABEL' | translate }}</span>
         <span class="kpi-value">{{ highRiskPatientsCount | number }}</span>
-        <span class="kpi-sub">{{ summary?.symptoms?.pendingValidations }} validations en attente</span>
+        <span class="kpi-sub">{{ summary?.symptoms?.pendingValidations }} {{ 'SUPER_ADMIN_DASHBOARD.PENDING_VALIDATIONS' | translate }}</span>
       </div>
     </div>
 
   </div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       CHARTS ROW
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
   <div class="charts-row">
 
-    <!-- Activity Chart -->
     <div class="card chart-card">
       <div class="card-header">
-        <span class="card-title">Activité de suivi</span>
+        <span class="card-title">{{ 'SUPER_ADMIN_DASHBOARD.FOLLOW_UP_ACTIVITY' | translate }}</span>
         <span class="card-subtitle">{{ rangeLabel }}</span>
         <div class="chart-legend">
           <span class="leg-item">
-            <span class="leg-dot" style="background:#1D9E75"></span>Nouveaux patients
+            <span class="leg-dot" style="background:#1D9E75"></span>{{ 'SUPER_ADMIN_DASHBOARD.NEW_PATIENTS' | translate }}
           </span>
           <span class="leg-item">
-            <span class="leg-dot" style="background:#378ADD;border-radius:0"></span>Réponses soumises
+            <span class="leg-dot" style="background:#378ADD;border-radius:0"></span>{{ 'SUPER_ADMIN_DASHBOARD.SUBMITTED_RESPONSES' | translate }}
           </span>
         </div>
       </div>
@@ -148,35 +138,34 @@
       </div>
     </div>
 
-    <!-- Gauge + Mini stats -->
     <div class="card gauge-card">
       <div class="card-header">
-        <span class="card-title">Suivi global</span>
+        <span class="card-title">{{ 'SUPER_ADMIN_DASHBOARD.OVERALL_FOLLOW_UP_RATE' | translate }}</span>
       </div>
       <div class="gauge-wrap">
         <div class="gauge-ring">
           <canvas #gaugeChart width="130" height="130"></canvas>
           <div class="gauge-center">
             <span class="gauge-pct">{{ summary?.followup?.overallRate ?? 0 }}%</span>
-            <span class="gauge-lbl">global</span>
+            <span class="gauge-lbl">{{ 'SUPER_ADMIN_DASHBOARD.GLOBAL' | translate }}</span>
           </div>
         </div>
         <div class="mini-stats">
           <div class="mini-stat">
             <span class="ms-val">{{ summary?.followup?.respondedToday | number }}</span>
-            <span class="ms-lbl">Répondants aujourd'hui</span>
+            <span class="ms-lbl">{{ 'SUPER_ADMIN_DASHBOARD.RESPONDED_TODAY' | translate }}</span>
           </div>
           <div class="mini-stat">
             <span class="ms-val">{{ summary?.followup?.everResponded | number }}</span>
-            <span class="ms-lbl">Ont déjà répondu</span>
+            <span class="ms-lbl">{{ 'SUPER_ADMIN_DASHBOARD.EVER_RESPONDED' | translate }}</span>
           </div>
           <div class="mini-stat">
             <span class="ms-val">{{ summary?.followup?.completedToday | number }}</span>
-            <span class="ms-lbl">Soumissions aujourd'hui</span>
+            <span class="ms-lbl">{{ 'SUPER_ADMIN_DASHBOARD.SUBMISSIONS_TODAY' | translate }}</span>
           </div>
           <div class="mini-stat">
             <span class="ms-val">{{ summary?.questionnaires?.active | number }}</span>
-            <span class="ms-lbl">Questionnaires actifs</span>
+            <span class="ms-lbl">{{ 'SUPER_ADMIN_DASHBOARD.ACTIVE_QUESTIONNAIRES_LABEL' | translate }}</span>
           </div>
         </div>
       </div>
@@ -184,204 +173,163 @@
 
   </div>
 
-
   <div class="bottom-row">
 
-    <!-- Compliance by service -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Conformité par service</span>
+        <span class="card-title">{{ 'SUPER_ADMIN_DASHBOARD.COMPLIANCE_BY_SERVICE' | translate }}</span>
         <input
           [(ngModel)]="complianceSearch"
           class="card-search"
           type="text"
-          placeholder="Rechercher un service"
+          [placeholder]="'SUPER_ADMIN_DASHBOARD.SEARCH_SERVICE' | translate"
         />
-        <span class="card-subtitle">{{ filteredCompliance.length }} services</span>
+        <span class="card-subtitle">{{ 'SUPER_ADMIN_DASHBOARD.SERVICE_COUNT' | translate:{ count: filteredCompliance.length } }}</span>
       </div>
       <div class="scroll-panel compliance-scroll">
         <div class="compliance-list">
-        <div *ngFor="let s of filteredCompliance" class="comp-item">
-          <div class="comp-header">
-            <span class="comp-name">{{ s.serviceName }}</span>
-            <span class="comp-pct" [style.color]="getRateColor(s.complianceRate)">{{ s.complianceRate }}%</span>
-          </div>
-          <div class="comp-bar">
-            <div class="comp-fill"
-              [style.width.%]="s.complianceRate"
-              [style.background]="getRateColor(s.complianceRate)">
+          <div *ngFor="let s of filteredCompliance" class="comp-item">
+            <div class="comp-header">
+              <span class="comp-name">{{ s.serviceName }}</span>
+              <span class="comp-pct" [style.color]="getRateColor(s.complianceRate)">{{ s.complianceRate }}%</span>
+            </div>
+            <div class="comp-bar">
+              <div class="comp-fill"
+                [style.width.%]="s.complianceRate"
+                [style.background]="getRateColor(s.complianceRate)">
+              </div>
+            </div>
+            <div class="comp-detail">
+              {{ 'SUPER_ADMIN_DASHBOARD.COMPLIANCE_DETAIL' | translate:{ respondents: s.distinctRespondents, total: s.patientCount, questionnaires: s.activeQuestionnaires } }}
             </div>
           </div>
-          <div class="comp-detail">
-            {{ s.distinctRespondents }}/{{ s.patientCount }} patients Â· {{ s.activeQuestionnaires }} questionnaires
-          </div>
+          <div *ngIf="!compliance?.length" class="empty-state">{{ 'SUPER_ADMIN_DASHBOARD.NO_COMPLIANCE_DATA' | translate }}</div>
+          <div *ngIf="compliance?.length && !filteredCompliance.length" class="empty-state">{{ 'SUPER_ADMIN_DASHBOARD.NO_COMPLIANCE_DATA' | translate }}</div>
         </div>
-        <div *ngIf="!compliance?.length" class="empty-state">Aucune donnée de conformité</div>
-        <div *ngIf="!filteredCompliance.length" class="empty-state">Aucune donnee de conformite</div>
-      </div>
       </div>
     </div>
 
-    <!-- High risk patients -->
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Patients à risque élevé</span>
+        <span class="card-title">{{ 'SUPER_ADMIN_DASHBOARD.HIGH_RISK_PATIENTS' | translate }}</span>
         <input
           [(ngModel)]="highRiskSearch"
           class="card-search"
           type="text"
-          placeholder="Rechercher un patient"
+          [placeholder]="'SUPER_ADMIN_DASHBOARD.SEARCH_PATIENT' | translate"
         />
         <span class="badge-count red">{{ filteredHighRiskPatients.length }}</span>
       </div>
       <div class="scroll-panel risk-scroll">
-      <table class="risk-table">
-        <thead>
-          <tr>
-            <th>Patient</th>
-            <th>Service</th>
-            <th>Réponses</th>
-            <th>Risque</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of filteredHighRiskPatients">
-            <td>
-              <div class="patient-cell">
-                <div class="avatar" [style.background]="getAvatarBg(p.riskScore ?? 0)">
-{{ p.firstName.charAt(0) + p.lastName.charAt(0) }}
+        <table class="risk-table">
+          <thead>
+            <tr>
+              <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_PATIENT' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_SERVICE' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_RESPONSES' | translate }}</th>
+              <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_RISK' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of filteredHighRiskPatients">
+              <td>
+                <div class="patient-cell">
+                  <div class="avatar" [style.background]="getAvatarBg(p.riskScore ?? 0)">
+                    {{ p.firstName.charAt(0) + p.lastName.charAt(0) }}
+                  </div>
+                  <span>{{ p.firstName }} {{ p.lastName.charAt(0) }}.</span>
                 </div>
-<span>{{ p.firstName }} {{ p.lastName.charAt(0) }}.</span>
-              </div>
-            </td>
-            <td class="text-muted">{{ p.assignedDepartment }}</td>
-            <td class="text-mono">{{ p.totalResponses }}/{{ p.activeQuestionnaires }}</td>
-            <td>
-              <span class="risk-badge" [class.high]="(p.riskScore ?? 0) >= 85" [class.medium]="(p.riskScore ?? 0) < 85">
-                {{ p.riskScore ?? 0 }}%
-              </span>
-            </td>
-          </tr>
-          <tr *ngIf="!filteredHighRiskPatients.length">
-            <td colspan="4" class="empty-state">Aucun patient critique détecté</td>
-          </tr>
-        </tbody>
-      </table>
-      </div>
-    </div>
-
-    <!-- Right column: Alerts + AI Insights -->
-    <div class="right-col">
-
-      <!-- Alerts -->
-      <!-- <div class="card">
-        <div class="card-header">
-          <span class="card-title">Alertes systÃ¨me</span>
-          <span class="badge-count" [class.red]="hasHighAlert" [class.amber]="!hasHighAlert">
-            {{ alerts.length }}
-          </span>
-        </div>
-        <div class="alerts-list">
-          <div *ngFor="let a of alerts" class="alert-item" [class]="'alert-' + a.severity">
-            <div class="alert-dot"></div>
-            <div class="alert-body">
-              <span class="alert-type">{{ a.type }}</span>
-              <span class="alert-msg">{{ a.message }}</span>
-            </div>
-          </div>
-          <div *ngIf="!alerts?.length" class="alert-item alert-LOW">
-            <div class="alert-dot"></div>
-            <span>Aucune alerte active</span>
-          </div>
-        </div>
-      </div> -->
-
-      <!-- AI Insights -->
-    <div class="card ai-card">
-
-  <div class="card-header">
-    <span class="card-title">AI Dashboard Assistant</span>
-  </div>
-
-  <!-- CHAT BOX -->
-  <div class="chat-box">
-
-    <div *ngFor="let msg of messages">
-      <div [ngClass]="msg.role" class="chat-msg">
-        {{ msg.text }}
-      </div>
-    </div>
-
-  </div>
-
-  <!-- INPUT -->
-  <div class="chat-input">
-    <input
-      [(ngModel)]="userQuestion"
-      placeholder="Ask: Why engagement is low?"
-    />
-
-    <button (click)="sendQuestion()">
-      Send
-    </button>
-  </div>
-
-    </div>
-    </div>
-
-
-
-
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       INACTIVE PATIENTS
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
-<div class="card inactive-full" style="margin-top: 12px;">
-    <div class="card-header" style="cursor:pointer" (click)="toggleInactive()">
-      <span class="card-title">Patients inactifs (7j+)</span>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="badge-count amber">{{ inactivePatientsCount | number }}</span>
-        <svg [style.transform]="showInactive ? 'rotate(180deg)' : ''"
-             style="transition:.2s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14">
-          <polyline points="6 9 12 15 18 9"/>
-        </svg>
-      </div>
-    </div>
-    <div *ngIf="showInactive" class="inactive-table-wrap">
-      <div class="inactive-toolbar">
-        <input
-          [(ngModel)]="inactivePatientsSearch"
-          class="card-search"
-          type="text"
-          placeholder="Rechercher un patient inactif"
-        />
-      </div>
-      <div class="scroll-panel inactive-scroll">
-        <table class="risk-table" style="margin-top:8px">
-        <thead>
-          <tr>
-            <th>Nom</th>
-            <th>Email</th>
-            <th>Service</th>
-            <th>Dernière connexion</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of filteredInactivePatients">
-            <td>{{ p.firstName }} {{ p.lastName }}</td>
-            <td class="text-muted text-mono" style="font-size:11px">{{ p.email || '-' }}</td>
-            <td class="text-muted">{{ p.assignedDepartment || '' }}</td>
-            <td class="text-muted">{{ formatInactivePatientLastLogin(p.lastLogin) }}</td>
-          </tr>
-          <tr *ngIf="!filteredInactivePatients.length">
-            <td colspan="4" class="empty-state">Aucun patient inactif detecte</td>
-          </tr>
-        </tbody>
+              </td>
+              <td class="text-muted">{{ p.assignedDepartment }}</td>
+              <td class="text-mono">{{ p.totalResponses }}/{{ p.activeQuestionnaires }}</td>
+              <td>
+                <span class="risk-badge" [class.high]="(p.riskScore ?? 0) >= 85" [class.medium]="(p.riskScore ?? 0) < 85">
+                  {{ p.riskScore ?? 0 }}%
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="!filteredHighRiskPatients.length">
+              <td colspan="4" class="empty-state">{{ 'SUPER_ADMIN_DASHBOARD.NO_HIGH_RISK' | translate }}</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </div>
+
+    <div class="right-col">
+      <div class="card ai-card">
+        <div class="card-header">
+          <span class="card-title">{{ 'SUPER_ADMIN_DASHBOARD.AI_ASSISTANT' | translate }}</span>
+        </div>
+
+        <div class="chat-box">
+          <div *ngFor="let msg of messages">
+            <div [ngClass]="msg.role" class="chat-msg">
+              {{ msg.text }}
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-input">
+          <input
+            [(ngModel)]="userQuestion"
+            [placeholder]="'SUPER_ADMIN_DASHBOARD.CHAT_PLACEHOLDER' | translate"
+          />
+
+          <button (click)="sendQuestion()">
+            {{ 'SUPER_ADMIN_DASHBOARD.SEND' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card inactive-full" style="margin-top: 12px;">
+      <div class="card-header" style="cursor:pointer" (click)="toggleInactive()">
+        <span class="card-title">{{ 'SUPER_ADMIN_DASHBOARD.INACTIVE_PATIENTS_7D' | translate }}</span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="badge-count amber">{{ inactivePatientsCount | number }}</span>
+          <svg [style.transform]="showInactive ? 'rotate(180deg)' : ''"
+               style="transition:.2s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14">
+            <polyline points="6 9 12 15 18 9"/>
+          </svg>
+        </div>
+      </div>
+      <div *ngIf="showInactive" class="inactive-table-wrap">
+        <div class="inactive-toolbar">
+          <input
+            [(ngModel)]="inactivePatientsSearch"
+            class="card-search"
+            type="text"
+            [placeholder]="'SUPER_ADMIN_DASHBOARD.SEARCH_INACTIVE_PATIENT' | translate"
+          />
+        </div>
+        <div class="scroll-panel inactive-scroll">
+          <table class="risk-table" style="margin-top:8px">
+            <thead>
+              <tr>
+                <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_NAME' | translate }}</th>
+                <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_EMAIL' | translate }}</th>
+                <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_SERVICE' | translate }}</th>
+                <th>{{ 'SUPER_ADMIN_DASHBOARD.TABLE_LAST_LOGIN' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let p of filteredInactivePatients">
+                <td>{{ p.firstName }} {{ p.lastName }}</td>
+                <td class="text-muted text-mono" style="font-size:11px">{{ p.email || '-' }}</td>
+                <td class="text-muted">{{ p.assignedDepartment || '' }}</td>
+                <td class="text-muted">{{ formatInactivePatientLastLogin(p.lastLogin) }}</td>
+              </tr>
+              <tr *ngIf="!filteredInactivePatients.length">
+                <td colspan="4" class="empty-state">{{ 'SUPER_ADMIN_DASHBOARD.NO_INACTIVE_PATIENTS' | translate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Loading overlay -->
   <div class="loading-overlay" *ngIf="loading">
     <div class="spinner"></div>
   </div>

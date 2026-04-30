@@ -15,12 +15,9 @@ export class LanguageService {
     this.translate.setDefaultLang('fr');
 
     const savedLanguage = localStorage.getItem(this.storageKey);
-    const browserLanguage = this.translate.getBrowserLang();
     const initialLanguage = this.isSupported(savedLanguage)
       ? savedLanguage
-      : this.isSupported(browserLanguage)
-        ? browserLanguage
-        : 'fr';
+      : 'fr';
 
     this.use(initialLanguage);
   }
@@ -29,6 +26,7 @@ export class LanguageService {
     const nextLanguage = this.isSupported(language) ? language : 'fr';
     this.translate.use(nextLanguage);
     localStorage.setItem(this.storageKey, nextLanguage);
+    document.documentElement.lang = nextLanguage;
   }
 
   get currentLanguage(): string {
