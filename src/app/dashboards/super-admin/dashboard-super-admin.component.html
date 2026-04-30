@@ -47,6 +47,7 @@
         <span class="kpi-label">{{ 'SUPER_ADMIN_DASHBOARD.ACTIVE_PATIENTS' | translate }}</span>
         <span class="kpi-value">{{ summary?.patients?.total | number }}</span>
         <span class="kpi-sub">{{ 'SUPER_ADMIN_DASHBOARD.NEW_THIS_WEEK' | translate:{ count: summary?.patients?.newThisWeek } }}</span>
+        <div *ngIf="!filteredCompliance.length" class="empty-state">Aucune donnÃ©e de conformitÃ©</div>
       </div>
     </div>
 
@@ -65,7 +66,7 @@
       </div>
     </div>
 
-    <div class="kpi-card amber">
+    <div class="kpi-card coral">
       <div class="kpi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
@@ -79,7 +80,7 @@
       </div>
     </div>
 
-    <div class="kpi-card coral">
+    <div class="kpi-card purple">
       <div class="kpi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
@@ -94,7 +95,7 @@
       </div>
     </div>
 
-    <div class="kpi-card purple">
+    <div class="kpi-card red">
       <div class="kpi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
@@ -107,7 +108,7 @@
       </div>
     </div>
 
-    <div class="kpi-card red">
+    <div class="kpi-card amber">
       <div class="kpi-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
           <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
@@ -190,10 +191,17 @@
     <div class="card">
       <div class="card-header">
         <span class="card-title">Conformité par service</span>
-        <span class="card-subtitle">{{ compliance.length }} services</span>
+        <input
+          [(ngModel)]="complianceSearch"
+          class="card-search"
+          type="text"
+          placeholder="Rechercher un service"
+        />
+        <span class="card-subtitle">{{ filteredCompliance.length }} services</span>
       </div>
-      <div class="compliance-list">
-        <div *ngFor="let s of compliance?.slice(0, 7)" class="comp-item">
+      <div class="scroll-panel compliance-scroll">
+        <div class="compliance-list">
+        <div *ngFor="let s of filteredCompliance" class="comp-item">
           <div class="comp-header">
             <span class="comp-name">{{ s.serviceName }}</span>
             <span class="comp-pct" [style.color]="getRateColor(s.complianceRate)">{{ s.complianceRate }}%</span>
@@ -209,6 +217,8 @@
           </div>
         </div>
         <div *ngIf="!compliance?.length" class="empty-state">Aucune donnée de conformité</div>
+        <div *ngIf="!filteredCompliance.length" class="empty-state">Aucune donnee de conformite</div>
+      </div>
       </div>
     </div>
 
@@ -216,8 +226,15 @@
     <div class="card">
       <div class="card-header">
         <span class="card-title">Patients à risque élevé</span>
-        <span class="badge-count red">{{ highRiskPatients.length }}</span>
+        <input
+          [(ngModel)]="highRiskSearch"
+          class="card-search"
+          type="text"
+          placeholder="Rechercher un patient"
+        />
+        <span class="badge-count red">{{ filteredHighRiskPatients.length }}</span>
       </div>
+      <div class="scroll-panel risk-scroll">
       <table class="risk-table">
         <thead>
           <tr>
@@ -228,7 +245,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of highRiskPatients?.slice(0, 6)">
+          <tr *ngFor="let p of filteredHighRiskPatients">
             <td>
               <div class="patient-cell">
                 <div class="avatar" [style.background]="getAvatarBg(p.riskScore ?? 0)">
@@ -245,11 +262,12 @@
               </span>
             </td>
           </tr>
-          <tr *ngIf="!highRiskPatients?.length">
+          <tr *ngIf="!filteredHighRiskPatients.length">
             <td colspan="4" class="empty-state">Aucun patient critique détecté</td>
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
 
     <!-- Right column: Alerts + AI Insights -->

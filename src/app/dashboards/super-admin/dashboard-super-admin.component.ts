@@ -60,6 +60,8 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
   alerts: Alert[] = [];
   inactivePatients: InactivePatient[] = [];
   aiInsights: AIInsight[] = [];
+  complianceSearch = '';
+  highRiskSearch = '';
 
   get currentDate(): string {
     return new Date().toLocaleDateString('fr-FR', {
@@ -98,6 +100,31 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
       ?? this.summary?.users?.inactive7d
       ?? this.inactivePatients.length
       ?? 0;
+  }
+
+  get filteredCompliance(): ComplianceService[] {
+    const query = this.complianceSearch.trim().toLowerCase();
+    if (!query) {
+      return this.compliance;
+    }
+
+    return this.compliance.filter((service) =>
+      service.serviceName?.toLowerCase().includes(query)
+    );
+  }
+
+  get filteredHighRiskPatients(): HighRiskPatient[] {
+    const query = this.highRiskSearch.trim().toLowerCase();
+    if (!query) {
+      return this.highRiskPatients;
+    }
+
+    return this.highRiskPatients.filter((patient) => {
+      const fullName = `${patient.firstName ?? ''} ${patient.lastName ?? ''}`.toLowerCase();
+      const department = (patient.assignedDepartment ?? '').toLowerCase();
+
+      return fullName.includes(query) || department.includes(query);
+    });
   }
 
   formatInactivePatientLastLogin(lastLogin?: string | null): string {
@@ -157,8 +184,8 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
   }
 
   getAvatarBg(riskScore: number): string {
-    if (riskScore >= 85) return '#FCEBEB';
-    return '#FAEEDA';
+    if (riskScore >= 85) return '#eec7c7';
+    return '#f2debb';
   }
 
   private loadAll(): void {
