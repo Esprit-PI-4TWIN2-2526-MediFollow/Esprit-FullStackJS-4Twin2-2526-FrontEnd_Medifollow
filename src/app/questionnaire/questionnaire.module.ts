@@ -6,6 +6,7 @@ import { DashboardQuestionnaireComponent } from './dashboard-questionnaire.compo
 import { ViewQuestionnaireComponent } from './view-questionnaire/view-questionnaire.component';
 import { BuilderComponent } from './builder/builder.component';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     QuestionnaireRoutingModule,
-    FormsModule
+    FormsModule,
+    TranslateModule
   ]
 })
 export class QuestionnaireModule { }
