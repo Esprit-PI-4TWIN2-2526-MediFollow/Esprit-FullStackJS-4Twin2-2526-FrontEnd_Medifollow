@@ -56,7 +56,7 @@ export class ConsultationListComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Erreur lors du chargement des consultations';
+        this.error = 'Error loading consultations';
         console.error(err);
         this.loading = false;
       }
@@ -96,13 +96,13 @@ export class ConsultationListComponent implements OnInit {
 
   startConsultation(id: string, event: Event): void {
     event.stopPropagation();
-    if (confirm('Démarrer cette consultation?')) {
+    if (confirm('Start this consultation?')) {
       this.consultationService.start(id).subscribe({
         next: () => {
           this.loadConsultations();
         },
         error: (err) => {
-          alert('Erreur lors du démarrage de la consultation');
+          alert('Error starting consultation');
           console.error(err);
         }
       });
@@ -111,13 +111,13 @@ export class ConsultationListComponent implements OnInit {
 
   cancelConsultation(id: string, event: Event): void {
     event.stopPropagation();
-    if (confirm('Annuler cette consultation?')) {
+    if (confirm('Cancel this consultation?')) {
       this.consultationService.cancel(id).subscribe({
         next: () => {
           this.loadConsultations();
         },
         error: (err) => {
-          alert('Erreur lors de l\'annulation de la consultation');
+          alert('Error cancelling consultation');
           console.error(err);
         }
       });
@@ -166,20 +166,20 @@ export class ConsultationListComponent implements OnInit {
 
   getStatusLabel(status: string): string {
     const labels: { [key: string]: string } = {
-      'pending': 'En attente',
-      'in-progress': 'En cours',
-      'completed': 'Terminée',
-      'cancelled': 'Annulée',
-      'no-show': 'Absent'
+      'pending': 'Pending',
+      'in-progress': 'In Progress',
+      'completed': 'Completed',
+      'cancelled': 'Cancelled',
+      'no-show': 'No Show'
     };
     return labels[status] || status;
   }
 
   getTypeLabel(type: string): string {
     const labels: { [key: string]: string } = {
-      'scheduled': 'Programmée',
-      'urgent': 'Urgente',
-      'follow-up': 'Suivi'
+      'scheduled': 'Scheduled',
+      'urgent': 'Urgent',
+      'follow-up': 'Follow-up'
     };
     return labels[type] || type;
   }

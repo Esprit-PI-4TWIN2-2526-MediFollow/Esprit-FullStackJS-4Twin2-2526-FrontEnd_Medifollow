@@ -1,8 +1,11 @@
 import { CommonModule } from '@angular/common';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
+import { TranslateModule } from '@ngx-translate/core';
 import { of, throwError } from 'rxjs';
 
 import { BuilderComponent } from './builder.component';
@@ -15,6 +18,7 @@ import { Service, ServiceManagementService } from '../../services/service/servic
 describe('BuilderComponent', () => {
   let component: BuilderComponent;
   let fixture: ComponentFixture<BuilderComponent>;
+  let httpController: HttpTestingController;
   let symptomService: jasmine.SpyObj<SymptomService>;
   let aiService: jasmine.SpyObj<AiService>;
   let usersService: jasmine.SpyObj<UsersService>;
@@ -75,7 +79,14 @@ describe('BuilderComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [BuilderComponent],
-      imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterTestingModule],
+      imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TranslateModule.forRoot(),
+      ],
       providers: [
         { provide: SymptomService, useValue: symptomService },
         { provide: AiService, useValue: aiService },
@@ -92,15 +103,21 @@ describe('BuilderComponent', () => {
           },
         },
       ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA],
     }).compileComponents();
 
     router = TestBed.inject(Router);
+    httpController = TestBed.inject(HttpTestingController);
     spyOn(router, 'navigate').and.resolveTo(true);
     spyOn(console, 'error');
 
     fixture = TestBed.createComponent(BuilderComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    httpController.verify();
   });
 
   it('should create and initialize default symptoms questions', () => {
@@ -194,23 +211,26 @@ describe('BuilderComponent', () => {
     component.title = 'Post-op monitoring';
     component.medicalService = 'Cardiology';
     component.currentStep = 1;
-    aiService.generateQuestions.and.returnValue(of({
+
+    component.generateWithAI();
+
+    const request = httpController.expectOne('http://localhost:3000/symptoms/generate');
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body).toEqual({
+      title: 'Post-op monitoring',
+      description: '',
+      service: 'Cardiology',
+      section: 'symptoms',
+      numberOfQuestions: 5,
+    });
+    request.flush({
       questions: [
         { label: ' Pain level ', type: 'rating' },
         { label: 'Symptoms', type: 'multiple', options: [' Cough ', '', 'Fatigue'] },
       ],
-    }));
-
-    component.generateWithAI();
+    });
 
     const generatedQuestions = component.questions.slice(-2);
-    expect(aiService.generateQuestions).toHaveBeenCalledWith({
-      title: 'Post-op monitoring',
-      description: '',
-      medicalService: 'Cardiology',
-      category: 'symptoms',
-      numberOfQuestions: 5,
-    });
     expect(generatedQuestions[0]).toEqual(jasmine.objectContaining({
       label: 'Pain level',
       type: 'scale',
@@ -235,18 +255,20 @@ describe('BuilderComponent', () => {
 
     component.title = 'Daily form';
     component.medicalService = 'Cardiology';
-    aiService.generateQuestions.and.returnValue(throwError(() => new Error('AI down')));
 
     component.generateWithAI();
+    httpController
+      .expectOne('http://localhost:3000/symptoms/generate')
+      .flush({ message: 'AI down' }, { status: 500, statusText: 'Server Error' });
 
     expect(component.generateError).toBe('Failed to generate questions. Please try again.');
     expect(component.isGenerating).toBeFalse();
 
-    aiService.generateQuestions.and.returnValue(
-      throwError(() => ({ status: 404 }))
-    );
     component.generateWithAI();
-    expect(component.generateError).toBe("Endpoint introuvable: vérifier l’URL backend");
+    httpController
+      .expectOne('http://localhost:3000/symptoms/generate')
+      .flush({ message: 'Not found' }, { status: 404, statusText: 'Not Found' });
+    expect(component.generateError).toBe('Failed to generate questions. Please try again.');
   });
 
   it('should create a symptoms form with trimmed values and selected patients', () => {

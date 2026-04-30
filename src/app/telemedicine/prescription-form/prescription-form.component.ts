@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PrescriptionService } from '../services/prescription.service';
 import { Medication, CreatePrescriptionDto } from '../models/prescription.model';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-prescription-form',
@@ -36,7 +37,12 @@ export class PrescriptionFormComponent implements OnInit {
 
   addMedication(): void {
     if (!this.newMed.name || !this.newMed.dosage || !this.newMed.frequency || !this.newMed.duration) {
-      alert('Veuillez remplir tous les champs du médicament');
+      Swal.fire({
+        icon: 'warning',
+        title: 'Missing Information',
+        text: 'Please fill in all medication fields',
+        confirmButtonColor: '#087f8b'
+      });
       return;
     }
 
@@ -56,7 +62,12 @@ export class PrescriptionFormComponent implements OnInit {
 
   onSubmit(): void {
     if (this.medications.length === 0) {
-      alert('Ajoutez au moins un médicament');
+      Swal.fire({
+        icon: 'warning',
+        title: 'No Medications',
+        text: 'Add at least one medication',
+        confirmButtonColor: '#087f8b'
+      });
       return;
     }
 
@@ -71,13 +82,26 @@ export class PrescriptionFormComponent implements OnInit {
 
     this.prescriptionService.create(dto).subscribe({
       next: (prescription) => {
-        alert('Prescription créée avec succès!');
-        this.router.navigate(['/telemedicine/consultation', this.consultationId]);
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: 'Prescription created successfully',
+          timer: 2000,
+          showConfirmButton: false
+        }).then(() => {
+          this.router.navigate(['/telemedicine/consultation', this.consultationId]);
+        });
       },
       error: (err) => {
-        this.error = 'Erreur lors de la création de la prescription';
+        this.error = 'Error creating prescription';
         console.error(err);
         this.loading = false;
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to create prescription',
+          confirmButtonColor: '#087f8b'
+        });
       }
     });
   }

@@ -10,6 +10,8 @@ import { LanguageService } from '../../../services/i18n/language.service';
 })
 export class AppHeaderComponent {
   isApplicationMenuOpen = false;
+  readonly isExpanded$;
+  readonly isHovered$;
   readonly isMobileOpen$;
 
   @ViewChild('searchInput') searchInput!: ElementRef<HTMLInputElement>;
@@ -18,6 +20,8 @@ export class AppHeaderComponent {
     public sidebarService: SidebarService,
     public languageService: LanguageService,
   ) {
+    this.isExpanded$ = this.sidebarService.isExpanded$;
+    this.isHovered$ = this.sidebarService.isHovered$;
     this.isMobileOpen$ = this.sidebarService.isMobileOpen$;
   }
 
@@ -26,6 +30,7 @@ export class AppHeaderComponent {
   }
 
   handleToggle() {
+    this.isApplicationMenuOpen = false;
     if (window.innerWidth >= 1280) {
       this.sidebarService.toggleExpanded();
     } else {
@@ -39,20 +44,33 @@ export class AppHeaderComponent {
 
   changeLanguage(language: string) {
     this.languageService.use(language);
+    this.isApplicationMenuOpen = false;
+  }
+
+  closeApplicationMenu() {
+    this.isApplicationMenuOpen = false;
   }
 
   ngAfterViewInit() {
     document.addEventListener('keydown', this.handleKeyDown);
+    window.addEventListener('resize', this.handleResize);
   }
 
   ngOnDestroy() {
     document.removeEventListener('keydown', this.handleKeyDown);
+    window.removeEventListener('resize', this.handleResize);
   }
 
   handleKeyDown = (event: KeyboardEvent) => {
     if ((event.metaKey || event.ctrlKey) && event.key === 'k') {
       event.preventDefault();
       this.searchInput?.nativeElement.focus();
+    }
+  };
+
+  handleResize = () => {
+    if (window.innerWidth >= 1280) {
+      this.isApplicationMenuOpen = false;
     }
   };
 }

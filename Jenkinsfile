@@ -3,6 +3,7 @@ pipeline {
 
     options {
         skipDefaultCheckout(true)
+        disableConcurrentBuilds()
     }
 
     tools {
@@ -11,6 +12,8 @@ pipeline {
 
     environment {
         SONAR_TOKEN = credentials('sonar-token')
+        PUPPETEER_CACHE_DIR = "${WORKSPACE}/.cache/puppeteer"
+        NPM_CONFIG_CACHE = "${WORKSPACE}/.npm"
         CHROME_BIN = '/usr/bin/chromium'
     }
 
@@ -18,13 +21,17 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow.git'
+                git branch: 'main',
+                    url: 'https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow.git'
             }
         }
 
         stage('Install') {
             steps {
-                sh 'npm install --legacy-peer-deps'
+                sh '''
+                set -eux
+                npm ci --prefer-offline --legacy-peer-deps
+                '''
             }
         }
 
@@ -50,7 +57,7 @@ pipeline {
                         ${scannerHome}/bin/sonar-scanner \
                         -Dsonar.projectKey=MediFollow-Frontend \
                         -Dsonar.sources=src \
-                        -Dsonar.host.url=http://localhost:9000 \
+                        -Dsonar.host.url=http://sonarqube:9000 \
                         -Dsonar.login=$SONAR_TOKEN \
                         -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
                         """
@@ -58,6 +65,5 @@ pipeline {
                 }
             }
         }
-
     }
 }

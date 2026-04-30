@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import Swal from 'sweetalert2';
 import { SymptomForm, SymptomService } from '../services/symptom.service';
 
@@ -19,7 +20,8 @@ export class DashboardSymptomsComponent implements OnInit {
 
   constructor(
     private symptomService: SymptomService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -37,7 +39,7 @@ export class DashboardSymptomsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Failed to load symptoms forms', error);
-        this.errorMessage = 'Unable to load forms right now.';
+        this.errorMessage = this.translate.instant('SYMPTOMS_DASHBOARD.ERROR_LOAD');
         this.isLoading = false;
       }
     });
@@ -57,14 +59,14 @@ export class DashboardSymptomsComponent implements OnInit {
 
   deleteForm(id: string, title: string): void {
     void Swal.fire({
-      title: 'Confirm Deletion',
-      text: `Are you sure you want to delete "${title}"?`,
+      title: this.translate.instant('SYMPTOMS_DASHBOARD.DELETE_TITLE'),
+      text: this.translate.instant('SYMPTOMS_DASHBOARD.DELETE_CONFIRM', { title }),
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#6b7280',
-      confirmButtonText: 'Delete',
-      cancelButtonText: 'Cancel',
+      confirmButtonText: this.translate.instant('SYMPTOMS_DASHBOARD.DELETE'),
+      cancelButtonText: this.translate.instant('SYMPTOMS_DASHBOARD.CANCEL'),
     }).then((result) => {
       if (!result.isConfirmed) return;
 
@@ -77,14 +79,14 @@ export class DashboardSymptomsComponent implements OnInit {
 
           void Swal.fire({
             icon: 'success',
-            title: 'Form deleted',
-            text: 'The symptoms form was deleted successfully.',
+            title: this.translate.instant('SYMPTOMS_DASHBOARD.DELETE_SUCCESS_TITLE'),
+            text: this.translate.instant('SYMPTOMS_DASHBOARD.DELETE_SUCCESS_TEXT'),
             confirmButtonColor: '#465fff',
           });
         },
         error: (error) => {
           console.error('Failed to delete symptoms form', error);
-          this.errorMessage = 'Unable to delete the selected form.';
+          this.errorMessage = this.translate.instant('SYMPTOMS_DASHBOARD.ERROR_DELETE');
         }
       });
     });
@@ -127,5 +129,17 @@ export class DashboardSymptomsComponent implements OnInit {
 
   getFormStatus(form: SymptomForm): 'active' | 'inactive' {
     return form.status || 'active';
+  }
+
+  getQuestionCountLabel(count: number): string {
+    return this.translate.instant('SYMPTOMS_DASHBOARD.QUESTION_COUNT', { count });
+  }
+
+  getStatusLabel(status: 'active' | 'inactive'): string {
+    return this.translate.instant(
+      status === 'active'
+        ? 'SYMPTOMS_DASHBOARD.STATUS_ACTIVE'
+        : 'SYMPTOMS_DASHBOARD.STATUS_INACTIVE'
+    );
   }
 }

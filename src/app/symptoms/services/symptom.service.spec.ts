@@ -37,7 +37,14 @@ describe('SymptomService', () => {
     const response: SymptomForm = {
       _id: 'form-1',
       title: 'Daily follow-up',
-      questions: payload.questions ?? [],
+      questions: [
+        {
+          ...(payload.questions?.[0] ?? { label: 'Pain level', type: 'scale' }),
+          measurementsPerDay: 1,
+          occurrencesPerDay: 1,
+          maxOccurrencesPerDay: 1,
+        },
+      ],
     };
 
     service.createForm(payload).subscribe((createdForm) => {
@@ -46,7 +53,17 @@ describe('SymptomService', () => {
 
     const request = httpMock.expectOne(`${apiUrl}/form`);
     expect(request.request.method).toBe('POST');
-    expect(request.request.body).toEqual(payload);
+    expect(request.request.body).toEqual({
+      ...payload,
+      questions: [
+        {
+          ...payload.questions?.[0],
+          measurementsPerDay: 1,
+          occurrencesPerDay: 1,
+          maxOccurrencesPerDay: 1,
+        },
+      ],
+    });
     request.flush(response);
   });
 

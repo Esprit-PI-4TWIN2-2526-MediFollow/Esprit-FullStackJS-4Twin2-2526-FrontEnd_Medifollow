@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { Questionnaire } from '../models/questionnaire';
 import { QuestionnaireService } from '../services/questionnaire.service';
 
@@ -25,7 +26,8 @@ questionnaireToRestore: Questionnaire | null = null;
   itemsPerPage = 6;
   constructor(
     private questionnaireService: QuestionnaireService,
-    private router: Router
+    private router: Router,
+    private translate: TranslateService
   ) {}
 
   ngOnInit(): void {
@@ -40,7 +42,7 @@ questionnaireToRestore: Questionnaire | null = null;
         this.isLoading = false;
       },
       error: () => {
-        this.errorMessage = 'Failed to load questionnaires.';
+        this.errorMessage = this.translate.instant('QUESTIONNAIRE_DASHBOARD.ERROR_LOAD');
         this.isLoading = false;
       }
     });
@@ -107,7 +109,7 @@ get totalPages(): number {
         if (index !== -1) this.questionnaires[index] = updated;
       },
       error: () => {
-        this.errorMessage = 'Failed to update status.';
+        this.errorMessage = this.translate.instant('QUESTIONNAIRE_DASHBOARD.ERROR_STATUS');
       }
     });
   }
@@ -129,7 +131,7 @@ confirmDelete(): void {
       this.isDeleting = false;
     },
     error: () => {
-      this.errorMessage = 'Failed to delete the questionnaire.';
+      this.errorMessage = this.translate.instant('QUESTIONNAIRE_DASHBOARD.ERROR_DELETE');
       setTimeout(() => this.errorMessage = '', 4000);
       this.questionnaireToDelete = null;
       this.isDeleting = false;
@@ -159,7 +161,7 @@ confirmArchive(): void {
       this.questionnaireToArchive = null;
     },
     error: () => {
-      this.errorMessage = 'Failed to archive the questionnaire.';
+      this.errorMessage = this.translate.instant('QUESTIONNAIRE_DASHBOARD.ERROR_ARCHIVE');
       setTimeout(() => this.errorMessage = '', 4000);
       this.questionnaireToArchive = null;
     }
@@ -184,7 +186,7 @@ confirmRestore(): void {
       this.questionnaireToRestore = null;
     },
     error: () => {
-      this.errorMessage = 'Failed to restore questionnaire.';
+      this.errorMessage = this.translate.instant('QUESTIONNAIRE_DASHBOARD.ERROR_RESTORE');
       setTimeout(() => this.errorMessage = '', 4000);
       this.questionnaireToRestore = null;
     }
@@ -193,5 +195,19 @@ confirmRestore(): void {
 
 cancelRestore(): void {
   this.questionnaireToRestore = null;
+}
+
+getQuestionCountLabel(count: number): string {
+  return this.translate.instant('QUESTIONNAIRE_DASHBOARD.QUESTION_COUNT', { count });
+}
+
+getStatusLabel(status: 'active' | 'inactive' | 'archived'): string {
+  const keyMap = {
+    active: 'QUESTIONNAIRE_DASHBOARD.STATUS_ACTIVE',
+    inactive: 'QUESTIONNAIRE_DASHBOARD.STATUS_INACTIVE',
+    archived: 'QUESTIONNAIRE_DASHBOARD.STATUS_ARCHIVED',
+  };
+
+  return this.translate.instant(keyMap[status]);
 }
 }

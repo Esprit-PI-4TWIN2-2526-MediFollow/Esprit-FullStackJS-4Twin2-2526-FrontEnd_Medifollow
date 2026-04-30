@@ -2,7 +2,7 @@
 
   <!-- ── Header ─────────────────────────────────────────────── -->
   <div class="flex flex-col gap-2 px-5 mb-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Manage All Users</h3>
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_PROFILES.TITLE' | translate }}</h3>
     <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
       <div class="relative">
         <select
@@ -12,7 +12,7 @@
                  appearance-none cursor-pointer
                  focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10
                  dark:border-gray-700 dark:bg-gray-900 dark:text-white/90">
-          <option value="">Filter by Role</option>
+          <option value="">{{ 'MANAGE_PROFILES.FILTER_BY_ROLE' | translate }}</option>
           <option *ngFor="let role of roles" [value]="role._id">{{ role.label }}</option>
         </select>
         <!-- Icône chevron -->
@@ -29,13 +29,13 @@
             <path d="M3.042 9.374C3.042 5.877 5.877 3.042 9.375 3.042 12.873 3.042 15.709 5.877 15.709 9.374c0 3.497-2.835 6.332-6.334 6.332-3.498 0-6.334-2.835-6.334-6.332z"/>
           </svg>
         </button>
-        <input type="text" placeholder="Search..." (input)="onSearchInput($event)"
+        <input type="text" [placeholder]="'MANAGE_PROFILES.SEARCH_PLACEHOLDER' | translate" (input)="onSearchInput($event)"
           class="h-[42px] w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-[42px] pr-4 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 xl:w-[300px]" />
       </div>
 
       <button type="button" (click)="openBulkDeleteModal()" [disabled]="selectedUsersCount === 0"
         class="inline-flex h-[42px] items-center justify-center rounded-lg bg-red-500 px-4 text-sm font-medium text-white shadow-theme-xs transition hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
-        Delete Selected ({{ selectedUsersCount }})
+        {{ 'MANAGE_PROFILES.DELETE_SELECTED' | translate:{ count: selectedUsersCount } }}
       </button>
 
       <div *ngIf="canExportUsers" class="relative">
@@ -49,7 +49,7 @@
             <polyline points="7 10 12 15 17 10"/>
             <line x1="12" y1="15" x2="12" y2="3"/>
           </svg>
-          {{ exportingFormat ? ('Exporting ' + (exportingFormat | uppercase) + '...') : 'Export' }}
+          {{ exportButtonLabel }}
         </button>
 
         <div *ngIf="isExportMenuOpen" class="absolute right-0 z-20 mt-2 w-44 rounded-xl border border-gray-200 bg-white p-2 shadow-lg dark:border-gray-700 dark:bg-gray-900">
@@ -58,7 +58,7 @@
             (click)="exportUsers('csv')"
             [disabled]="isExportingPdf || isExportingCsv"
             class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-gray-200 dark:hover:bg-white/[0.05]">
-            <span>Export as CSV</span>
+            <span>{{ 'MANAGE_PROFILES.EXPORT.CSV' | translate }}</span>
             <span *ngIf="isExportingCsv">...</span>
           </button>
           <button
@@ -66,7 +66,7 @@
             (click)="exportUsers('pdf')"
             [disabled]="isExportingPdf || isExportingCsv"
             class="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:text-gray-200 dark:hover:bg-white/[0.05]">
-            <span>Export as PDF</span>
+            <span>{{ 'MANAGE_PROFILES.EXPORT.PDF' | translate }}</span>
             <span *ngIf="isExportingPdf">...</span>
           </button>
         </div>
@@ -74,7 +74,7 @@
 
       <button type="button" (click)="openAddUserModal()"
         class="inline-flex h-[42px] items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600">
-        Add New User
+        {{ 'MANAGE_PROFILES.ADD_NEW_USER' | translate }}
       </button>
     </div>
   </div>
@@ -97,16 +97,16 @@
                 [indeterminate]="someCurrentItemsSelected"
                 (change)="toggleSelectAllCurrentItems($event)"
                 class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
-                title="Select all users on this page"
+                [title]="'MANAGE_PROFILES.TABLE.SELECT_ALL_PAGE' | translate"
               />
             </th>
             <th class="w-10 py-3"></th>
-            <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Name</th>
-            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Email</th>
-            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Phone Number</th>
-            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Role</th>
-            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Status</th>
-            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Actions</th>
+            <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.TABLE.NAME' | translate }}</th>
+            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.TABLE.EMAIL' | translate }}</th>
+            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.TABLE.PHONE' | translate }}</th>
+            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.TABLE.ROLE' | translate }}</th>
+            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.TABLE.STATUS' | translate }}</th>
+            <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.TABLE.ACTIONS' | translate }}</th>
           </tr>
         </thead>
 
@@ -129,7 +129,7 @@
                     [checked]="isUserSelected(user)"
                     (change)="toggleUserSelection(user, $event)"
                     class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500/30"
-                    title="Select user"
+                    [title]="'MANAGE_PROFILES.TABLE.SELECT_USER' | translate"
                   />
                 </td>
 
@@ -170,14 +170,14 @@
                 <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{{ user.role || '—' }}</td>
                 <td class="px-4 py-3">
                   <app-badge size="sm" [color]="getBadgeColor(user)">
-                    {{ user.actif ? 'Active' : 'Inactive' }}
+                    {{ getStatusLabel(user.actif) }}
                   </app-badge>
                 </td>
 
                 <!-- Actions -->
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-1">
-                    <button (click)="startInlineEdit(user)" title="Edit"
+                    <button (click)="startInlineEdit(user)" [title]="'MANAGE_PROFILES.ACTIONS.EDIT' | translate"
                       class="inline-flex h-8 w-8 items-center justify-center rounded-lg
                              text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition">
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -186,7 +186,7 @@
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                       </svg>
                     </button>
-                    <button (click)="handleDelete(user)" title="Delete"
+                    <button (click)="handleDelete(user)" [title]="'MANAGE_PROFILES.ACTIONS.DELETE' | translate"
                       class="inline-flex h-8 w-8 items-center justify-center rounded-lg
                              text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition">
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -581,10 +581,10 @@
     <div class="px-6 py-4 border-t border-gray-200 dark:border-white/[0.05]">
       <div class="flex items-center justify-between">
         <app-button size="sm" variant="outline" (btnClick)="goToPage(currentPage - 1)" [disabled]="currentPage === 1">
-          <span class="hidden sm:inline">Previous</span>
+          <span class="hidden sm:inline">{{ 'MANAGE_PROFILES.PAGINATION.PREVIOUS' | translate }}</span>
         </app-button>
         <span class="block text-sm font-medium text-gray-700 dark:text-gray-400 sm:hidden">
-          Page {{ currentPage }} of {{ totalPages }}
+          {{ 'MANAGE_PROFILES.PAGINATION.PAGE_OF' | translate:{ page: currentPage, total: totalPages } }}
         </span>
         <ul class="hidden items-center gap-0.5 sm:flex">
           <li *ngFor="let page of [].constructor(totalPages); let idx = index">
@@ -597,7 +597,7 @@
           </li>
         </ul>
         <app-button size="sm" variant="outline" (btnClick)="goToPage(currentPage + 1)" [disabled]="currentPage === totalPages">
-          <span class="hidden sm:inline">Next</span>
+          <span class="hidden sm:inline">{{ 'MANAGE_PROFILES.PAGINATION.NEXT' | translate }}</span>
         </app-button>
       </div>
     </div>
@@ -609,8 +609,8 @@
           <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z"/>
         </svg>
       </div>
-      <h4 class="text-base font-semibold text-gray-800 dark:text-white/90">No users found</h4>
-      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">No result matches your search.</p>
+      <h4 class="text-base font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_PROFILES.EMPTY.TITLE' | translate }}</h4>
+      <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.EMPTY.SUBTITLE' | translate }}</p>
     </div>
   }
 </div>
@@ -618,17 +618,16 @@
 <!-- Bulk Delete Confirmation Modal -->
 <div *ngIf="isBulkDeleteModalOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
   <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl w-80">
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Delete Selected Users</h3>
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ 'MANAGE_PROFILES.BULK_DELETE.TITLE' | translate }}</h3>
     <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-      Are you sure you want to delete
-      <strong>{{ selectedUsersCount }}</strong> selected user(s)?
+      {{ 'MANAGE_PROFILES.BULK_DELETE.CONFIRM' | translate:{ count: selectedUsersCount } }}
     </p>
     <div class="mt-5 flex justify-end gap-3">
       <button (click)="cancelBulkDelete()" [disabled]="isBulkDeleting"
-        class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+        class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 dark:border-gray-700 dark:text-gray-300">{{ 'MANAGE_PROFILES.ACTIONS.CANCEL' | translate }}</button>
       <button (click)="confirmBulkDelete()" [disabled]="isBulkDeleting"
         class="px-4 py-2 rounded-lg bg-red-500 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50">
-        {{ isBulkDeleting ? 'Deleting...' : 'Delete All' }}
+        {{ isBulkDeleting ? ('MANAGE_PROFILES.ACTIONS.DELETING' | translate) : ('MANAGE_PROFILES.ACTIONS.DELETE_ALL' | translate) }}
       </button>
     </div>
   </div>
@@ -637,16 +636,16 @@
 <!-- Delete Confirmation Modal -->
 <div *ngIf="selectedUserToDelete" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
   <div class="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl w-80">
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Confirm Deletion</h3>
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ 'MANAGE_PROFILES.DELETE_MODAL.TITLE' | translate }}</h3>
     <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-      Are you sure you want to delete
+      {{ 'MANAGE_PROFILES.DELETE_MODAL.CONFIRM_PREFIX' | translate }}
       <strong>{{ selectedUserToDelete.firstName }} {{ selectedUserToDelete.lastName }}</strong>?
     </p>
     <div class="mt-5 flex justify-end gap-3">
       <button (click)="cancelDelete()"
-        class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+        class="px-4 py-2 rounded-lg border border-gray-300 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">{{ 'MANAGE_PROFILES.ACTIONS.CANCEL' | translate }}</button>
       <button (click)="confirmDelete()"
-        class="px-4 py-2 rounded-lg bg-red-500 text-sm font-medium text-white hover:bg-red-600">Delete</button>
+        class="px-4 py-2 rounded-lg bg-red-500 text-sm font-medium text-white hover:bg-red-600">{{ 'MANAGE_PROFILES.ACTIONS.DELETE' | translate }}</button>
     </div>
   </div>
 </div>
@@ -662,13 +661,13 @@
       <div class="mb-6 sm:mb-8 flex items-start justify-between">
         <div>
           <h1 class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md">
-            Create An Account
+            {{ 'MANAGE_PROFILES.CREATE_ACCOUNT.TITLE' | translate }}
           </h1>
           @if (step === 1) {
-            <p class="text-sm text-gray-500 dark:text-gray-400">Select a role and fill common information.</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.STEP1' | translate }}</p>
           } @else {
             <p class="text-sm text-gray-500 dark:text-gray-400">
-              Complete role-specific info for <span class="font-medium text-brand-500">{{ roleTitle }}</span>.
+              {{ 'MANAGE_PROFILES.CREATE_ACCOUNT.STEP2_PREFIX' | translate }} <span class="font-medium text-brand-500">{{ roleTitle }}</span>.
             </p>
           }
         </div>
@@ -843,8 +842,8 @@
             @if (showPasswordStrength && signupForm.get('password')?.value) {
               <div class="mt-2">
                 <div class="mb-1 flex items-center justify-between text-xs">
-                  <span class="text-gray-500">Password strength</span>
-                  <span class="font-medium text-gray-700 dark:text-gray-200">{{ passwordStrengthLabel }}</span>
+                  <span class="text-gray-500">{{ 'MANAGE_PROFILES.PASSWORD_STRENGTH.LABEL' | translate }}</span>
+                  <span class="font-medium text-gray-700 dark:text-gray-200">{{ translatedPasswordStrengthLabel }}</span>
                 </div>
                 <div class="h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   <div class="h-full transition-all duration-300" [ngClass]="passwordStrengthClass" [style.width.%]="passwordStrengthPercent"></div>
@@ -930,8 +929,8 @@
             <app-checkbox className="w-5 h-5 mt-0.5" [(checked)]="isChecked" />
             <p class="text-sm font-normal text-gray-500 dark:text-gray-400">
               By creating an account you agree to the
-              <span class="text-gray-800 dark:text-white/90">Terms and Conditions</span> and
-              <span class="text-gray-800 dark:text-white">Privacy Policy</span>.
+              <span class="text-gray-800 dark:text-white/90">{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.TERMS' | translate }}</span> {{ 'MANAGE_PROFILES.CREATE_ACCOUNT.AND' | translate }}
+              <span class="text-gray-800 dark:text-white">{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.PRIVACY' | translate }}</span>.
             </p>
           </div>
 
@@ -939,7 +938,7 @@
             class="flex w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3
                    text-sm font-medium text-white transition hover:bg-brand-600
                    disabled:cursor-not-allowed disabled:opacity-50">
-            Continue
+            {{ 'MANAGE_PROFILES.ACTIONS.CONTINUE' | translate }}
           </button>
         </form>
 
@@ -950,23 +949,23 @@
           <div class="flex items-center justify-between rounded-xl border border-brand-100
                       bg-brand-50/60 p-3 dark:border-brand-800 dark:bg-brand-900/20">
             <div>
-              <p class="text-xs uppercase tracking-wide text-brand-500">Selected role</p>
+              <p class="text-xs uppercase tracking-wide text-brand-500">{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.SELECTED_ROLE' | translate }}</p>
               <p class="text-sm font-semibold text-gray-800 dark:text-white/90">{{ roleTitle }}</p>
             </div>
             <button type="button" (click)="backToRoleSelection()"
               class="rounded-lg border border-brand-200 px-3 py-2 text-xs font-medium text-brand-600
-                     transition hover:bg-brand-100 dark:border-brand-700 dark:text-brand-400">Back</button>
+                     transition hover:bg-brand-100 dark:border-brand-700 dark:text-brand-400">{{ 'MANAGE_PROFILES.ACTIONS.BACK' | translate }}</button>
           </div>
 
           <!-- Profile Image -->
           <div>
-            <app-label>Profile Image @if (requiresImage()) { <span class="text-error-500">*</span> }</app-label>
+            <app-label>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.PROFILE_IMAGE' | translate }} @if (requiresImage()) { <span class="text-error-500">*</span> }</app-label>
             <label class="mt-1 flex cursor-pointer items-center justify-between rounded-lg border
                           border-dashed border-brand-300 bg-brand-50/40 px-4 py-3 text-sm text-gray-700
                           hover:bg-brand-50 dark:border-brand-700 dark:bg-brand-900/20 dark:text-gray-300">
-              <span>{{ profileImageName || 'Upload profile image (JPG/PNG)' }}</span>
+              <span>{{ profileImageName || ('MANAGE_PROFILES.CREATE_ACCOUNT.UPLOAD_IMAGE' | translate) }}</span>
               <span class="rounded-md bg-white px-2 py-1 text-xs font-medium text-brand-600
-                           dark:bg-gray-800 dark:text-brand-400">Browse</span>
+                           dark:bg-gray-800 dark:text-brand-400">{{ 'MANAGE_PROFILES.ACTIONS.BROWSE' | translate }}</span>
               <input type="file" accept="image/*" class="hidden" (change)="onImageSelected($event)" />
             </label>
           </div>
@@ -974,12 +973,12 @@
           <!-- Patient fields -->
           @if (isSelectedRole('patient')) {
             <div>
-              <app-label>Primary Doctor <span class="text-error-500">*</span></app-label>
+              <app-label>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.PRIMARY_DOCTOR' | translate }} <span class="text-error-500">*</span></app-label>
               <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
                              text-gray-800 focus:border-brand-300 focus:outline-none
                              dark:border-gray-700 dark:text-white/90"
                 formControlName="primaryDoctor">
-                <option value="" disabled>Select primary doctor</option>
+                <option value="" disabled>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.SELECT_PRIMARY_DOCTOR' | translate }}</option>
                 @for (d of doctors; track d) { <option [value]="d">{{ d }}</option> }
               </select>
               @if (isFieldInvalid('primaryDoctor')) {
@@ -988,8 +987,8 @@
             </div>
 
             <div>
-              <app-label>Date of Birth <span class="text-error-500">*</span></app-label>
-              <app-date-picker id="dob-create" placeholder="Select date of birth"
+              <app-label>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.DATE_OF_BIRTH' | translate }} <span class="text-error-500">*</span></app-label>
+              <app-date-picker id="dob-create" [placeholder]="'MANAGE_PROFILES.CREATE_ACCOUNT.SELECT_DATE_OF_BIRTH' | translate"
                 [defaultDate]="signupForm.get('dateOfBirth')?.value || undefined"
                 [minDate]="minDateOfBirth" [maxDate]="maxDateOfBirth"
                 [themeClass]="'flatpickr-theme-green'"
@@ -1000,12 +999,12 @@
             </div>
             <!-- Assigned Department (doctor) — select, pas de micro -->
               <div class="sm:col-span-2">
-                <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
+                <app-label>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.ASSIGNED_DEPARTMENT' | translate }} <span class="text-error-500">*</span></app-label>
                 <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
                                text-gray-800 focus:border-brand-300 focus:outline-none
                                dark:border-gray-700 dark:text-white/90"
                   formControlName="assignedDepartment">
-                  <option value="" disabled>Select department</option>
+                  <option value="" disabled>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.SELECT_DEPARTMENT' | translate }}</option>
                   @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
                 </select>
               </div>
@@ -1112,12 +1111,12 @@
           <!-- Nurse / Coordinator fields -->
           @if (isSelectedRole('nurse') || isSelectedRole('coordinator')) {
             <div>
-              <app-label>Assigned Department <span class="text-error-500">*</span></app-label>
+              <app-label>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.ASSIGNED_DEPARTMENT' | translate }} <span class="text-error-500">*</span></app-label>
               <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
                              text-gray-800 focus:border-brand-300 focus:outline-none
                              dark:border-gray-700 dark:text-white/90"
                 formControlName="assignedDepartment">
-                <option value="" disabled>Select department</option>
+                <option value="" disabled>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.SELECT_DEPARTMENT' | translate }}</option>
                 @for (d of departments; track d) { <option [value]="d">{{ d }}</option> }
               </select>
             </div>
@@ -1126,12 +1125,12 @@
           <!-- Auditor fields -->
           @if (isSelectedRole('auditor')) {
             <div>
-              <app-label>Audit Scope <span class="text-error-500">*</span></app-label>
+              <app-label>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.AUDIT_SCOPE' | translate }} <span class="text-error-500">*</span></app-label>
               <select class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
                              text-gray-800 focus:border-brand-300 focus:outline-none
                              dark:border-gray-700 dark:text-white/90"
                 formControlName="auditScope">
-                <option value="" disabled>Select audit scope</option>
+                <option value="" disabled>{{ 'MANAGE_PROFILES.CREATE_ACCOUNT.SELECT_AUDIT_SCOPE' | translate }}</option>
                 @for (sc of auditScopes; track sc) { <option [value]="sc">{{ sc }}</option> }
               </select>
             </div>
@@ -1140,7 +1139,7 @@
           <button type="submit"
             class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white
                    transition rounded-lg bg-brand-500 hover:bg-brand-600">
-            Create Account
+            {{ 'MANAGE_PROFILES.ACTIONS.CREATE_ACCOUNT' | translate }}
           </button>
         </form>
       }
@@ -1153,8 +1152,8 @@
                       shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
             <div class="mb-4 flex items-start justify-between">
               <div>
-                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Add Role</h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Enter role name.</p>
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_PROFILES.ROLE_MODAL.TITLE' | translate }}</h2>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'MANAGE_PROFILES.ROLE_MODAL.SUBTITLE' | translate }}</p>
               </div>
               <button type="button" (click)="closeAddRoleModal()"
                 class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200
@@ -1163,11 +1162,11 @@
             </div>
             <form class="space-y-4" (ngSubmit)="submitAddRole()">
               <div>
-                <app-label>Name <span class="text-error-500">*</span></app-label>
+                <app-label>{{ 'MANAGE_PROFILES.FORM.NAME' | translate }} <span class="text-error-500">*</span></app-label>
                 <input class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm
                               text-gray-800 focus:border-brand-300 focus:outline-none
                               dark:border-gray-700 dark:text-white/90"
-                  type="text" placeholder="Role name"
+                  type="text" [placeholder]="'MANAGE_PROFILES.ROLE_MODAL.PLACEHOLDER' | translate"
                   [(ngModel)]="newRoleName" name="newRoleName" required />
                 @if (addRoleError) {
                   <p class="mt-2 text-sm text-error-500">{{ addRoleError }}</p>
@@ -1176,11 +1175,11 @@
               <div class="flex items-center justify-end gap-2 pt-2">
                 <button type="button" (click)="closeAddRoleModal()"
                   class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium
-                         text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+                         text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">{{ 'MANAGE_PROFILES.ACTIONS.CANCEL' | translate }}</button>
                 <button type="submit" [disabled]="isAddingRole"
                   class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white
                          hover:bg-brand-600 disabled:opacity-50">
-                  {{ isAddingRole ? 'Saving...' : 'Add' }}
+                  {{ isAddingRole ? ('MANAGE_PROFILES.ACTIONS.SAVING' | translate) : ('MANAGE_PROFILES.ACTIONS.ADD' | translate) }}
                 </button>
               </div>
             </form>

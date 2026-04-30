@@ -10,7 +10,8 @@ import { SuggestionsService } from '../../../../services/suggestion/suggestion.s
 @Component({
   selector: 'app-symptoms-details',
   templateUrl: './symptoms-details.component.html',
-  styleUrl: './symptoms-details.component.css'
+  styleUrl: './symptoms-details.component.css',
+  
 })
 export class SymptomsDetailsComponent implements OnInit {
   response: NurseSymptomsResponse | null = null;

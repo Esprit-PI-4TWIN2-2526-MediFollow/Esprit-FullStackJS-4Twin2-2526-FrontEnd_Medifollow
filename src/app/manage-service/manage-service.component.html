@@ -1,7 +1,7 @@
 <!-- ===== TOAST ===== -->
 @if (toastMessage()) {
   <div class="toast" [class.toast--error]="toastMessage()!.type === 'error'">
-    <span class="toast__icon">{{ toastMessage()!.type === 'success' ? '✓' : '✕' }}</span>
+    <span class="toast__icon">{{ toastMessage()!.type === 'success' ? 'âœ“' : 'âœ•' }}</span>
     {{ toastMessage()!.text }}
   </div>
 }
@@ -12,21 +12,21 @@
   <!-- HEADER -->
   <header class="page-header">
     <div class="page-header__left">
-      <h1 class="page-header__title">Services</h1>
-      <p class="page-header__sub">Manage all your medical services</p>
+      <h1 class="page-header__title">{{ 'MANAGE_SERVICES.HEADER.TITLE' | translate }}</h1>
+      <p class="page-header__sub">{{ 'MANAGE_SERVICES.HEADER.SUBTITLE' | translate }}</p>
     </div>
     <div class="page-header__actions">
       <button class="btn btn--ai" (click)="openAiModal()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
         </svg>
-        Generate with AI
+        {{ 'MANAGE_SERVICES.HEADER.GENERATE_WITH_AI' | translate }}
       </button>
       <button class="btn btn--primary" (click)="openCreateModal()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
-        New Service
+        {{ 'MANAGE_SERVICES.HEADER.NEW_SERVICE' | translate }}
       </button>
     </div>
   </header>
@@ -35,19 +35,19 @@
   <div class="stats-strip">
     <div class="stat-card stat-card--teal">
       <div class="stat-card__value">{{ stats().total }}</div>
-      <div class="stat-card__label">Total</div>
+      <div class="stat-card__label">{{ 'MANAGE_SERVICES.STATS.TOTAL' | translate }}</div>
     </div>
     <div class="stat-card stat-card--green">
       <div class="stat-card__value">{{ stats().active }}</div>
-      <div class="stat-card__label">Active</div>
+      <div class="stat-card__label">{{ 'MANAGE_SERVICES.STATS.ACTIVE' | translate }}</div>
     </div>
     <div class="stat-card stat-card--gray">
       <div class="stat-card__value">{{ stats().inactive }}</div>
-      <div class="stat-card__label">Inactive</div>
+      <div class="stat-card__label">{{ 'MANAGE_SERVICES.STATS.INACTIVE' | translate }}</div>
     </div>
     <div class="stat-card stat-card--red">
       <div class="stat-card__value">{{ stats().emergency }}</div>
-      <div class="stat-card__label">Emergency</div>
+      <div class="stat-card__label">{{ 'MANAGE_SERVICES.STATS.EMERGENCY' | translate }}</div>
     </div>
   </div>
 
@@ -57,22 +57,22 @@
       <svg class="search-box__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
-      <input class="search-box__input" type="text" placeholder="Search by name, type, location…"
+      <input class="search-box__input" type="text" [placeholder]="'MANAGE_SERVICES.FILTERS.SEARCH_PLACEHOLDER' | translate"
         [value]="searchQuery()" (input)="onSearch($any($event.target).value)" />
     </div>
     <div class="filter-tabs">
-      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ALL'"      (click)="setFilter('ALL')">All</button>
-      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ACTIVE'"   (click)="setFilter('ACTIVE')">Active</button>
-      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'INACTIVE'" (click)="setFilter('INACTIVE')">Inactive</button>
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ALL'" (click)="setFilter('ALL')">{{ 'MANAGE_SERVICES.FILTERS.ALL' | translate }}</button>
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'ACTIVE'" (click)="setFilter('ACTIVE')">{{ 'MANAGE_SERVICES.FILTERS.ACTIVE' | translate }}</button>
+      <button class="filter-tab" [class.filter-tab--active]="filterStatus() === 'INACTIVE'" (click)="setFilter('INACTIVE')">{{ 'MANAGE_SERVICES.FILTERS.INACTIVE' | translate }}</button>
     </div>
     <div class="view-toggle">
-      <button class="view-btn" [class.view-btn--active]="viewMode() === 'grid'" (click)="setView('grid')" title="Grid view">
+      <button class="view-btn" [class.view-btn--active]="viewMode() === 'grid'" (click)="setView('grid')" [title]="'MANAGE_SERVICES.VIEW.GRID' | translate">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
           <rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
         </svg>
       </button>
-      <button class="view-btn" [class.view-btn--active]="viewMode() === 'list'" (click)="setView('list')" title="List view">
+      <button class="view-btn" [class.view-btn--active]="viewMode() === 'list'" (click)="setView('list')" [title]="'MANAGE_SERVICES.VIEW.LIST' | translate">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
         </svg>
@@ -82,7 +82,7 @@
 
   <!-- LOADING -->
   @if (loading()) {
-    <div class="loading-state"><div class="spinner"></div><p>Loading services…</p></div>
+    <div class="loading-state"><div class="spinner"></div><p>{{ 'MANAGE_SERVICES.COMMON.LOADING' | translate }}</p></div>
   }
 
   <!-- ERROR -->
@@ -90,22 +90,22 @@
     <div class="error-state">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <p>{{ error() }}</p>
-      <button class="btn btn--secondary" (click)="loadServices()">Retry</button>
+      <button class="btn btn--secondary" (click)="loadServices()">{{ 'MANAGE_SERVICES.ACTIONS.RETRY' | translate }}</button>
     </div>
   }
 
   <!-- EMPTY -->
   @if (!loading() && !error() && filteredServices().length === 0) {
     <div class="empty-state">
-      <div class="empty-state__icon">🏥</div>
-      <h3>No services found</h3>
-      <p>Create your first service or let the AI help you</p>
+      <div class="empty-state__icon">ðŸ¥</div>
+      <h3>{{ 'MANAGE_SERVICES.EMPTY.TITLE' | translate }}</h3>
+      <p>{{ 'MANAGE_SERVICES.EMPTY.SUBTITLE' | translate }}</p>
       <div class="empty-state__actions">
         <button class="btn btn--ai" (click)="openAiModal()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-          Generate with AI
+          {{ 'MANAGE_SERVICES.HEADER.GENERATE_WITH_AI' | translate }}
         </button>
-        <button class="btn btn--primary" (click)="openCreateModal()">Create manually</button>
+        <button class="btn btn--primary" (click)="openCreateModal()">{{ 'MANAGE_SERVICES.EMPTY.CREATE_MANUALLY' | translate }}</button>
       </div>
     </div>
   }
@@ -116,10 +116,10 @@
       @for (service of filteredServices(); track service._id) {
         <div class="service-card" [class.service-card--inactive]="service.statut === 'INACTIF'">
           <div class="service-card__header">
-            <div class="service-card__type-badge">{{ service.type || 'N/A' }}</div>
-            @if (service.estUrgence) { <div class="urgence-badge">🚨 Emergency</div> }
+            <div class="service-card__type-badge">{{ serviceTypeLabel(service.type) }}</div>
+            @if (service.estUrgence) { <div class="urgence-badge">{{ 'MANAGE_SERVICES.STATUS.EMERGENCY' | translate }}</div> }
             <div class="service-card__status" [class.service-card__status--active]="service.statut === 'ACTIF'">
-              {{ service.statut === 'ACTIF' ? 'Active' : 'Inactive' }}
+              {{ statusLabel(service.statut) }}
             </div>
           </div>
           <div class="service-card__body">
@@ -135,24 +135,24 @@
               @if (service.capacite) {
                 <div class="meta-item">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                  {{ service.capacite }} beds
+                  {{ service.capacite }} {{ 'MANAGE_SERVICES.COMMON.BEDS' | translate }}
                 </div>
               }
               @if (service.tempsAttenteMoyen) {
                 <div class="meta-item">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  {{ service.tempsAttenteMoyen }} min
+                  {{ service.tempsAttenteMoyen }} {{ 'MANAGE_SERVICES.COMMON.MINUTES_SHORT' | translate }}
                 </div>
               }
             </div>
           </div>
           <div class="service-card__footer">
-            <button class="icon-btn icon-btn--view"  (click)="openViewModal(service)" title="View"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-            <button class="icon-btn icon-btn--edit"  (click)="openEditModal(service)" title="Edit"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-            <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut==='ACTIF'" [class.icon-btn--toggle-on]="service.statut==='INACTIF'" (click)="toggleStatus(service)" [title]="service.statut==='ACTIF'?'Deactivate':'Activate'">
+            <button class="icon-btn icon-btn--view" (click)="openViewModal(service)" [title]="'MANAGE_SERVICES.ACTIONS.VIEW' | translate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+            <button class="icon-btn icon-btn--edit" (click)="openEditModal(service)" [title]="'MANAGE_SERVICES.ACTIONS.EDIT' | translate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+            <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut==='ACTIF'" [class.icon-btn--toggle-on]="service.statut==='INACTIF'" (click)="toggleStatus(service)" [title]="service.statut==='ACTIF' ? ('MANAGE_SERVICES.ACTIONS.DEACTIVATE' | translate) : ('MANAGE_SERVICES.ACTIONS.ACTIVATE' | translate)">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut==='ACTIF'?'16':'8'" cy="12" r="3" fill="currentColor"/></svg>
             </button>
-            <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)" title="Delete"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+            <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)" [title]="'MANAGE_SERVICES.ACTIONS.DELETE' | translate"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
           </div>
         </div>
       }
@@ -164,27 +164,27 @@
     <div class="services-table-wrap">
       <table class="services-table">
         <thead>
-          <tr><th>Name</th><th>Type</th><th>Location</th><th>Capacity</th><th>Avg. Wait</th><th>Status</th><th>Actions</th></tr>
+          <tr><th>{{ 'MANAGE_SERVICES.TABLE.NAME' | translate }}</th><th>{{ 'MANAGE_SERVICES.TABLE.TYPE' | translate }}</th><th>{{ 'MANAGE_SERVICES.TABLE.LOCATION' | translate }}</th><th>{{ 'MANAGE_SERVICES.TABLE.CAPACITY' | translate }}</th><th>{{ 'MANAGE_SERVICES.TABLE.AVG_WAIT' | translate }}</th><th>{{ 'MANAGE_SERVICES.TABLE.STATUS' | translate }}</th><th>{{ 'MANAGE_SERVICES.TABLE.ACTIONS' | translate }}</th></tr>
         </thead>
         <tbody>
           @for (service of filteredServices(); track service._id) {
             <tr class="table-row" [class.table-row--inactive]="service.statut === 'INACTIF'">
-              <td><div class="table-name">{{ service.nom }} @if (service.estUrgence) { <span title="Emergency">🚨</span> }</div></td>
-              <td><span class="type-pill">{{ service.type || '—' }}</span></td>
-              <td>{{ service.localisation || '—' }}</td>
-              <td>{{ service.capacite || '—' }}</td>
-              <td>{{ service.tempsAttenteMoyen ? service.tempsAttenteMoyen + ' min' : '—' }}</td>
+              <td><div class="table-name">{{ service.nom }} @if (service.estUrgence) { <span [title]="'MANAGE_SERVICES.STATUS.EMERGENCY' | translate">ðŸš¨</span> }</div></td>
+              <td><span class="type-pill">{{ serviceTypeLabel(service.type) }}</span></td>
+              <td>{{ service.localisation || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</td>
+              <td>{{ service.capacite || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</td>
+              <td>{{ service.tempsAttenteMoyen ? service.tempsAttenteMoyen + ' ' + ('MANAGE_SERVICES.COMMON.MINUTES_SHORT' | translate) : ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</td>
               <td>
                 <span class="status-chip" [class.status-chip--active]="service.statut === 'ACTIF'">
-                  {{ service.statut === 'ACTIF' ? 'Active' : 'Inactive' }}
+                  {{ statusLabel(service.statut) }}
                 </span>
               </td>
               <td>
                 <div class="table-actions">
-                  <button class="icon-btn icon-btn--view"  (click)="openViewModal(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                  <button class="icon-btn icon-btn--edit"  (click)="openEditModal(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                  <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut==='ACTIF'" [class.icon-btn--toggle-on]="service.statut==='INACTIF'" (click)="toggleStatus(service)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut==='ACTIF'?'16':'8'" cy="12" r="3" fill="currentColor"/></svg></button>
-                  <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
+                  <button class="icon-btn icon-btn--view" (click)="openViewModal(service)" [title]="'MANAGE_SERVICES.ACTIONS.VIEW' | translate"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                  <button class="icon-btn icon-btn--edit" (click)="openEditModal(service)" [title]="'MANAGE_SERVICES.ACTIONS.EDIT' | translate"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                  <button class="icon-btn" [class.icon-btn--toggle-off]="service.statut==='ACTIF'" [class.icon-btn--toggle-on]="service.statut==='INACTIF'" (click)="toggleStatus(service)" [title]="service.statut==='ACTIF' ? ('MANAGE_SERVICES.ACTIONS.DEACTIVATE' | translate) : ('MANAGE_SERVICES.ACTIONS.ACTIVATE' | translate)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="5" width="22" height="14" rx="7"/><circle [attr.cx]="service.statut==='ACTIF'?'16':'8'" cy="12" r="3" fill="currentColor"/></svg></button>
+                  <button class="icon-btn icon-btn--delete" (click)="confirmDelete(service._id!)" [title]="'MANAGE_SERVICES.ACTIONS.DELETE' | translate"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></button>
                 </div>
               </td>
             </tr>
@@ -195,7 +195,7 @@
   }
 </div>
 
-<!-- ═══════════════════════ AI MODAL ═══════════════════════ -->
+<!-- AI MODAL -->
 @if (showAiModal()) {
   <div class="modal-backdrop" (click)="closeAiModal()">
     <div class="modal modal--ai" (click)="$event.stopPropagation()">
@@ -207,8 +207,8 @@
             </svg>
           </div>
           <div>
-            <h2>Generate with AI</h2>
-            <p class="ai-modal-sub">Describe the service — AI fills the entire form</p>
+            <h2>{{ 'MANAGE_SERVICES.AI.TITLE' | translate }}</h2>
+            <p class="ai-modal-sub">{{ 'MANAGE_SERVICES.AI.SUBTITLE' | translate }}</p>
           </div>
         </div>
         <button class="modal__close" (click)="closeAiModal()">
@@ -217,20 +217,20 @@
       </div>
       <div class="modal__body">
         <div class="ai-stepper">
-          <div class="ai-stepper__step"><div class="ai-stepper__num">1</div><span>Describe</span></div>
-          <span class="ai-stepper__arrow">→</span>
-          <div class="ai-stepper__step"><div class="ai-stepper__num ai-stepper__num--inactive">2</div><span class="ai-stepper__label--muted">Review</span></div>
-          <span class="ai-stepper__arrow">→</span>
-          <div class="ai-stepper__step"><div class="ai-stepper__num ai-stepper__num--inactive">3</div><span class="ai-stepper__label--muted">Save</span></div>
+          <div class="ai-stepper__step"><div class="ai-stepper__num">1</div><span>{{ 'MANAGE_SERVICES.AI.STEPS.DESCRIBE' | translate }}</span></div>
+          <span class="ai-stepper__arrow">â†’</span>
+          <div class="ai-stepper__step"><div class="ai-stepper__num ai-stepper__num--inactive">2</div><span class="ai-stepper__label--muted">{{ 'MANAGE_SERVICES.AI.STEPS.REVIEW' | translate }}</span></div>
+          <span class="ai-stepper__arrow">â†’</span>
+          <div class="ai-stepper__step"><div class="ai-stepper__num ai-stepper__num--inactive">3</div><span class="ai-stepper__label--muted">{{ 'MANAGE_SERVICES.AI.STEPS.SAVE' | translate }}</span></div>
         </div>
         <div class="form-field">
-          <label class="form-label">Your description <span class="required">*</span></label>
+          <label class="form-label">{{ 'MANAGE_SERVICES.AI.DESCRIPTION_LABEL' | translate }} <span class="required">*</span></label>
           <textarea class="form-input form-textarea ai-textarea" rows="4"
-            placeholder="Ex: Neurology unit on the 4th floor, 15 beds, open Monday to Friday…"
+            [placeholder]="'MANAGE_SERVICES.AI.DESCRIPTION_PLACEHOLDER' | translate"
             [value]="aiDescription()"
             (input)="aiDescription.set($any($event.target).value)"></textarea>
           <div class="ai-textarea-hints">
-            <span class="ai-hint">One word is enough — AI fills the rest</span>
+            <span class="ai-hint">{{ 'MANAGE_SERVICES.AI.DESCRIPTION_HINT' | translate }}</span>
             <span class="ai-char-count">{{ aiDescription().length }} / 500</span>
           </div>
         </div>
@@ -244,16 +244,16 @@
       <div class="modal__footer ai-modal__footer">
         <span class="ai-footer-tip">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          You can edit the form before saving
+          {{ 'MANAGE_SERVICES.AI.FOOTER_TIP' | translate }}
         </span>
         <div class="ai-footer-actions">
-          <button class="btn btn--secondary" (click)="closeAiModal()" [disabled]="aiLoading()">Cancel</button>
+          <button class="btn btn--secondary" (click)="closeAiModal()" [disabled]="aiLoading()">{{ 'MANAGE_SERVICES.ACTIONS.CANCEL' | translate }}</button>
           <button class="btn btn--ai" (click)="generateWithAI()" [disabled]="aiLoading() || !aiDescription().trim()">
             @if (aiLoading()) {
-              <span class="ai-spinner"></span> Generating…
+              <span class="ai-spinner"></span> {{ 'MANAGE_SERVICES.AI.GENERATING' | translate }}
             } @else {
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              Generate form
+              {{ 'MANAGE_SERVICES.AI.GENERATE_FORM' | translate }}
             }
           </button>
         </div>
@@ -262,20 +262,20 @@
   </div>
 }
 
-<!-- ═══════════════════ CREATE / EDIT MODAL (3 STEPS) ═══════════════════ -->
+<!-- CREATE / EDIT MODAL (3 STEPS) -->
 @if (showModal() && modalMode() !== 'view') {
   <div class="modal-backdrop" (click)="closeModal()">
     <div class="modal modal--steps" (click)="$event.stopPropagation()">
 
       <div class="modal__header modal__header--steps">
         <div class="step-header">
-          <h2>{{ modalMode() === 'create' ? 'New Service' : 'Edit Service' }}</h2>
+          <h2>{{ modalMode() === 'create' ? ('MANAGE_SERVICES.MODAL.NEW_TITLE' | translate) : ('MANAGE_SERVICES.MODAL.EDIT_TITLE' | translate) }}</h2>
 
           <div class="step-progress">
             <div class="step-progress__bar">
               <div class="step-progress__fill" [style.width.%]="(currentStep() / 3) * 100"></div>
             </div>
-            <span class="step-progress__label">Step {{ currentStep() }} of 3</span>
+            <span class="step-progress__label">{{ 'MANAGE_SERVICES.MODAL.STEP_OF' | translate:{ step: currentStep(), total: 3 } }}</span>
           </div>
 
           <div class="step-pills">
@@ -285,7 +285,7 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 } @else { 1 }
               </div>
-              <span>General Info</span>
+              <span>{{ 'MANAGE_SERVICES.MODAL.STEPS.GENERAL_INFO' | translate }}</span>
             </div>
             <div class="step-pill__connector" [class.step-pill__connector--done]="currentStep() > 1"></div>
             <div class="step-pill" [class.step-pill--active]="currentStep() === 2" [class.step-pill--done]="currentStep() > 2" (click)="currentStep() > 1 && goToStep(2)">
@@ -294,12 +294,12 @@
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 } @else { 2 }
               </div>
-              <span>Contact & Config</span>
+              <span>{{ 'MANAGE_SERVICES.MODAL.STEPS.CONTACT_CONFIG' | translate }}</span>
             </div>
             <div class="step-pill__connector" [class.step-pill__connector--done]="currentStep() > 2"></div>
             <div class="step-pill" [class.step-pill--active]="currentStep() === 3" (click)="currentStep() > 2 && goToStep(3)">
               <div class="step-pill__num">3</div>
-              <span>Schedule</span>
+              <span>{{ 'MANAGE_SERVICES.MODAL.STEPS.SCHEDULE' | translate }}</span>
             </div>
           </div>
         </div>
@@ -315,45 +315,45 @@
           <div class="modal__body step-body">
             <div class="step-section-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-              General Information
+              {{ 'MANAGE_SERVICES.FORM.SECTIONS.GENERAL_INFORMATION' | translate }}
             </div>
             <div class="form-grid">
               <div class="form-field form-field--full">
-                <label class="form-label">Service name <span class="required">*</span></label>
-                <input class="form-input" formControlName="nom" placeholder="e.g. Cardiology, Pediatric Emergency…"
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.NAME' | translate }} <span class="required">*</span></label>
+                <input class="form-input" formControlName="nom" [placeholder]="'MANAGE_SERVICES.FORM.NAME_PLACEHOLDER' | translate"
                   [class.form-input--error]="form.get('nom')?.invalid && form.get('nom')?.touched" />
                 @if (form.get('nom')?.invalid && form.get('nom')?.touched) {
-                  <span class="form-error">Service name is required (min. 2 characters)</span>
+                  <span class="form-error">{{ 'MANAGE_SERVICES.FORM.ERRORS.NAME_REQUIRED' | translate }}</span>
                 }
               </div>
               <div class="form-field form-field--full">
-                <label class="form-label">Description</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.DESCRIPTION' | translate }}</label>
                 <textarea class="form-input form-textarea" formControlName="description"
-                  placeholder="Professional description of the service…" rows="3"></textarea>
+                  [placeholder]="'MANAGE_SERVICES.FORM.DESCRIPTION_PLACEHOLDER' | translate" rows="3"></textarea>
               </div>
               <div class="form-field">
-                <label class="form-label">Service type</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.TYPE' | translate }}</label>
                 <select class="form-input form-select" formControlName="type">
-                  <option value="">Select a type…</option>
-                  @for (t of SERVICE_TYPES; track t) { <option [value]="t">{{ t }}</option> }
+                  <option value="">{{ 'MANAGE_SERVICES.FORM.SELECT_TYPE' | translate }}</option>
+                  @for (t of SERVICE_TYPES; track t) { <option [value]="t">{{ serviceTypeLabel(t) }}</option> }
                 </select>
               </div>
               <div class="form-field">
-                <label class="form-label">Location</label>
-                <input class="form-input" formControlName="localisation" placeholder="e.g. Building A - 2nd floor" />
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.LOCATION' | translate }}</label>
+                <input class="form-input" formControlName="localisation" [placeholder]="'MANAGE_SERVICES.FORM.LOCATION_PLACEHOLDER' | translate" />
               </div>
               <div class="form-field">
-                <label class="form-label">Status</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.STATUS' | translate }}</label>
                 <select class="form-input form-select" formControlName="statut">
-                  <option value="ACTIF">Active</option>
-                  <option value="INACTIF">Inactive</option>
+                  <option value="ACTIF">{{ 'MANAGE_SERVICES.STATUS.ACTIVE' | translate }}</option>
+                  <option value="INACTIF">{{ 'MANAGE_SERVICES.STATUS.INACTIVE' | translate }}</option>
                 </select>
               </div>
               <div class="form-field form-field--checkbox">
                 <label class="checkbox-label">
                   <input type="checkbox" formControlName="estUrgence" class="checkbox-input" />
                   <span class="checkbox-custom"></span>
-                  Emergency service
+                  {{ 'MANAGE_SERVICES.FORM.EMERGENCY_SERVICE' | translate }}
                 </label>
               </div>
             </div>
@@ -365,38 +365,38 @@
           <div class="modal__body step-body">
             <div class="step-section-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.6 3.38 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.54a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/></svg>
-              Contact & Configuration
+              {{ 'MANAGE_SERVICES.FORM.SECTIONS.CONTACT_CONFIGURATION' | translate }}
             </div>
             <div class="form-grid">
               <div class="form-field">
-                <label class="form-label">Phone</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.PHONE' | translate }}</label>
                 <input class="form-input" formControlName="telephone" placeholder="+216 71 234 567" />
               </div>
               <div class="form-field">
-                <label class="form-label">Email</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.EMAIL' | translate }}</label>
                 <input class="form-input" formControlName="email" type="email" placeholder="service@hospital.tn"
                   [class.form-input--error]="form.get('email')?.invalid && form.get('email')?.touched" />
                 @if (form.get('email')?.invalid && form.get('email')?.touched) {
-                  <span class="form-error">Invalid email address</span>
+                  <span class="form-error">{{ 'MANAGE_SERVICES.FORM.ERRORS.INVALID_EMAIL' | translate }}</span>
                 }
               </div>
               <div class="form-field">
-                <label class="form-label">Capacity (patients / beds)</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.CAPACITY' | translate }}</label>
                 <div class="input-with-unit">
                   <input class="form-input" formControlName="capacite" type="number" min="0" placeholder="0" />
-                  <span class="input-unit">beds</span>
+                  <span class="input-unit">{{ 'MANAGE_SERVICES.COMMON.BEDS' | translate }}</span>
                 </div>
               </div>
               <div class="form-field">
-                <label class="form-label">Average waiting time</label>
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.AVERAGE_WAITING_TIME' | translate }}</label>
                 <div class="input-with-unit">
                   <input class="form-input" formControlName="tempsAttenteMoyen" type="number" min="0" placeholder="0" />
-                  <span class="input-unit">min</span>
+                  <span class="input-unit">{{ 'MANAGE_SERVICES.COMMON.MINUTES_SHORT' | translate }}</span>
                 </div>
               </div>
               <div class="form-field form-field--full">
-                <label class="form-label">Manager ID</label>
-                <input class="form-input" formControlName="responsableId" placeholder="Service manager identifier" />
+                <label class="form-label">{{ 'MANAGE_SERVICES.FORM.MANAGER_ID' | translate }}</label>
+                <input class="form-input" formControlName="responsableId" [placeholder]="'MANAGE_SERVICES.FORM.MANAGER_ID_PLACEHOLDER' | translate" />
               </div>
             </div>
           </div>
@@ -407,35 +407,35 @@
           <div class="modal__body step-body">
             <div class="step-section-title">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              Opening Hours
+              {{ 'MANAGE_SERVICES.SCHEDULE.TITLE' | translate }}
             </div>
             <div class="horaires-presets">
-              <p class="horaires-presets__label">Apply a template:</p>
+              <p class="horaires-presets__label">{{ 'MANAGE_SERVICES.SCHEDULE.APPLY_TEMPLATE' | translate }}</p>
               <div class="horaires-presets__list">
-                <button type="button" class="preset-chip" (click)="applyPreset('weekdays')">Mon–Fri 8am–5pm</button>
-                <button type="button" class="preset-chip" (click)="applyPreset('extended')">Mon–Sat 7:30am–4pm</button>
-                <button type="button" class="preset-chip" (click)="applyPreset('24h')">24/7</button>
-                <button type="button" class="preset-chip" (click)="applyPreset('pharmacy')">Daily 8am–8pm</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('weekdays')">{{ 'MANAGE_SERVICES.SCHEDULE.PRESETS.WEEKDAYS' | translate }}</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('extended')">{{ 'MANAGE_SERVICES.SCHEDULE.PRESETS.EXTENDED' | translate }}</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('24h')">{{ 'MANAGE_SERVICES.SCHEDULE.PRESETS.ALL_DAY' | translate }}</button>
+                <button type="button" class="preset-chip" (click)="applyPreset('pharmacy')">{{ 'MANAGE_SERVICES.SCHEDULE.PRESETS.PHARMACY' | translate }}</button>
               </div>
             </div>
             <div class="horaires-section" formArrayName="horaires">
               <div class="horaires-list-header">
-                <span class="horaires-count">{{ horairesArray.length }} schedule(s)</span>
-                <button type="button" class="btn-link" (click)="addHoraire()">+ Add a day</button>
+                <span class="horaires-count">{{ 'MANAGE_SERVICES.SCHEDULE.COUNT' | translate:{ count: horairesArray.length } }}</span>
+                <button type="button" class="btn-link" (click)="addHoraire()">{{ 'MANAGE_SERVICES.SCHEDULE.ADD_DAY' | translate }}</button>
               </div>
               @if (horairesArray.length === 0) {
                 <div class="horaires-empty">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  <p>No schedule defined — use a template or add manually</p>
+                  <p>{{ 'MANAGE_SERVICES.SCHEDULE.EMPTY' | translate }}</p>
                 </div>
               }
               @for (h of horairesArray.controls; track $index; let i = $index) {
                 <div class="horaire-row" [formGroupName]="i">
                   <select class="form-input form-select" formControlName="jour">
-                    @for (j of DAYS; track j) { <option [value]="j">{{ j }}</option> }
+                    @for (j of DAYS; track j) { <option [value]="j">{{ dayLabel(j) }}</option> }
                   </select>
                   <input class="form-input" formControlName="ouverture" type="time" />
-                  <span class="horaire-sep">→</span>
+                  <span class="horaire-sep">â†’</span>
                   <input class="form-input" formControlName="fermeture" type="time" />
                   <button type="button" class="icon-btn icon-btn--delete" (click)="removeHoraire(i)">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -452,22 +452,22 @@
             @if (currentStep() > 1) {
               <button type="button" class="btn btn--secondary" (click)="prevStep()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-                Previous
+                {{ 'MANAGE_SERVICES.ACTIONS.PREVIOUS' | translate }}
               </button>
             } @else {
-              <button type="button" class="btn btn--secondary" (click)="closeModal()">Cancel</button>
+              <button type="button" class="btn btn--secondary" (click)="closeModal()">{{ 'MANAGE_SERVICES.ACTIONS.CANCEL' | translate }}</button>
             }
           </div>
           <div class="step-footer__right">
             @if (currentStep() < 3) {
               <button type="button" class="btn btn--primary" (click)="nextStep()">
-                Next
+                {{ 'MANAGE_SERVICES.ACTIONS.NEXT' | translate }}
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
               </button>
             } @else {
               <button type="submit" class="btn btn--primary">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-                {{ modalMode() === 'create' ? 'Create Service' : 'Save Changes' }}
+                {{ modalMode() === 'create' ? ('MANAGE_SERVICES.ACTIONS.CREATE_SERVICE' | translate) : ('MANAGE_SERVICES.ACTIONS.SAVE_CHANGES' | translate) }}
               </button>
             }
           </div>
@@ -489,35 +489,35 @@
       </div>
       <div class="modal__body">
         <div class="view-header">
-          <span class="type-pill">{{ selectedService()!.type || 'N/A' }}</span>
+          <span class="type-pill">{{ serviceTypeLabel(selectedService()!.type) }}</span>
           <span class="status-chip" [class.status-chip--active]="selectedService()!.statut === 'ACTIF'">
-            {{ selectedService()!.statut === 'ACTIF' ? 'Active' : 'Inactive' }}
+            {{ statusLabel(selectedService()!.statut) }}
           </span>
-          @if (selectedService()!.estUrgence) { <span class="urgence-badge">🚨 Emergency</span> }
+          @if (selectedService()!.estUrgence) { <span class="urgence-badge">ðŸš¨ {{ 'MANAGE_SERVICES.STATUS.EMERGENCY' | translate }}</span> }
         </div>
         @if (selectedService()!.description) { <p class="view-description">{{ selectedService()!.description }}</p> }
         <div class="view-grid">
-          <div class="view-item"><span class="view-item__label">Location</span><span class="view-item__value">{{ selectedService()!.localisation || '—' }}</span></div>
-          <div class="view-item"><span class="view-item__label">Phone</span><span class="view-item__value">{{ selectedService()!.telephone || '—' }}</span></div>
-          <div class="view-item"><span class="view-item__label">Email</span><span class="view-item__value">{{ selectedService()!.email || '—' }}</span></div>
-          <div class="view-item"><span class="view-item__label">Capacity</span><span class="view-item__value">{{ selectedService()!.capacite || '—' }}</span></div>
-          <div class="view-item"><span class="view-item__label">Avg. Wait</span><span class="view-item__value">{{ selectedService()!.tempsAttenteMoyen ? selectedService()!.tempsAttenteMoyen + ' min' : '—' }}</span></div>
-          <div class="view-item"><span class="view-item__label">Manager</span><span class="view-item__value">{{ selectedService()!.responsableId || '—' }}</span></div>
+          <div class="view-item"><span class="view-item__label">{{ 'MANAGE_SERVICES.VIEW_MODAL.LOCATION' | translate }}</span><span class="view-item__value">{{ selectedService()!.localisation || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</span></div>
+          <div class="view-item"><span class="view-item__label">{{ 'MANAGE_SERVICES.VIEW_MODAL.PHONE' | translate }}</span><span class="view-item__value">{{ selectedService()!.telephone || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</span></div>
+          <div class="view-item"><span class="view-item__label">{{ 'MANAGE_SERVICES.VIEW_MODAL.EMAIL' | translate }}</span><span class="view-item__value">{{ selectedService()!.email || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</span></div>
+          <div class="view-item"><span class="view-item__label">{{ 'MANAGE_SERVICES.VIEW_MODAL.CAPACITY' | translate }}</span><span class="view-item__value">{{ selectedService()!.capacite || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</span></div>
+          <div class="view-item"><span class="view-item__label">{{ 'MANAGE_SERVICES.VIEW_MODAL.AVG_WAIT' | translate }}</span><span class="view-item__value">{{ selectedService()!.tempsAttenteMoyen ? selectedService()!.tempsAttenteMoyen + ' ' + ('MANAGE_SERVICES.COMMON.MINUTES_SHORT' | translate) : ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</span></div>
+          <div class="view-item"><span class="view-item__label">{{ 'MANAGE_SERVICES.VIEW_MODAL.MANAGER' | translate }}</span><span class="view-item__value">{{ selectedService()!.responsableId || ('MANAGE_SERVICES.COMMON.NOT_AVAILABLE' | translate) }}</span></div>
         </div>
         @if (selectedService()!.horaires && selectedService()!.horaires.length) {
           <div class="view-horaires">
-            <h4>Opening Hours</h4>
+            <h4>{{ 'MANAGE_SERVICES.VIEW_MODAL.OPENING_HOURS' | translate }}</h4>
             <div class="horaires-list">
               @for (h of selectedService()!.horaires; track $index) {
-                <div class="horaire-chip"><strong>{{ h.jour }}</strong> {{ h.ouverture }} – {{ h.fermeture }}</div>
+                <div class="horaire-chip"><strong>{{ dayLabel(h.jour) }}</strong> {{ h.ouverture }} â€“ {{ h.fermeture }}</div>
               }
             </div>
           </div>
         }
       </div>
       <div class="modal__footer">
-        <button class="btn btn--secondary" (click)="closeModal()">Close</button>
-        <button class="btn btn--primary" (click)="openEditModal(selectedService()!)">Edit</button>
+        <button class="btn btn--secondary" (click)="closeModal()">{{ 'MANAGE_SERVICES.ACTIONS.CLOSE' | translate }}</button>
+        <button class="btn btn--primary" (click)="openEditModal(selectedService()!)">{{ 'MANAGE_SERVICES.ACTIONS.EDIT' | translate }}</button>
       </div>
     </div>
   </div>
@@ -536,11 +536,11 @@
 	<path d="M 35.216 78.235 c -2.209 0 -4 -1.791 -4 -4 V 44.976 c 0 -2.209 1.791 -4 4 -4 s 4 1.791 4 4 v 29.259 C 39.216 76.444 37.425 78.235 35.216 78.235 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round"/>
 </g>
 </svg></div>
-      <h3>Delete this service?</h3>
-      <p>This action cannot be undone.</p>
+      <h3>{{ 'MANAGE_SERVICES.DELETE_MODAL.TITLE' | translate }}</h3>
+      <p>{{ 'MANAGE_SERVICES.DELETE_MODAL.SUBTITLE' | translate }}</p>
       <div class="confirm-dialog__actions">
-        <button class="btn btn--secondary" (click)="showDeleteConfirm.set(false)">Cancel</button>
-        <button class="btn btn--danger" (click)="deleteService()">Delete</button>
+        <button class="btn btn--secondary" (click)="showDeleteConfirm.set(false)">{{ 'MANAGE_SERVICES.ACTIONS.CANCEL' | translate }}</button>
+        <button class="btn btn--danger" (click)="deleteService()">{{ 'MANAGE_SERVICES.ACTIONS.DELETE' | translate }}</button>
       </div>
     </div>
   </div>

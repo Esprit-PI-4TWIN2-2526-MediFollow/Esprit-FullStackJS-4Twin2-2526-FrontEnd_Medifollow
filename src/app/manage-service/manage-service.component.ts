@@ -4,6 +4,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil } from 'rxjs';
 import { Service, ServiceManagementService } from '../services/service/service-management.service';
 
@@ -19,6 +20,7 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private svc = inject(ServiceManagementService);
   private fb = inject(FormBuilder);
+  private translate = inject(TranslateService);
 
 
   services = signal<Service[]>([]);
@@ -113,6 +115,45 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     this.horairesArray.removeAt(i);
   }
 
+  t(key: string, params?: Record<string, unknown>): string {
+    return this.translate.instant(key, params);
+  }
+
+  serviceTypeLabel(type?: string | null): string {
+    if (!type) return this.t('MANAGE_SERVICES.COMMON.NOT_AVAILABLE');
+
+    const map: Record<string, string> = {
+      Medical: 'MANAGE_SERVICES.TYPES.MEDICAL',
+      Emergency: 'MANAGE_SERVICES.TYPES.EMERGENCY',
+      Consultation: 'MANAGE_SERVICES.TYPES.CONSULTATION',
+      Surgery: 'MANAGE_SERVICES.TYPES.SURGERY',
+      Laboratory: 'MANAGE_SERVICES.TYPES.LABORATORY',
+      Radiology: 'MANAGE_SERVICES.TYPES.RADIOLOGY',
+      Pharmacy: 'MANAGE_SERVICES.TYPES.PHARMACY',
+      Administrative: 'MANAGE_SERVICES.TYPES.ADMINISTRATIVE',
+    };
+
+    return this.t(map[type] || 'MANAGE_SERVICES.COMMON.NOT_AVAILABLE');
+  }
+
+  dayLabel(day: string): string {
+    const map: Record<string, string> = {
+      Monday: 'MANAGE_SERVICES.DAYS.MONDAY',
+      Tuesday: 'MANAGE_SERVICES.DAYS.TUESDAY',
+      Wednesday: 'MANAGE_SERVICES.DAYS.WEDNESDAY',
+      Thursday: 'MANAGE_SERVICES.DAYS.THURSDAY',
+      Friday: 'MANAGE_SERVICES.DAYS.FRIDAY',
+      Saturday: 'MANAGE_SERVICES.DAYS.SATURDAY',
+      Sunday: 'MANAGE_SERVICES.DAYS.SUNDAY',
+    };
+
+    return this.t(map[day] || day);
+  }
+
+  statusLabel(status: string): string {
+    return this.t(status === 'ACTIF' ? 'MANAGE_SERVICES.STATUS.ACTIVE' : 'MANAGE_SERVICES.STATUS.INACTIVE');
+  }
+
   // ── Schedule presets ───────────────────────────────
   applyPreset(type: string): void {
     this.horairesArray.clear();
@@ -168,7 +209,7 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.svc.getAll().pipe(takeUntil(this.destroy$)).subscribe({
       next: data => { this.services.set(data); this.loading.set(false); },
-      error: () => { this.error.set('Failed to load services. Please try again.'); this.loading.set(false); },
+      error: () => { this.error.set(this.t('MANAGE_SERVICES.ERRORS.LOAD')); this.loading.set(false); },
     });
   }
 
@@ -215,18 +256,18 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
         next: created => {
           this.services.update(list => [created, ...list]);
           this.closeModal();
-          this.showToast('Service created successfully', 'success');
+          this.showToast(this.t('MANAGE_SERVICES.TOAST.CREATED'), 'success');
         },
-        error: () => this.showToast('Failed to create service', 'error'),
+        error: () => this.showToast(this.t('MANAGE_SERVICES.ERRORS.CREATE'), 'error'),
       });
     } else if (mode === 'edit' && this.selectedService()?._id) {
       this.svc.update(this.selectedService()!._id!, value).pipe(takeUntil(this.destroy$)).subscribe({
         next: updated => {
           this.services.update(list => list.map(s => s._id === updated._id ? updated : s));
           this.closeModal();
-          this.showToast('Service updated successfully', 'success');
+          this.showToast(this.t('MANAGE_SERVICES.TOAST.UPDATED'), 'success');
         },
-        error: () => this.showToast('Failed to update service', 'error'),
+        error: () => this.showToast(this.t('MANAGE_SERVICES.ERRORS.UPDATE'), 'error'),
       });
     }
   }
@@ -236,9 +277,9 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
     action.pipe(takeUntil(this.destroy$)).subscribe({
       next: updated => {
         this.services.update(list => list.map(s => s._id === updated._id ? updated : s));
-        this.showToast(`Service ${updated.statut === 'ACTIF' ? 'activated' : 'deactivated'}`, 'success');
+        this.showToast(this.t(updated.statut === 'ACTIF' ? 'MANAGE_SERVICES.TOAST.ACTIVATED' : 'MANAGE_SERVICES.TOAST.DEACTIVATED'), 'success');
       },
-      error: () => this.showToast('Failed to update status', 'error'),
+      error: () => this.showToast(this.t('MANAGE_SERVICES.ERRORS.STATUS'), 'error'),
     });
   }
 
@@ -252,9 +293,9 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
         this.services.update(list => list.filter(s => s._id !== id));
         this.showDeleteConfirm.set(false);
         this.serviceToDelete.set(null);
-        this.showToast('Service deleted successfully', 'success');
+        this.showToast(this.t('MANAGE_SERVICES.TOAST.DELETED'), 'success');
       },
-      error: () => this.showToast('Failed to delete service', 'error'),
+      error: () => this.showToast(this.t('MANAGE_SERVICES.ERRORS.DELETE'), 'error'),
     });
   }
 
@@ -298,11 +339,11 @@ export class ManageServiceComponent implements OnInit, OnDestroy {
         this.modalMode.set('create');
         this.selectedService.set(null);
         this.showModal.set(true);
-        this.showToast('Form pre-filled by AI', 'success');
+        this.showToast(this.t('MANAGE_SERVICES.TOAST.AI_PREFILL'), 'success');
       },
       error: () => {
         this.aiLoading.set(false);
-        this.aiError.set('Generation failed. Please check your connection and try again.');
+        this.aiError.set(this.t('MANAGE_SERVICES.ERRORS.AI'));
       },
     });
   }

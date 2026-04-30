@@ -250,7 +250,7 @@ import { HomeComponent } from './pages/home/home.component';
     FullCalendarModule,
     TranslateModule,
     TranslateModule.forRoot({
-      defaultLanguage: 'fr',
+      defaultLanguage: 'en',
       loader: {
         provide: TranslateLoader,
         useClass: TranslateHttpLoader,
