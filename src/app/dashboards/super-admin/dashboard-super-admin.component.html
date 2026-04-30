@@ -347,7 +347,16 @@
       </div>
     </div>
     <div *ngIf="showInactive" class="inactive-table-wrap">
-      <table class="risk-table" style="margin-top:8px">
+      <div class="inactive-toolbar">
+        <input
+          [(ngModel)]="inactivePatientsSearch"
+          class="card-search"
+          type="text"
+          placeholder="Rechercher un patient inactif"
+        />
+      </div>
+      <div class="scroll-panel inactive-scroll">
+        <table class="risk-table" style="margin-top:8px">
         <thead>
           <tr>
             <th>Nom</th>
@@ -357,17 +366,18 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of inactivePatients?.slice(0, 10)">
+          <tr *ngFor="let p of filteredInactivePatients">
             <td>{{ p.firstName }} {{ p.lastName }}</td>
             <td class="text-muted text-mono" style="font-size:11px">{{ p.email || '-' }}</td>
             <td class="text-muted">{{ p.assignedDepartment || '' }}</td>
             <td class="text-muted">{{ formatInactivePatientLastLogin(p.lastLogin) }}</td>
           </tr>
-          <tr *ngIf="!inactivePatients?.length">
+          <tr *ngIf="!filteredInactivePatients.length">
             <td colspan="4" class="empty-state">Aucun patient inactif detecte</td>
           </tr>
         </tbody>
-      </table>
+        </table>
+      </div>
     </div>
   </div>
 

@@ -62,13 +62,6 @@ $sh-h:   0 4px 12px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
 .kpi-grid {
   display: grid; grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 12px; margin-bottom: 1.5rem;
-
-  > .kpi-card:nth-child(1) { order: 1; }
-  > .kpi-card:nth-child(2) { order: 2; }
-  > .kpi-card:nth-child(4) { order: 3; }
-  > .kpi-card:nth-child(5) { order: 4; }
-  > .kpi-card:nth-child(6) { order: 5; }
-  > .kpi-card:nth-child(3) { order: 6; }
 }
 .kpi-card {
   display: flex; align-items: center; gap: 14px;
@@ -157,7 +150,7 @@ $sh-h:   0 4px 12px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
   &::-webkit-scrollbar-thumb { background: $teal-m; border-radius: 2px; }
 }
 .compliance-list { display: flex; flex-direction: column; gap: 12px; }
-.compliance-scroll { max-height: 355px; }
+.compliance-scroll { max-height: 260px; }
 .comp-item {
   .comp-header {
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;
@@ -179,7 +172,7 @@ $sh-h:   0 4px 12px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
   tr:last-child td { border-bottom: none; }
   tbody tr { transition: background .12s; &:hover td { background: $bg; } }
 }
-.risk-scroll { max-height: 355px; }
+.risk-scroll { max-height: 280px; }
 .patient-cell { display: flex; align-items: center; gap: 8px; }
 .avatar { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: #000000; flex-shrink: 0; }
 
@@ -235,11 +228,15 @@ $sh-h:   0 4px 12px rgba(0,0,0,.10), 0 8px 24px rgba(0,0,0,.06);
 
 // ── Misc ─────────────────────────────────────────────────
 .inactive-full { width: 100%; grid-column: 1 / -1; margin-top: 12px; }
+.inactive-toolbar {
+  display: flex; justify-content: flex-end; margin-bottom: 8px;
+}
 .inactive-table-wrap {
   overflow-x: auto;
   &::-webkit-scrollbar { height: 4px; }
   &::-webkit-scrollbar-thumb { background: $teal-m; border-radius: 2px; }
 }
+.inactive-scroll { max-height: 285px; }
 .loading-overlay {
   position: absolute; inset: 0; z-index: 100;
   background: rgba(#fff,.65); backdrop-filter: blur(2px);

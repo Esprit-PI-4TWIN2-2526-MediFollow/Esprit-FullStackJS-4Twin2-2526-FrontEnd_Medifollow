@@ -62,6 +62,7 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
   aiInsights: AIInsight[] = [];
   complianceSearch = '';
   highRiskSearch = '';
+  inactivePatientsSearch = '';
 
   get currentDate(): string {
     return new Date().toLocaleDateString('fr-FR', {
@@ -124,6 +125,21 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
       const department = (patient.assignedDepartment ?? '').toLowerCase();
 
       return fullName.includes(query) || department.includes(query);
+    });
+  }
+
+  get filteredInactivePatients(): InactivePatient[] {
+    const query = this.inactivePatientsSearch.trim().toLowerCase();
+    if (!query) {
+      return this.inactivePatients;
+    }
+
+    return this.inactivePatients.filter((patient) => {
+      const fullName = `${patient.firstName ?? ''} ${patient.lastName ?? ''}`.toLowerCase();
+      const email = (patient.email ?? '').toLowerCase();
+      const department = (patient.assignedDepartment ?? '').toLowerCase();
+
+      return fullName.includes(query) || email.includes(query) || department.includes(query);
     });
   }
 
