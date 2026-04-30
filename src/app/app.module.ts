@@ -124,6 +124,7 @@ import { ContactsComponent } from './chat/contacts/contacts.component';
 import { NotificationsPageComponent } from './pages/notifications/notifications-page.component';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translate/http-loader';
+import { HomeComponent } from './pages/home/home.component';
 
 @NgModule({
   declarations: [
@@ -233,6 +234,7 @@ import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translat
     ManageServiceComponent,
     UnauthorizedComponent,
     NotificationsPageComponent,
+    HomeComponent,
 
 
 
