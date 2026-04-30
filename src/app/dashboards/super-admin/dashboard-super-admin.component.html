@@ -116,7 +116,7 @@
       </div>
       <div class="kpi-body">
         <span class="kpi-label">Patients à risque élevé</span>
-        <span class="kpi-value">{{ summary?.alerts?.highRiskPatients | number }}</span>
+        <span class="kpi-value">{{ highRiskPatientsCount | number }}</span>
         <span class="kpi-sub">{{ summary?.symptoms?.pendingValidations }} validations en attente</span>
       </div>
     </div>
@@ -321,7 +321,7 @@
     <div class="card-header" style="cursor:pointer" (click)="toggleInactive()">
       <span class="card-title">Patients inactifs (7j+)</span>
       <div style="display:flex;align-items:center;gap:8px">
-        <span class="badge-count amber">{{ inactivePatients.length }}</span>
+        <span class="badge-count amber">{{ inactivePatientsCount | number }}</span>
         <svg [style.transform]="showInactive ? 'rotate(180deg)' : ''"
              style="transition:.2s" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="14" height="14">
           <polyline points="6 9 12 15 18 9"/>

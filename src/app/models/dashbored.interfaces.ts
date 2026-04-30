@@ -1,6 +1,19 @@
 // dashboard.interfaces.ts (fichier corrigé)
 export interface Summary {
-  patients: { total: number; newThisWeek: number };
+  patients: {
+    total: number;
+    newThisWeek: number;
+    inactive7d?: number;
+    inactivePatients7d?: number;
+    highRisk?: number;
+    highRiskPatients?: number;
+  };
+  users?: {
+    total: number;
+    inactive7d?: number;
+    inactiveUsers7d?: number;
+    inactivePatients7d?: number;
+  };
   doctors: { total: number };
   services: {
     total: number;
@@ -24,9 +37,7 @@ export interface Summary {
     respondedToday: number;
     everResponded: number;
     completedToday: number;
-  };
-  alerts?: {
-    highRiskPatients: number;
+    highRiskPatients?: number;
   };
 }
 

@@ -83,6 +83,23 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
     return this.alerts?.some((a) => a.severity === 'HIGH' || a.type === 'critical') ?? false;
   }
 
+  get highRiskPatientsCount(): number {
+    return this.summary?.patients?.highRiskPatients
+      ?? this.summary?.patients?.highRisk
+      ?? this.summary?.followup?.highRiskPatients
+      ?? this.highRiskPatients.length
+      ?? 0;
+  }
+
+  get inactivePatientsCount(): number {
+    return this.summary?.patients?.inactivePatients7d
+      ?? this.summary?.patients?.inactive7d
+      ?? this.summary?.users?.inactivePatients7d
+      ?? this.summary?.users?.inactive7d
+      ?? this.inactivePatients.length
+      ?? 0;
+  }
+
   constructor(
     private dashboardService: DashboardService,
     private readonly translate: TranslateService,
@@ -151,10 +168,28 @@ export class DashboardSuperAdminComponent implements OnInit, AfterViewInit, OnDe
         next: ({ summary, activity, compliance, highRisk }) => {
           this.summary = {
             ...summary,
+            patients: summary.patients || {
+              total: 0,
+              newThisWeek: 0,
+              inactivePatients7d: 0,
+              highRiskPatients: 0,
+            },
+            users: summary.users || {
+              total: 0,
+              inactive7d: 0,
+              inactiveUsers7d: 0,
+              inactivePatients7d: 0,
+            },
             staff: summary.staff || { doctors: { total: 0 }, nurses: { total: 0 }, coordinators: { total: 0 } },
             symptoms: summary.symptoms || { totalResponses: 0, pendingValidations: 0 },
-            followup: summary.followup || { overallRate: 0, todayRate: 0, respondedToday: 0, everResponded: 0, completedToday: 0 },
-            alerts: summary.alerts || { highRiskPatients: 0 },
+            followup: summary.followup || {
+              overallRate: 0,
+              todayRate: 0,
+              respondedToday: 0,
+              everResponded: 0,
+              completedToday: 0,
+              highRiskPatients: 0,
+            },
             services: {
               ...summary.services,
               emergency: summary.services?.emergency || 0,
