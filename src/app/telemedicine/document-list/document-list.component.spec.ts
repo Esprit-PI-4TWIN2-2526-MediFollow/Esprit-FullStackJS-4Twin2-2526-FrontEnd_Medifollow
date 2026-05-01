@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { DocumentListComponent } from './document-list.component';
+import { buildComponentTestingModule } from '../../testing/test-bed-helpers';
 
 describe('DocumentListComponent', () => {
   let component: DocumentListComponent;
   let fixture: ComponentFixture<DocumentListComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [DocumentListComponent]
-    })
-    .compileComponents();
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(DocumentListComponent),
+    ).compileComponents();
 
     fixture = TestBed.createComponent(DocumentListComponent);
     component = fixture.componentInstance;

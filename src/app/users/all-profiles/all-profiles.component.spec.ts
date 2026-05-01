@@ -1,20 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AllProfilesComponent } from './all-profiles.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { RouterTestingModule } from '@angular/router/testing';
-import { FormsModule } from '@angular/forms';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { buildComponentTestingModule } from '../../testing/test-bed-helpers';
 
 describe('AllProfilesComponent', () => {
   let component: AllProfilesComponent;
   let fixture: ComponentFixture<AllProfilesComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      declarations: [AllProfilesComponent],
-      imports: [HttpClientTestingModule, RouterTestingModule, FormsModule],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA],
-    }).compileComponents();
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(AllProfilesComponent),
+    ).compileComponents();
 
     fixture = TestBed.createComponent(AllProfilesComponent);
     component = fixture.componentInstance;

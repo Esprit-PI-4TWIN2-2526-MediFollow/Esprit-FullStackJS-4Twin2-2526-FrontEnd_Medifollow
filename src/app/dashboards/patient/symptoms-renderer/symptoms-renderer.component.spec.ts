@@ -10,6 +10,7 @@ import { SymptomsAssignedForm, SymptomsTodayResponse } from './symptoms-response
 import { SymptomsResponseService } from './symptoms-response.service';
 import { Users } from '../../../models/users';
 import { UsersService } from '../../../services/user/users.service';
+import { buildComponentTestingModule } from '../../../testing/test-bed-helpers';
 
 describe('SymptomsRendererComponent', () => {
   let component: SymptomsRendererComponent;
@@ -78,20 +79,21 @@ describe('SymptomsRendererComponent', () => {
     symptomsResponseService.getResponsesByDate.and.returnValue(of([]));
     symptomsResponseService.submitResponse.and.returnValue(of({ saved: true }));
 
-    await TestBed.configureTestingModule({
-      declarations: [SymptomsRendererComponent],
-      imports: [CommonModule, ReactiveFormsModule, RouterTestingModule],
-      providers: [
-        { provide: UsersService, useValue: usersService },
-        { provide: SymptomsResponseService, useValue: symptomsResponseService },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            paramMap: of(convertToParamMap({})),
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(SymptomsRendererComponent, {
+        imports: [CommonModule, ReactiveFormsModule, RouterTestingModule],
+        providers: [
+          { provide: UsersService, useValue: usersService },
+          { provide: SymptomsResponseService, useValue: symptomsResponseService },
+          {
+            provide: ActivatedRoute,
+            useValue: {
+              paramMap: of(convertToParamMap({})),
+            },
           },
-        },
-      ],
-    }).compileComponents();
+        ],
+      }),
+    ).compileComponents();
 
     router = TestBed.inject(Router);
     spyOn(router, 'navigate').and.resolveTo(true);

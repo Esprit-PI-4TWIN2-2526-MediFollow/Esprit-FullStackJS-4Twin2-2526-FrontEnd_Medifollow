@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 
 import { SymptomsListComponent } from './symptoms-list.component';
 import { NurseSymptomsResponse, SymptomsNurseService } from '../services/symptoms-nurse.service';
+import { buildComponentTestingModule } from '../../../../testing/test-bed-helpers';
 
 describe('SymptomsListComponent', () => {
   let component: SymptomsListComponent;
@@ -45,13 +46,12 @@ describe('SymptomsListComponent', () => {
     );
     symptomsNurseService.getResponsesForNurse.and.returnValue(of(responses));
 
-    await TestBed.configureTestingModule({
-      declarations: [SymptomsListComponent],
-      imports: [CommonModule, RouterTestingModule],
-      providers: [
-        { provide: SymptomsNurseService, useValue: symptomsNurseService },
-      ],
-    }).compileComponents();
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(SymptomsListComponent, {
+        imports: [CommonModule, RouterTestingModule],
+        providers: [{ provide: SymptomsNurseService, useValue: symptomsNurseService }],
+      }),
+    ).compileComponents();
 
     router = TestBed.inject(Router);
     spyOn(router, 'navigate').and.resolveTo(true);
