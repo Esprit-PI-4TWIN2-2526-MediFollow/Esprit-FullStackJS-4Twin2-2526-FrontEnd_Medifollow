@@ -10,7 +10,8 @@ RUN npm run build -- --configuration production
 FROM nginx:alpine
 
 # ✅ CHEMIN CORRECT
-COPY --from=build /app/dist/frontend-medifollow /usr/share/nginx/html
+COPY --from=build /app/dist/frontend-medifollow/browser /usr/share/nginx/html
+
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
