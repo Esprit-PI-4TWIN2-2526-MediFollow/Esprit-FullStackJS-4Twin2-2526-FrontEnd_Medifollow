@@ -13,7 +13,7 @@ spec:
         app: medifollow-frontend
     spec:
       containers:
-      - name: frontend
+      - name: medifollow-frontend
         image: yahyakaroui/medifollow-frontend:latest
         ports:
         - containerPort: 80
