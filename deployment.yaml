@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: frontend
+  name: medifollow-frontend
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: frontend
+      app: medifollow-frontend
   template:
     metadata:
       labels:
-        app: frontend
+        app: medifollow-frontend
     spec:
       containers:
       - name: frontend
