@@ -56,9 +56,9 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
   ) {}
 
   async ngAfterViewInit(): Promise<void> {
-    await this.gestureService.init(this.videoEl.nativeElement);
-    this.active = true;
-
+    // Don't auto-start, wait for user to click toggle
+    this.active = false;
+    
     this.sub.add(
       this.gestureService.gesture$.subscribe((evt) => {
         this.cursorX = evt.x * window.innerWidth;
@@ -77,13 +77,22 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
     clearTimeout(this.badgeTimer);
   }
 
-  toggleActive(): void {
+  async toggleActive(): Promise<void> {
     this.active = !this.active;
     if (this.active) {
-      this.gestureService.init(this.videoEl.nativeElement);
+      try {
+        await this.gestureService.init(this.videoEl.nativeElement);
+        console.log('✅ Gesture control activated');
+      } catch (error) {
+        console.error('❌ Failed to start gesture control:', error);
+        this.active = false;
+        alert('Failed to access camera. Please check permissions.');
+      }
     } else {
       this.gestureService.destroy();
+      console.log('🛑 Gesture control deactivated');
     }
+    this.cdr.markForCheck();
   }
 
   get gestureInfo() {

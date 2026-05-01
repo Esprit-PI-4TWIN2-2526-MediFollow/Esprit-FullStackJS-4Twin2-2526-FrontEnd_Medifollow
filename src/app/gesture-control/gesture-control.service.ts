@@ -70,12 +70,18 @@ export class GestureControlService {
   }
 
   private async startCamera(): Promise<void> {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: 640, height: 480, facingMode: 'user' },
-    });
-    this.videoElement.srcObject = stream;
-    await this.videoElement.play();
-    this.runDetectionLoop();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: 640, height: 480, facingMode: 'user' },
+      });
+      this.videoElement.srcObject = stream;
+      await this.videoElement.play();
+      console.log('📹 Camera started successfully');
+      this.runDetectionLoop();
+    } catch (error: any) {
+      console.error('❌ Camera access failed:', error);
+      throw new Error(`Camera access denied: ${error.message}`);
+    }
   }
 
   private runDetectionLoop(): void {
