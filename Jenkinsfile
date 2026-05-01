@@ -35,21 +35,14 @@ pipeline {
             }
         }
 
-        stage('Build Angular') {
-            steps {
-                sh '''
-                set -eux
-                npm run build -- --configuration production
-                '''
-            }
-        }
-
         stage('Test & Coverage') {
             steps {
                 sh '''
                 set -eux
+
                 echo "Using Chrome: $CHROME_BIN"
                 $CHROME_BIN --version || true
+
                 npm run test:cov -- --watch=false --browsers=ChromeHeadlessNoSandbox
                 '''
             }
@@ -72,15 +65,14 @@ pipeline {
                 }
             }
         }
-
         stage('Trigger CD Pipeline') {
-            steps {
+             steps {
                 build job: 'Medifollow-Frontend_CD',
-                      wait: false,
-                      parameters: [
-                          string(name: 'DOCKER_IMAGE_TAG', value: "${BUILD_NUMBER}")
-                      ]
-            }
-        }
+                     wait: false,
+                    parameters: [
+                       string(name: 'DOCKER_IMAGE_TAG', value: "${BUILD_NUMBER}")
+                     ]
+                }
+        }           
     }
 }
