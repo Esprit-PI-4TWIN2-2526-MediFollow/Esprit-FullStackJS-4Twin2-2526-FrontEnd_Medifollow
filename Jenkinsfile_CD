@@ -1,27 +1,25 @@
 pipeline {
     agent any
-    environment {
-    IMAGE_NAME = "yahyakaroui/medifollow-frontend"
-    IMAGE_TAG = "${BUILD_NUMBER}"
-}
 
-    parameters {
-        string(name: 'DOCKER_IMAGE_TAG', defaultValue: 'latest')
+    environment {
+        IMAGE_NAME = "yahyakaroui/medifollow-frontend"
+        IMAGE_TAG = "${BUILD_NUMBER}"
     }
 
     stages {
 
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow.git'
+                git branch: 'main',
+                url: 'https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                docker build -t yahyakaroui/medifollow-frontend:${DOCKER_IMAGE_TAG} .
-                """
+                sh '''
+                docker build -t $IMAGE_NAME:$IMAGE_TAG .
+                '''
             }
         }
 
@@ -32,29 +30,29 @@ pipeline {
                     usernameVariable: 'DOCKER_USER',
                     passwordVariable: 'DOCKER_PASS'
                 )]) {
-                    sh """
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker push yahyakaroui/medifollow-frontend:${DOCKER_IMAGE_TAG}
-                    """
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    docker push $IMAGE_NAME:$IMAGE_TAG
+                    '''
                 }
             }
         }
 
         stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-        export KUBECONFIG=/var/jenkins_home/.kube/config
+            steps {
+                sh '''
+                export KUBECONFIG=/var/jenkins_home/.kube/config
 
-        kubectl apply -f deployment.yaml
-        kubectl apply -f service.yaml
+                kubectl apply -f deployment.yaml
+                kubectl apply -f service.yaml
 
-        kubectl set image deployment/medifollow-frontend \
-        medifollow-frontend=$IMAGE_NAME:$IMAGE_TAG \
-        -n default
+                kubectl set image deployment/medifollow-frontend \
+                medifollow-frontend=$IMAGE_NAME:$IMAGE_TAG \
+                -n default
 
-        kubectl rollout status deployment/medifollow-frontend -n default
-        '''
-    }
-}
+                kubectl rollout status deployment/medifollow-frontend -n default
+                '''
+            }
+        }
     }
 }
