@@ -34,6 +34,14 @@ pipeline {
                 '''
             }
         }
+        stage('Build Angular') {
+    steps {
+        sh '''
+        set -eux
+        npm run build -- --configuration production
+        '''
+    }
+}
 
         stage('Test & Coverage') {
             steps {
@@ -73,6 +81,6 @@ pipeline {
                        string(name: 'DOCKER_IMAGE_TAG', value: "${BUILD_NUMBER}")
                      ]
                 }
-        }           
+    }           
     }
 }
