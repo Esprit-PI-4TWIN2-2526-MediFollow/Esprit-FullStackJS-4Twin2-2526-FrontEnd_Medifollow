@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 
 import { ViewSymptomsComponent } from './view-symptoms.component';
 import { SymptomForm, SymptomService } from '../services/symptom.service';
+import { buildComponentTestingModule } from '../../testing/test-bed-helpers';
 
 describe('ViewSymptomsComponent', () => {
   let component: ViewSymptomsComponent;
@@ -54,23 +55,24 @@ describe('ViewSymptomsComponent', () => {
     symptomService.getTodayQuestionStatus.and.returnValue(of(todayStatuses));
     symptomService.submitResponse.and.returnValue(of({ saved: true }));
 
-    await TestBed.configureTestingModule({
-      declarations: [ViewSymptomsComponent],
-      imports: [CommonModule, ReactiveFormsModule, RouterTestingModule],
-      providers: [
-        { provide: SymptomService, useValue: symptomService },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              paramMap: {
-                get: () => routeId,
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(ViewSymptomsComponent, {
+        imports: [CommonModule, ReactiveFormsModule, RouterTestingModule],
+        providers: [
+          { provide: SymptomService, useValue: symptomService },
+          {
+            provide: ActivatedRoute,
+            useValue: {
+              snapshot: {
+                paramMap: {
+                  get: () => routeId,
+                },
               },
             },
           },
-        },
-      ],
-    }).compileComponents();
+        ],
+      }),
+    ).compileComponents();
 
     router = TestBed.inject(Router);
     spyOn(router, 'navigate').and.resolveTo(true);

@@ -5,10 +5,10 @@
   <div
     class="content-wrapper transition-all duration-300"
     [ngClass]="{
-      'xl:ml-[268px]': (isExpanded$ | async) || (isHovered$ | async),
+      'xl:ml-[272px]': (isExpanded$ | async) || (isHovered$ | async),
       'xl:ml-[72px]':  !((isExpanded$ | async) || (isHovered$ | async))
     }"
-    style="flex:1;min-width:0;display:flex;flex-direction:column;"
+    style="flex:1;min-width:0;display:flex;flex-direction:column;padding-top:66px;"
   >
     <app-header />
 

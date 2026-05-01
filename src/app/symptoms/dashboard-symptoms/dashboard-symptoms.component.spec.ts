@@ -8,6 +8,7 @@ import Swal from 'sweetalert2';
 
 import { DashboardSymptomsComponent } from './dashboard-symptoms.component';
 import { SymptomForm, SymptomService } from '../services/symptom.service';
+import { buildComponentTestingModule } from '../../testing/test-bed-helpers';
 
 describe('DashboardSymptomsComponent', () => {
   let component: DashboardSymptomsComponent;
@@ -41,13 +42,12 @@ describe('DashboardSymptomsComponent', () => {
     symptomService.getForms.and.returnValue(of(forms));
     symptomService.deleteForm.and.returnValue(of(undefined));
 
-    await TestBed.configureTestingModule({
-      declarations: [DashboardSymptomsComponent],
-      imports: [CommonModule, FormsModule, RouterTestingModule],
-      providers: [
-        { provide: SymptomService, useValue: symptomService },
-      ],
-    }).compileComponents();
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(DashboardSymptomsComponent, {
+        imports: [CommonModule, FormsModule, RouterTestingModule],
+        providers: [{ provide: SymptomService, useValue: symptomService }],
+      }),
+    ).compileComponents();
 
     router = TestBed.inject(Router);
     spyOn(router, 'navigate').and.resolveTo(true);
@@ -71,7 +71,7 @@ describe('DashboardSymptomsComponent', () => {
     component.loadForms();
 
     expect(component.forms).toEqual(forms);
-    expect(component.errorMessage).toBe('Unable to load forms right now.');
+    expect(component.errorMessage).toBe('SYMPTOMS_DASHBOARD.ERROR_LOAD');
     expect(component.isLoading).toBeFalse();
   });
 

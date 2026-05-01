@@ -34,6 +34,14 @@ pipeline {
                 '''
             }
         }
+        stage('Build Angular') {
+    steps {
+        sh '''
+        set -eux
+        npm run build -- --configuration production
+        '''
+    }
+}
 
         stage('Test & Coverage') {
             steps {
@@ -65,5 +73,14 @@ pipeline {
                 }
             }
         }
+        stage('Trigger CD Pipeline') {
+             steps {
+                build job: 'Medifollow-Frontend_CD',
+                     wait: false,
+                    parameters: [
+                       string(name: 'DOCKER_IMAGE_TAG', value: "${BUILD_NUMBER}")
+                     ]
+                }
+    }           
     }
 }

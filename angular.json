@@ -30,6 +30,11 @@
               "zone.js"
             ],
             "tsConfig": "tsconfig.app.json",
+            "allowedCommonJsDependencies": [
+              "@mediapipe/hands",
+              "sweetalert2",
+              "node-fetch"
+            ],
             "assets": [
               {
                 "glob": "**/*",

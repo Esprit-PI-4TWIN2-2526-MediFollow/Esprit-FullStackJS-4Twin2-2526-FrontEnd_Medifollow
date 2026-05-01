@@ -50,4 +50,11 @@ export class DashboardService {
   getInactivePatients(): Observable<InactivePatient[]> {
     return this.http.get<InactivePatient[]>(`${this.API}/inactive-patients`);
   }
+  askAssistant(question: string) {
+  return this.http.post<{ answer: string }>(
+    `${this.API}/ai-assistant`,
+    { question }
+  );
+}
+
 }

@@ -1,11 +1,17 @@
-FROM jenkins/jenkins:lts
+# Build stage
+FROM node:22 AS build
+WORKDIR /app
+COPY . .
 
-USER root
+RUN npm install --legacy-peer-deps
+RUN npm run build -- --configuration production
 
-RUN apt-get update && apt-get install -y \
-    chromium \
-    chromium-driver \
-    --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+# Serve stage
+FROM nginx:alpine
 
-USER jenkins
+# ✅ CHEMIN CORRECT
+COPY --from=build /app/dist/frontend-medifollow/browser /usr/share/nginx/html
+
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

@@ -1,28 +1,26 @@
 <div class="rounded-2xl border border-gray-200 bg-white pt-4 dark:border-white/[0.05] dark:bg-white/[0.03]">
-  <!-- Header -->
   <div class="mb-4 flex flex-col gap-2 px-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Manage All Roles</h3>
+    <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_ROLES.TITLE' | translate }}</h3>
     <button type="button" (click)="openAddModal()"
       class="inline-flex h-[42px] items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600">
-      Add New Role
+      {{ 'MANAGE_ROLES.ADD_NEW_ROLE' | translate }}
     </button>
   </div>
 
-  <!-- Roles Table -->
   <div class="max-w-full overflow-x-auto px-5 sm:px-6">
     <table class="min-w-full">
       <thead class="border-y border-gray-100 dark:border-white/[0.05]">
         <tr>
-          <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Role</th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Image</th>
-          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">Actions</th>
+          <th class="py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_ROLES.TABLE.ROLE' | translate }}</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_ROLES.TABLE.IMAGE' | translate }}</th>
+          <th class="px-4 py-3 text-start text-theme-sm font-normal text-gray-500 dark:text-gray-400">{{ 'MANAGE_ROLES.TABLE.ACTIONS' | translate }}</th>
         </tr>
       </thead>
 
       <tbody>
         <tr *ngIf="roles.length === 0">
           <td colspan="4" class="py-8 text-center text-gray-500 dark:text-gray-400">
-            No roles found. Click "Add New Role" to create one.
+            {{ 'MANAGE_ROLES.EMPTY_STATE' | translate }}
           </td>
         </tr>
 
@@ -39,7 +37,7 @@
           </td>
           <td class="px-4 py-3">
             <div class="flex items-center gap-1">
-              <button type="button" title="Edit"
+              <button type="button" [title]="'MANAGE_ROLES.ACTIONS.EDIT' | translate"
                 (click)="openEditModal(roleItem)"
                 class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-blue-500 transition hover:bg-blue-50 dark:hover:bg-blue-900/20">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -48,7 +46,7 @@
                   <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
                 </svg>
               </button>
-              <button type="button" title="Delete"
+              <button type="button" [title]="'MANAGE_ROLES.ACTIONS.DELETE' | translate"
                 (click)="openDeleteModal(roleItem)"
                 class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-red-500 transition hover:bg-red-50 dark:hover:bg-red-900/20">
                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24"
@@ -67,26 +65,24 @@
   </div>
 </div>
 
-<!-- Add Role Modal -->
 <div *ngIf="showAddRoleModal" class="fixed inset-0 z-[60] flex items-center justify-center">
   <div class="absolute inset-0 bg-black/55 backdrop-blur-md" (click)="closeAddModal()"></div>
   <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     <div class="mb-4 flex items-start justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Add Role</h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Add a new role to the system.</p>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_ROLES.MODALS.ADD.TITLE' | translate }}</h2>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'MANAGE_ROLES.MODALS.ADD.SUBTITLE' | translate }}</p>
       </div>
       <button type="button" (click)="closeAddModal()"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200
-               text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">✕</button>
+        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">x</button>
     </div>
     <form class="space-y-4" (ngSubmit)="submitAddRole()">
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-          Name <span class="text-error-500">*</span>
+          {{ 'MANAGE_ROLES.FORM.NAME' | translate }} <span class="text-error-500">*</span>
         </label>
         <input class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90"
-          type="text" placeholder="Enter role name" [(ngModel)]="roleName" name="roleNameAdd" required
+          type="text" [placeholder]="'MANAGE_ROLES.FORM.PLACEHOLDER' | translate" [(ngModel)]="roleName" name="roleNameAdd" required
           [ngClass]="{'border-error-500': roleError}"/>
         @if (roleError) {
           <p class="mt-2 text-sm text-error-500">{{ roleError }}</p>
@@ -94,36 +90,34 @@
       </div>
       <div class="flex items-center justify-end gap-2 pt-2">
         <button type="button" (click)="closeAddModal()"
-          class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+          class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">{{ 'MANAGE_ROLES.ACTIONS.CANCEL' | translate }}</button>
         <button type="submit" [disabled]="isSubmitting"
           class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-50">
-          {{ isSubmitting ? 'Adding...' : 'Add Role' }}
+          {{ isSubmitting ? ('MANAGE_ROLES.ACTIONS.ADDING' | translate) : ('MANAGE_ROLES.ACTIONS.ADD_ROLE' | translate) }}
         </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Edit Role Modal -->
 <div *ngIf="showEditRoleModal" class="fixed inset-0 z-[60] flex items-center justify-center">
   <div class="absolute inset-0 bg-black/55 backdrop-blur-md" (click)="closeEditModal()"></div>
   <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     <div class="mb-4 flex items-start justify-between">
       <div>
-        <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Edit Role</h2>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Update role information.</p>
+        <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_ROLES.MODALS.EDIT.TITLE' | translate }}</h2>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ 'MANAGE_ROLES.MODALS.EDIT.SUBTITLE' | translate }}</p>
       </div>
       <button type="button" (click)="closeEditModal()"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200
-               text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">✕</button>
+        class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-gray-500 transition hover:border-brand-300 hover:text-brand-500 dark:border-gray-700 dark:text-gray-400">x</button>
     </div>
     <form class="space-y-4" (ngSubmit)="submitEditRole()">
       <div>
         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
-          Name <span class="text-error-500">*</span>
+          {{ 'MANAGE_ROLES.FORM.NAME' | translate }} <span class="text-error-500">*</span>
         </label>
         <input class="h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 text-sm text-gray-800 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:text-white/90"
-          type="text" placeholder="Enter role name" [(ngModel)]="roleName" name="roleNameEdit" required
+          type="text" [placeholder]="'MANAGE_ROLES.FORM.PLACEHOLDER' | translate" [(ngModel)]="roleName" name="roleNameEdit" required
           [ngClass]="{'border-error-500': roleError}"/>
         @if (roleError) {
           <p class="mt-2 text-sm text-error-500">{{ roleError }}</p>
@@ -131,28 +125,27 @@
       </div>
       <div class="flex items-center justify-end gap-2 pt-2">
         <button type="button" (click)="closeEditModal()"
-          class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+          class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">{{ 'MANAGE_ROLES.ACTIONS.CANCEL' | translate }}</button>
         <button type="submit" [disabled]="isSubmitting"
           class="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:opacity-50">
-          {{ isSubmitting ? 'Updating...' : 'Update Role' }}
+          {{ isSubmitting ? ('MANAGE_ROLES.ACTIONS.UPDATING' | translate) : ('MANAGE_ROLES.ACTIONS.UPDATE_ROLE' | translate) }}
         </button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Delete Role Modal -->
 <div *ngIf="showDeleteRoleModal" class="fixed inset-0 z-[60] flex items-center justify-center">
   <div class="absolute inset-0 bg-black/55 backdrop-blur-md" (click)="closeDeleteModal()"></div>
   <div class="relative w-[92%] max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-sm dark:border-gray-800 dark:bg-gray-900">
     <div class="mb-2">
-      <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">Delete Role</h2>
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-white/90">{{ 'MANAGE_ROLES.MODALS.DELETE.TITLE' | translate }}</h2>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        Are you sure you want to delete
+        {{ 'MANAGE_ROLES.MODALS.DELETE.CONFIRM_PREFIX' | translate }}
         <span class="font-semibold text-gray-700 dark:text-gray-200">{{ roleToDelete?.label }}</span>?
       </p>
       <p class="mt-2 text-xs text-gray-400 dark:text-gray-500">
-        This action cannot be undone. Users with this role may be affected.
+        {{ 'MANAGE_ROLES.MODALS.DELETE.WARNING' | translate }}
       </p>
       @if (roleError) {
         <p class="mt-2 text-sm text-error-500">{{ roleError }}</p>
@@ -160,10 +153,10 @@
     </div>
     <div class="mt-5 flex items-center justify-end gap-2">
       <button type="button" (click)="closeDeleteModal()"
-        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">Cancel</button>
+        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300">{{ 'MANAGE_ROLES.ACTIONS.CANCEL' | translate }}</button>
       <button type="button" (click)="confirmDeleteRole()" [disabled]="isSubmitting"
         class="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:opacity-50">
-        {{ isSubmitting ? 'Deleting...' : 'Delete Role' }}
+        {{ isSubmitting ? ('MANAGE_ROLES.ACTIONS.DELETING' | translate) : ('MANAGE_ROLES.ACTIONS.DELETE_ROLE' | translate) }}
       </button>
     </div>
   </div>

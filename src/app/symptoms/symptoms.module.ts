@@ -6,6 +6,7 @@ import { SymptomsRoutingModule } from './symptoms-routing.module';
 import { BuilderComponent } from './builder/builder.component';
 import { ViewSymptomsComponent } from './view-symptoms/view-symptoms.component';
 import { DashboardSymptomsComponent } from './dashboard-symptoms/dashboard-symptoms.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { DashboardSymptomsComponent } from './dashboard-symptoms/dashboard-sympt
     CommonModule,
     SymptomsRoutingModule,
     FormsModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    TranslateModule
   ]
 })
 export class SymptomsModule { }

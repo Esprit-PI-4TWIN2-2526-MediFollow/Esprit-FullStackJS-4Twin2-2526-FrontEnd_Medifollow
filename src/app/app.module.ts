@@ -128,6 +128,7 @@ import { NotificationsPageComponent } from './pages/notifications/notifications-
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
 import { TRANSLATE_HTTP_LOADER_CONFIG, TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { HomeComponent } from './pages/home/home.component';
 
 @NgModule({
   declarations: [
@@ -237,6 +238,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     ManageServiceComponent,
     UnauthorizedComponent,
     NotificationsPageComponent,
+    HomeComponent,
 
 
 
@@ -252,7 +254,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     FullCalendarModule,
     TranslateModule,
     TranslateModule.forRoot({
-      defaultLanguage: 'fr',
+      defaultLanguage: 'en',
       loader: {
         provide: TranslateLoader,
         useClass: TranslateHttpLoader,

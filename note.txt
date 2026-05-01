@@ -14,4 +14,5 @@ npm install socket.io-client --legacy-peer-deps
 //commande pour les testes unitaire
 npm install --save-dev @types/jasmine --legacy-peer-deps
 
-hello my friend yahya karoui &éd sszzqsdqsdzzdfgsdfsf yahyasdfsdfsdfzzz
+hello my friend yahya karoui &éd sszzqsdqsdzzdfgsdfsf yahyasdfsdfsdfzzzdsfsdgdgsdgsgsrgdsdf
+yahya karoui 4TWIN2 558fffdvdvds

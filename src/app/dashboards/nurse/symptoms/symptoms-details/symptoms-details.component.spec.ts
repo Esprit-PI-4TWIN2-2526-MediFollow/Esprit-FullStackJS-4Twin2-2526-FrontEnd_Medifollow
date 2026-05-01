@@ -6,6 +6,7 @@ import { of, throwError } from 'rxjs';
 
 import { SymptomsDetailsComponent } from './symptoms-details.component';
 import { NurseSymptomsResponse, SymptomsNurseService } from '../services/symptoms-nurse.service';
+import { buildComponentTestingModule } from '../../../../testing/test-bed-helpers';
 
 describe('SymptomsDetailsComponent', () => {
   let component: SymptomsDetailsComponent;
@@ -52,23 +53,24 @@ describe('SymptomsDetailsComponent', () => {
       validationNote: 'Escalate',
     }));
 
-    await TestBed.configureTestingModule({
-      declarations: [SymptomsDetailsComponent],
-      imports: [CommonModule, RouterTestingModule],
-      providers: [
-        { provide: SymptomsNurseService, useValue: symptomsNurseService },
-        {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              paramMap: {
-                get: () => responseId,
+    await TestBed.configureTestingModule(
+      buildComponentTestingModule(SymptomsDetailsComponent, {
+        imports: [CommonModule, RouterTestingModule],
+        providers: [
+          { provide: SymptomsNurseService, useValue: symptomsNurseService },
+          {
+            provide: ActivatedRoute,
+            useValue: {
+              snapshot: {
+                paramMap: {
+                  get: () => responseId,
+                },
               },
             },
           },
-        },
-      ],
-    }).compileComponents();
+        ],
+      }),
+    ).compileComponents();
 
     router = TestBed.inject(Router);
     spyOn(router, 'navigate').and.resolveTo(true);

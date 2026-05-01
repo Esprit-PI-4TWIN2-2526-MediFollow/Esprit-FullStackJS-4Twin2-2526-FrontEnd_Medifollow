@@ -236,12 +236,28 @@ import { FirstLoginChangePasswordComponent } from './shared/components/auth/firs
 import { AuthGuard } from './services/auth/auth.guard';
 import { RoleGuard } from './services/auth/role.guard';
 import { ManageServiceComponent } from './manage-service/manage-service.component';
+
 import { DashboardSuperAdminComponent } from './dashboards/super-admin/dashboard-super-admin.component';
+import { HomeComponent } from './pages/home/home.component';
+
+
 
 // Rôles admin réutilisables
 const ADMIN_ROLES = ['SUPERADMIN', 'ADMIN'];
 
 const routes: Routes = [
+
+{
+    path: '',
+    redirectTo: 'home',
+    pathMatch: 'full'
+  },
+
+  {
+    path: 'home',
+    component: HomeComponent,
+    title: 'MediFollow - Home'
+  },
 
 
   {
@@ -249,6 +265,12 @@ const routes: Routes = [
     component: SignInComponent,
     title: 'MediFollow - Connexion'
   },
+
+  /* {
+    path: 'signin',
+    component: SignInComponent,
+    title: 'MediFollow - Connexion'
+  }, */
 
   {
     path: 'forgot-password',
@@ -285,7 +307,7 @@ const routes: Routes = [
 
       {
         path: 'dashboard',
-        component: DashboardSuperAdminComponent,
+        loadChildren: () => import('./dashboards/super-admin/super-admin.module').then(m => m.SuperAdminModule),
         canActivate: [RoleGuard],
         data: { allowedRoles: ADMIN_ROLES },
         title: 'MediFollow - Dashboard'

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: medifollow-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: medifollow-frontend
+  template:
+    metadata:
+      labels:
+        app: medifollow-frontend
+    spec:
+      containers:
+      - name: medifollow-frontend
+        image: yahyakaroui/medifollow-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
