@@ -68,7 +68,6 @@
               "sourceMap": false,
               "namedChunks": false,
               "extractLicenses": true,
-              "buildOptimizer": true,
               "budgets": [
                 {
                   "type": "initial",
