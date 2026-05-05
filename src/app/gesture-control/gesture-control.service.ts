@@ -46,23 +46,83 @@ export class GestureControlService {
     
     try {
       console.log('📦 Loading MediaPipe Hands...');
-      const mediapipeModule = await import('@mediapipe/hands');
-      console.log('✅ MediaPipe module loaded:', mediapipeModule);
       
-      // Try different ways to access the Hands constructor
-      const Hands = mediapipeModule.Hands || (mediapipeModule as any).default?.Hands || (mediapipeModule as any).default;
+      // Try to load from npm package first
+      let Hands = null;
+      try {
+        const mediapipeModule = await import('@mediapipe/hands');
+        console.log('✅ MediaPipe module loaded:', mediapipeModule);
+        console.log('📦 Module keys:', Object.keys(mediapipeModule));
+        console.log('📦 Module.default:', (mediapipeModule as any).default);
+        
+        // Try multiple ways to access the Hands constructor
+        // Method 1: Named export
+        if (mediapipeModule.Hands && typeof mediapipeModule.Hands === 'function') {
+          console.log('✅ Found Hands as named export');
+          Hands = mediapipeModule.Hands;
+        }
+        // Method 2: Default export
+        else if ((mediapipeModule as any).default && typeof (mediapipeModule as any).default === 'function') {
+          console.log('✅ Found Hands as default export (function)');
+          Hands = (mediapipeModule as any).default;
+        }
+        // Method 3: Default.Hands
+        else if ((mediapipeModule as any).default?.Hands && typeof (mediapipeModule as any).default.Hands === 'function') {
+          console.log('✅ Found Hands as default.Hands');
+          Hands = (mediapipeModule as any).default.Hands;
+        }
+        // Method 4: Check all properties for a constructor-like function
+        else {
+          console.log('🔍 Searching for Hands constructor in all module properties...');
+          for (const key of Object.keys(mediapipeModule)) {
+            const value = (mediapipeModule as any)[key];
+            if (typeof value === 'function' && key.toLowerCase().includes('hand')) {
+              console.log(`✅ Found potential Hands constructor: ${key}`);
+              Hands = value;
+              break;
+            }
+          }
+        }
+      } catch (importError) {
+        console.warn('⚠️ Failed to import from npm package:', importError);
+        console.log('🔄 Will try CDN fallback...');
+      }
+      
+      // If npm import failed, try loading from CDN
+      if (!Hands) {
+        console.log('📦 Attempting to load MediaPipe from CDN...');
+        
+        // Check if already loaded globally
+        if ((window as any).Hands) {
+          console.log('✅ Found Hands in window object');
+          Hands = (window as any).Hands;
+        } else {
+          // Load script from CDN
+          await this.loadMediaPipeFromCDN();
+          if ((window as any).Hands) {
+            console.log('✅ Loaded Hands from CDN');
+            Hands = (window as any).Hands;
+          }
+        }
+      }
       
       if (!Hands) {
-        console.error('❌ Hands constructor not found in module:', Object.keys(mediapipeModule));
-        throw new Error('MediaPipe Hands library not properly loaded. Please refresh the page.');
+        console.error('❌ Hands constructor not found after all attempts');
+        throw new Error('MediaPipe Hands library could not be loaded. Please refresh the page and try again.');
       }
       
       console.log('✅ Hands constructor found:', Hands);
+      console.log('✅ Hands constructor type:', typeof Hands);
       
       this.hands = new Hands({
-        locateFile: (file: string) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`,
+        locateFile: (file: string) => {
+          const url = `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`;
+          console.log(`📦 Loading MediaPipe file: ${url}`);
+          return url;
+        },
       });
+      
+      console.log('✅ Hands instance created:', this.hands);
       
       this.hands.setOptions({
         maxNumHands: 1,
@@ -352,5 +412,34 @@ export class GestureControlService {
 
   private dist2D(a: any, b: any): number {
     return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+  }
+
+  private loadMediaPipeFromCDN(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      // Check if script already exists
+      const existingScript = document.querySelector('script[src*="mediapipe/hands"]');
+      if (existingScript) {
+        console.log('📦 MediaPipe script already in DOM');
+        resolve();
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/hands.js';
+      script.async = true;
+      
+      script.onload = () => {
+        console.log('✅ MediaPipe CDN script loaded');
+        resolve();
+      };
+      
+      script.onerror = (error) => {
+        console.error('❌ Failed to load MediaPipe from CDN:', error);
+        reject(new Error('Failed to load MediaPipe library from CDN'));
+      };
+      
+      document.head.appendChild(script);
+      console.log('📦 MediaPipe CDN script added to DOM');
+    });
   }
 }

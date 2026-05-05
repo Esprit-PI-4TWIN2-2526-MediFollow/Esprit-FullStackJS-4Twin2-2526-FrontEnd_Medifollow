@@ -6,7 +6,6 @@ AfterViewInit,
 
 } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { Router } from '@angular/router';
 import { GestureControlService } from '../gesture-control.service';
 import { GestureType } from '../gesture.models';
 
@@ -56,7 +55,6 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
 
   constructor(
     private gestureService: GestureControlService,
-    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
