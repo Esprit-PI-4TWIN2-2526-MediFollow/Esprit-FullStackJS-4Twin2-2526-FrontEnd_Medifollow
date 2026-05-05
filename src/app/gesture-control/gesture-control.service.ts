@@ -39,21 +39,36 @@ export class GestureControlService {
   }
 
   async init(videoEl: HTMLVideoElement): Promise<void> {
+    console.log('🎬 Initializing gesture control...');
+    console.log('🎬 Video element received:', videoEl);
+    
     this.videoElement = videoEl;
+    
+    console.log('📦 Loading MediaPipe Hands...');
     const { Hands } = await import('@mediapipe/hands' as any);
+    console.log('✅ MediaPipe Hands loaded');
+    
     this.hands = new Hands({
       locateFile: (file: string) =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`,
     });
+    
     this.hands.setOptions({
       maxNumHands: 1,
       modelComplexity: 1,
       minDetectionConfidence: 0.72,
       minTrackingConfidence: 0.55,
     });
+    
+    console.log('⚙️ MediaPipe configured');
+    
     this.hands.onResults((results: any) => this.processResults(results));
+    
+    console.log('📹 Starting camera...');
     await this.startCamera();
+    
     this.active$.next(true);
+    console.log('✅ Gesture control fully initialized');
   }
 
   destroy(): void {
@@ -71,16 +86,43 @@ export class GestureControlService {
 
   private async startCamera(): Promise<void> {
     try {
+      console.log('📹 Requesting camera permissions...');
+      console.log('📹 Navigator.mediaDevices available:', !!navigator.mediaDevices);
+      console.log('📹 getUserMedia available:', !!navigator.mediaDevices?.getUserMedia);
+      
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: 'user' },
       });
+      
+      console.log('✅ Camera stream obtained:', stream);
+      console.log('📹 Video tracks:', stream.getVideoTracks());
+      
       this.videoElement.srcObject = stream;
+      console.log('📹 Stream assigned to video element');
+      
       await this.videoElement.play();
-      console.log('📹 Camera started successfully');
+      console.log('✅ Video element playing');
+      console.log('📹 Video dimensions:', this.videoElement.videoWidth, 'x', this.videoElement.videoHeight);
+      
       this.runDetectionLoop();
+      console.log('🔄 Detection loop started');
     } catch (error: any) {
       console.error('❌ Camera access failed:', error);
-      throw new Error(`Camera access denied: ${error.message}`);
+      console.error('❌ Error name:', error.name);
+      console.error('❌ Error message:', error.message);
+      
+      let userMessage = 'Camera access denied';
+      if (error.name === 'NotAllowedError') {
+        userMessage = 'Camera permission denied. Please allow camera access in your browser settings.';
+      } else if (error.name === 'NotFoundError') {
+        userMessage = 'No camera found. Please connect a camera.';
+      } else if (error.name === 'NotReadableError') {
+        userMessage = 'Camera is already in use by another application.';
+      } else if (error.name === 'OverconstrainedError') {
+        userMessage = 'Camera does not support the requested settings.';
+      }
+      
+      throw new Error(userMessage);
     }
   }
 

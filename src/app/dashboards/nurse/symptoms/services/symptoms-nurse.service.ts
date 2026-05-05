@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of, switchMap, throwError, forkJoin } from 'rxjs';
+import { Observable, catchError, map, of, throwError, forkJoin } from 'rxjs';
 import { Users } from '../../../../models/users';
 import { UsersService } from '../../../../services/user/users.service';
 import { ApiConfig } from '../../../../config/api.config';
@@ -116,7 +116,7 @@ export class SymptomsNurseService {
       issueReported: false
     };
 
-    return this.http.patch<NurseSymptomsResponse>(`${this.apiUrl}/response/${id}/validate`, payload);
+    return this.http.post<NurseSymptomsResponse>(`${this.apiUrl}/nurse/responses/${id}/validate`, payload);
   }
 
   signalProblem(id: string, note: string): Observable<NurseSymptomsResponse> {
@@ -129,7 +129,7 @@ export class SymptomsNurseService {
       validatedByName: this.getCurrentNurseName(nurse)
     };
 
-    return this.http.patch<NurseSymptomsResponse>(`${this.apiUrl}/response/${id}/signal-problem`, payload);
+    return this.http.post<NurseSymptomsResponse>(`${this.apiUrl}/nurse/responses/${id}/report-issue`, payload);
   }
 
   private fetchAllResponses(): Observable<NurseSymptomsResponse[]> {

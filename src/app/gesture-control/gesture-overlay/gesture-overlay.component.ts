@@ -24,6 +24,9 @@ export class GestureOverlayComponent implements AfterViewInit, OnDestroy {
   isClicking = false;
   active = false;
   currentGesture: GestureType | null = null;
+  isInitializing = false;
+  statusMessage = '';
+  hasError = false;
 
 
 // readonly gestureLabels: Record<GestureType, { icon: string; label: string }> = {
@@ -78,20 +81,78 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
   }
 
   async toggleActive(): Promise<void> {
+    console.log('🔘 Toggle clicked. Current state:', this.active);
+    
+    if (this.isInitializing) return;
+    
     this.active = !this.active;
+    console.log('🔘 New state:', this.active);
+    
     if (this.active) {
+      this.isInitializing = true;
+      this.statusMessage = 'Initializing camera...';
+      this.hasError = false;
+      this.cdr.markForCheck();
+      
       try {
+        console.log('📹 Requesting camera access...');
+        console.log('📹 Video element:', this.videoEl?.nativeElement);
+        
         await this.gestureService.init(this.videoEl.nativeElement);
-        console.log('✅ Gesture control activated');
-      } catch (error) {
+        
+        this.statusMessage = 'Camera active ✓';
+        this.hasError = false;
+        console.log('✅ Gesture control activated successfully');
+        
+        setTimeout(() => {
+          this.statusMessage = '';
+          this.cdr.markForCheck();
+        }, 3000);
+        
+      } catch (error: any) {
         console.error('❌ Failed to start gesture control:', error);
+        console.error('❌ Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+        
         this.active = false;
-        alert('Failed to access camera. Please check permissions.');
+        this.hasError = true;
+        
+        // Show user-friendly error message
+        if (error.message.includes('permission')) {
+          this.statusMessage = '❌ Camera permission denied';
+        } else if (error.message.includes('not found') || error.message.includes('No camera')) {
+          this.statusMessage = '❌ No camera found';
+        } else if (error.message.includes('in use') || error.message.includes('already')) {
+          this.statusMessage = '❌ Camera in use';
+        } else if (error.message.includes('HTTPS') || error.message.includes('secure')) {
+          this.statusMessage = '❌ Requires HTTPS';
+        } else {
+          this.statusMessage = `❌ ${error.message}`;
+        }
+        
+        setTimeout(() => {
+          this.statusMessage = '';
+          this.hasError = false;
+          this.cdr.markForCheck();
+        }, 5000);
+      } finally {
+        this.isInitializing = false;
+        this.cdr.markForCheck();
       }
     } else {
       this.gestureService.destroy();
+      this.statusMessage = 'Camera stopped';
       console.log('🛑 Gesture control deactivated');
+      
+      setTimeout(() => {
+        this.statusMessage = '';
+        this.cdr.markForCheck();
+      }, 2000);
     }
+    
     this.cdr.markForCheck();
   }
 
