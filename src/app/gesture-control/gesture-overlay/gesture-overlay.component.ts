@@ -62,8 +62,13 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
     // Don't auto-start, wait for user to click toggle
     this.active = false;
     
+    console.log('🎬 Gesture overlay component initialized');
+    
     this.sub.add(
       this.gestureService.gesture$.subscribe((evt) => {
+        console.log('📍 Gesture event received:', evt);
+        console.log('📍 Cursor position will be:', evt.x * window.innerWidth, evt.y * window.innerHeight);
+        
         this.cursorX = evt.x * window.innerWidth;
         this.cursorY = evt.y * window.innerHeight;
         this.currentGesture = evt.type;
@@ -71,8 +76,12 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
         this.updateHoveredElement();
         this.scheduleBadgeReset();
         this.cdr.markForCheck();
+        
+        console.log('📍 Cursor updated to:', this.cursorX, this.cursorY);
       })
     );
+    
+    console.log('✅ Gesture subscription active');
   }
 
   ngOnDestroy(): void {
