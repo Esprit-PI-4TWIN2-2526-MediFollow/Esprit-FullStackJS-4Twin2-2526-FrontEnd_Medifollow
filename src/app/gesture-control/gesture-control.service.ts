@@ -202,9 +202,27 @@ export class GestureControlService {
   }
 
   private runDetectionLoop(): void {
+    console.log('🔄 Starting detection loop...');
+    let frameCount = 0;
+    
     const loop = async () => {
-      if (!this.active$.value) return;
-      try { await this.hands.send({ image: this.videoElement }); } catch {}
+      if (!this.active$.value) {
+        console.log('🛑 Detection loop stopped - service inactive');
+        return;
+      }
+      
+      try { 
+        await this.hands.send({ image: this.videoElement });
+        frameCount++;
+        
+        // Log every 100 frames to show it's working
+        if (frameCount % 100 === 0) {
+          console.log(`📹 Detection running... (${frameCount} frames processed)`);
+        }
+      } catch (error) {
+        console.error('❌ Error in detection loop:', error);
+      }
+      
       requestAnimationFrame(loop);
     };
     requestAnimationFrame(loop);
@@ -212,14 +230,26 @@ export class GestureControlService {
 
   private processResults(results: any): void {
     if (!results.multiHandLandmarks?.length) {
+      // No hand detected - this is normal when hand is not in view
       this.pinchStartTime = null;
       this.pinchFired = false;
       return;
     }
+    
+    // Hand detected!
+    console.log('👋 Hand detected! Landmarks:', results.multiHandLandmarks.length);
+    
     const lm = results.multiHandLandmarks[0];
     const confidence: number = results.multiHandedness?.[0]?.score ?? 1;
+    
+    console.log('🎯 Hand confidence:', confidence);
+    
     const gesture = this.detectGesture(lm);
-    if (gesture) this.emitGesture(gesture, lm[8], confidence);
+    
+    if (gesture) {
+      console.log('✋ Gesture detected:', gesture);
+      this.emitGesture(gesture, lm[8], confidence);
+    }
   }
 
   private detectGesture(lm: any[]): GestureType | null {
