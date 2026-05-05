@@ -75,6 +75,8 @@ The platform enables:
 - **Automatic Alerts**: Critical alerts sent to the assigned doctor in real time
 - **AI Medical Summary**: Automatic generation of clinical summaries (HuggingFace `Falconsai/medical_summarization`)
 - **AI Question Generation**: Groq API with LLaMA 3.3 70B for service-specific clinical questions
+- **Integrate AI-powered** :Autocomplete suggestions using Socket.IO and Groq API
+- **Ai Service management** :Generate hospital service data using AI (Groq API)
 
 ### 📊 Physician Dashboard
 - Patient list with search, filter, and pagination
@@ -97,7 +99,6 @@ The platform enables:
 - **Real-time messaging**
 - **Gesture-based navigation**
 - **Voice-assisted form filling** (Web Speech API)
-- **Dark mode** support
 - **Responsive design** (mobile, tablet, desktop)
 - **Data export** (CSV / PDF)
 
@@ -203,8 +204,6 @@ npm install -g @angular/cli@18
 git clone https://github.com/Esprit-PI-4TWIN2-2526-MediFollow/Esprit-FullStackJS-4Twin2-2526-FrontEnd_Medifollow
 cd medifollow-frontend
 
-# Install dependencies
-npm install --legacy-peer-deps
 ```
 
 ### Run Development Server
@@ -239,7 +238,7 @@ Make sure the following services are running:
 | Service | Port | Description |
 |---|---|---|
 | NestJS Backend | 3000 | Main REST API |
-| MongoDB Atlas | Cloud | Database |
+| MongoDB Atlas Cloud | Database |
 | FastAPI ML Service | 8000 | Anomaly detection model |
 
 ---
