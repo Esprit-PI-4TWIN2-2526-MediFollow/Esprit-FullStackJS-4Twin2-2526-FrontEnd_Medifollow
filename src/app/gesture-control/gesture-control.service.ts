@@ -44,31 +44,46 @@ export class GestureControlService {
     
     this.videoElement = videoEl;
     
-    console.log('📦 Loading MediaPipe Hands...');
-    const { Hands } = await import('@mediapipe/hands' as any);
-    console.log('✅ MediaPipe Hands loaded');
-    
-    this.hands = new Hands({
-      locateFile: (file: string) =>
-        `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`,
-    });
-    
-    this.hands.setOptions({
-      maxNumHands: 1,
-      modelComplexity: 1,
-      minDetectionConfidence: 0.72,
-      minTrackingConfidence: 0.55,
-    });
-    
-    console.log('⚙️ MediaPipe configured');
-    
-    this.hands.onResults((results: any) => this.processResults(results));
-    
-    console.log('📹 Starting camera...');
-    await this.startCamera();
-    
-    this.active$.next(true);
-    console.log('✅ Gesture control fully initialized');
+    try {
+      console.log('📦 Loading MediaPipe Hands...');
+      const mediapipeModule = await import('@mediapipe/hands');
+      console.log('✅ MediaPipe module loaded:', mediapipeModule);
+      
+      // Try different ways to access the Hands constructor
+      const Hands = mediapipeModule.Hands || (mediapipeModule as any).default?.Hands || (mediapipeModule as any).default;
+      
+      if (!Hands) {
+        console.error('❌ Hands constructor not found in module:', Object.keys(mediapipeModule));
+        throw new Error('MediaPipe Hands library not properly loaded. Please refresh the page.');
+      }
+      
+      console.log('✅ Hands constructor found:', Hands);
+      
+      this.hands = new Hands({
+        locateFile: (file: string) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/${file}`,
+      });
+      
+      this.hands.setOptions({
+        maxNumHands: 1,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.72,
+        minTrackingConfidence: 0.55,
+      });
+      
+      console.log('⚙️ MediaPipe configured');
+      
+      this.hands.onResults((results: any) => this.processResults(results));
+      
+      console.log('📹 Starting camera...');
+      await this.startCamera();
+      
+      this.active$.next(true);
+      console.log('✅ Gesture control fully initialized');
+    } catch (error: any) {
+      console.error('❌ Failed to initialize MediaPipe:', error);
+      throw new Error(`Failed to load gesture recognition: ${error.message}`);
+    }
   }
 
   destroy(): void {
