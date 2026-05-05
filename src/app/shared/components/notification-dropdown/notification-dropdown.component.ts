@@ -62,18 +62,14 @@ export class NotificationDropdownComponent implements OnInit {
   }
 
   handleNotificationClick(notification: Notification) {
-    // Mark as read
+    // Mark as read without navigating
     this.notificationService.markAsRead(notification._id).subscribe(() => {
       if (this.doctorId) {
         this.notificationService.loadUnreadNotifications(this.doctorId);
       }
     });
     
-    // Navigate to action URL
-    if (notification.actionUrl) {
-      this.router.navigate([notification.actionUrl]);
-    }
-    
+    // Close dropdown
     this.isOpen = false;
   }
 

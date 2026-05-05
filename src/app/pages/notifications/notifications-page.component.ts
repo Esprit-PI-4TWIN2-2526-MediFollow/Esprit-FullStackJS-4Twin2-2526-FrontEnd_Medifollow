@@ -78,14 +78,13 @@ export class NotificationsPageComponent implements OnInit {
   }
 
   handleNotificationClick(notification: Notification) {
+    // Mark as read without navigating
     this.notificationService.markAsRead(notification._id).subscribe(() => {
       if (this.doctorId) {
         this.notificationService.updateUnreadCount(this.doctorId);
       }
-      
-      if (notification.actionUrl) {
-        this.router.navigate([notification.actionUrl]);
-      }
+      // Reload notifications to update the UI
+      this.loadNotifications();
     });
   }
 
