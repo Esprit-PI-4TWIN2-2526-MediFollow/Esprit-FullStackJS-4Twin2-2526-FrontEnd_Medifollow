@@ -95,13 +95,11 @@ export class SymptomsNurseService {
   }
 
   getResponseDetails(id: string): Observable<NurseSymptomsResponse> {
-    return this.getResponsesForNurse().pipe(
-      map((responses) => responses.find((response) => response._id === id) ?? null),
-      switchMap((response) => {
-        if (response) {
-          return of(response);
-        }
-
+    // Make a direct API call to the backend instead of searching through cached responses
+    // This ensures the backend's ID decoder interceptor can handle encrypted IDs
+    return this.http.get<NurseSymptomsResponse>(`${this.apiUrl}/nurse/responses/${id}`).pipe(
+      catchError((error) => {
+        console.error('Failed to load response details:', error);
         return throwError(() => new Error('Symptoms response not found'));
       })
     );
