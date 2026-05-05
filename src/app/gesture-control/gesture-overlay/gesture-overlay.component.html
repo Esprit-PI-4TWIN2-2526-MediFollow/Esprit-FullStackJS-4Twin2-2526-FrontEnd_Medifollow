@@ -24,6 +24,11 @@
   <span class="badge-label">{{ gestureInfo?.label }}</span>
 </div>
 
+<!-- Hover tooltip -->
+<div class="hover-tooltip" [class.visible]="active && hoveredElementDescription">
+  <span class="tooltip-text">{{ hoveredElementDescription }}</span>
+</div>
+
 <!-- Bouton ON/OFF -->
 <button class="gesture-toggle" (click)="toggleActive()" [disabled]="isInitializing">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"

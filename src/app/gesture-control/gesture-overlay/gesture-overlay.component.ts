@@ -27,6 +27,8 @@ export class GestureOverlayComponent implements AfterViewInit, OnDestroy {
   isInitializing = false;
   statusMessage = '';
   hasError = false;
+  hoveredElementDescription = '';
+  private lastHoveredElement: HTMLElement | null = null;
 
 
 // readonly gestureLabels: Record<GestureType, { icon: string; label: string }> = {
@@ -68,6 +70,7 @@ SCROLL_DOWN: { icon: '✊↓', label: 'Poing + descendre la main'      },
         this.cursorY = evt.y * window.innerHeight;
         this.currentGesture = evt.type;
         this.handleGesture(evt.type);
+        this.updateHoveredElement();
         this.scheduleBadgeReset();
         this.cdr.markForCheck();
       })
@@ -225,5 +228,102 @@ private handleGesture(type: GestureType): void {
       this.currentGesture = null;
       this.cdr.markForCheck();
     }, 1800);
+  }
+
+  private updateHoveredElement(): void {
+    const el = document.elementFromPoint(this.cursorX, this.cursorY) as HTMLElement;
+    
+    if (el === this.lastHoveredElement) {
+      return; // Same element, no need to update
+    }
+    
+    this.lastHoveredElement = el;
+    
+    if (!el) {
+      this.hoveredElementDescription = '';
+      return;
+    }
+    
+    // Get description from various sources
+    const description = this.getElementDescription(el);
+    this.hoveredElementDescription = description;
+  }
+
+  private getElementDescription(el: HTMLElement): string {
+    // Priority 1: aria-label
+    if (el.getAttribute('aria-label')) {
+      return el.getAttribute('aria-label')!;
+    }
+    
+    // Priority 2: title attribute
+    if (el.getAttribute('title')) {
+      return el.getAttribute('title')!;
+    }
+    
+    // Priority 3: data-gesture-hint custom attribute
+    if (el.getAttribute('data-gesture-hint')) {
+      return el.getAttribute('data-gesture-hint')!;
+    }
+    
+    // Priority 4: Button text content
+    if (el.tagName === 'BUTTON' || el.closest('button')) {
+      const button = el.tagName === 'BUTTON' ? el : el.closest('button')!;
+      const text = button.textContent?.trim();
+      if (text && text.length > 0 && text.length < 50) {
+        return `Button: ${text}`;
+      }
+    }
+    
+    // Priority 5: Link text or href
+    if (el.tagName === 'A' || el.closest('a')) {
+      const link = el.tagName === 'A' ? el as HTMLAnchorElement : el.closest('a')!;
+      const text = link.textContent?.trim();
+      if (text && text.length > 0 && text.length < 50) {
+        return `Link: ${text}`;
+      }
+      if (link.href) {
+        const url = new URL(link.href);
+        return `Navigate to: ${url.pathname}`;
+      }
+    }
+    
+    // Priority 6: Input/textarea placeholder or label
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      const input = el as HTMLInputElement;
+      if (input.placeholder) {
+        return `Input: ${input.placeholder}`;
+      }
+      const label = document.querySelector(`label[for="${input.id}"]`);
+      if (label) {
+        return `Input: ${label.textContent?.trim()}`;
+      }
+      return `Input field`;
+    }
+    
+    // Priority 7: Select dropdown
+    if (el.tagName === 'SELECT') {
+      const select = el as HTMLSelectElement;
+      const label = document.querySelector(`label[for="${select.id}"]`);
+      if (label) {
+        return `Select: ${label.textContent?.trim()}`;
+      }
+      return `Dropdown menu`;
+    }
+    
+    // Priority 8: Clickable elements with specific classes
+    if (el.classList.contains('card') || el.closest('.card')) {
+      return 'Click to view details';
+    }
+    
+    if (el.classList.contains('notification') || el.closest('.notification')) {
+      return 'Click to view notification';
+    }
+    
+    // Priority 9: Generic clickable element
+    if (el.onclick || el.style.cursor === 'pointer' || window.getComputedStyle(el).cursor === 'pointer') {
+      return 'Clickable element';
+    }
+    
+    return '';
   }
 }
