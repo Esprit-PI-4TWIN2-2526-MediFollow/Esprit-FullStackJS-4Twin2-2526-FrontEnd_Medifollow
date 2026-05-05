@@ -141,6 +141,85 @@ display: block;
   }
 }
 
+.gesture-toggle-wrapper {
+  pointer-events: all;
+  position: fixed;
+  bottom: 24px;
+  left: 20px;
+  z-index: 9999;
+
+  &:hover .gesture-toggle-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-10px);
+  }
+}
+
+.gesture-toggle-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.95);
+  color: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  min-width: 280px;
+  max-width: 320px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(0);
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+
+  .tooltip-header {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #3b8bd4;
+  }
+
+  .tooltip-content {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .tooltip-gestures {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+    margin-top: 10px;
+  }
+
+  .gesture-item {
+    font-size: 12px;
+    padding: 4px 0;
+    color: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &:not(:last-child) {
+      margin-bottom: 4px;
+    }
+  }
+
+  // Arrow pointing down to button
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 30px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid rgba(0, 0, 0, 0.95);
+  }
+}
+
 .status-indicator {
   pointer-events: none;
   position: fixed;
